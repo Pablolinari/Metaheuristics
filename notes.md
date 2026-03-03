@@ -1,2 +1,3 @@
-# Notes
+## practica 1 
+
 
