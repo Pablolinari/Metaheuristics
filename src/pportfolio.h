@@ -11,17 +11,20 @@ class ProblemPort : public Problem<Eigen::VectorX<double>> {
       sp_100; // preguntar : las empresas que estan en sp100 estan en sp500?
   Eigen::MatrixXd ib_35;
   Eigen::VectorXd solution;
+
 public:
-	
-	ProblemPort(std::string sp500,std::string sp100,std::string ib35):Problem<Eigen::VectorX<double>>(){
-		this->sp_500 = loadCSV(sp500, 2765,457);
-		this->sp_100 = loadCSV(sp100, 2765,97);
-		this->ib_35 = loadCSV(sp100, 2765,30);
-	}
+  ProblemPort(std::string sp500, std::string sp100, std::string ib35)
+      : Problem<Eigen::VectorX<double>>() {
+    this->sp_500 = loadCSV(sp500, 2765, 457);
+    this->sp_100 = loadCSV(sp100, 2765, 97);
+    this->ib_35 = loadCSV(sp100, 2765, 30);
+  }
 
   virtual size_t getSolutionSize() override { return solution.size(); }
-  virtual std::pair<int, int> getSolutionDomainRange() override {
-    return std::make_pair(false, true);
+  virtual Eigen::VectorX<double> getSolutionDomainRange() override {
+		Eigen::VectorX<double> v(this->sp_100.cols()*this->sp_500.cols()*this->ib_35.cols());
+		v.setZero();
+    return v;
   }
 
   tFitness fitness(const tSolution < std::vector<> & solution) override {
@@ -57,31 +60,28 @@ public:
    * @param cols The expected number of columns.
    * @return An Eigen::MatrixXd populated with the CSV data.
    */
-  static MatrixXd loadCSV(const string &path, int rows, int cols) {
-    ifstream file(path);
+
+  static Eigen::MatrixXd loadCSV(const std::string &path, int rows, int cols) {
+    std::ifstream file(path);
     if (!file.is_open()) {
-      throw runtime_error("Could not open file at: " + path);
+      throw std::runtime_error("No se pudo abrir el archivo en: " + path);
     }
-
-    MatrixXd mat(rows, cols);
-
-    string line;
+		int nrows = rows-1; // quito header de empresas
+		int ncols = cols-1; //quito fechas
+    Eigen::MatrixXd mat(nrows, ncols);
+    std::string line;
     int currentRow = 0;
-
-    // Read line by line until we reach the end of file or the expected row
-    // count
-    while (getline(file, line) /*&& currentRow < rows*/) {
-      stringstream ss(line);
-      string cell;
+    std::string trash;
+    getline(file, trash);
+    while (getline(file, line) && currentRow < nrows) {
+      std::stringstream ss(line);
+      std::string cell;
       int currentCol = 0;
-
-      // Extract each cell separated by a comma
-      while (getline(ss, cell, ',') && /*currentCol < cols*/) {
-        try {
-          // Convert string to double and insert directly into the matrix
+      getline(ss, trash, ',');
+      while (getline(ss, cell, ',') && currentCol < ncols) {
+        if (!cell.empty()) {
           mat(currentRow, currentCol) = stod(cell);
-        } catch (const invalid_argument &e) {
-          // Handle non-numeric data (like headers or empty cells)
+        } else {
           mat(currentRow, currentCol) = 0.0;
         }
         currentCol++;
