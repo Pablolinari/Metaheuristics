@@ -1,27 +1,21 @@
+#include "src/random.hpp"
 #include <eigen3/Eigen/Core>
 #include <eigen3/Eigen/Dense>
-#include <iostream>
 #include <fstream>
+#include <iostream>
 #include <ostream>
-#include <string>
 #include <sstream>
+#include <string>
+#include <vector>
 
 using namespace std;
+using Random = effolkronium::random_static;
 int main() {
-    try {
-        // Asegúrate de que la ruta sea correcta respecto a donde ejecutas el binario
-        Eigen::MatrixXd mt = loadCSV("data/ibex_35.csv", 2813, 30);
-        
-        cout << "Matriz cargada con éxito." << endl;
-        cout << "Dimensiones: " << mt.rows() << "x" << mt.cols() << endl;
-        // Imprimir una pequeña parte para verificar
-        cout << "Primer elemento: " << mt(2,1) << endl;
-				cout << mt.block(0,0,10,8)<<endl;
+  vector<int> v = {1, 2, 3, 4};
+  Random::shuffle(v);
+	cout <<endl;
+		cout<< std::accumulate(v.begin(), v.end(), 0);
+	cout << endl;
 
-    } catch (const exception &e) {
-        cerr << "Error: " << e.what() << endl;
-        return 1;
-    }
-
-    return 0;
+  return 0;
 }

@@ -1,58 +1,90 @@
 #pragma once
 #include "problem.h"
+#include "solution.h"
 #include <cstddef>
+#include <cstdlib>
 #include <eigen3/Eigen/Core>
 #include <eigen3/Eigen/Eigen>
 #include <fstream>
+#include <numeric>
 #include <string>
-class ProblemPort : public Problem<Eigen::VectorX<double>> {
+#include <utility>
+class ProblemPort : public Problem<double> {
   Eigen::MatrixXd sp_500;
   Eigen::MatrixXd
       sp_100; // preguntar : las empresas que estan en sp100 estan en sp500?
   Eigen::MatrixXd ib_35;
-  Eigen::VectorXd solution;
+  int n100 = 97;
+  int n500 = 457;
+  int n35 = 30;
+  double low = 0.005;
+  double hi500 = 0.02;
+  double hi100 = 0.05;
+  double hi35 = 0.08;
 
 public:
   ProblemPort(std::string sp500, std::string sp100, std::string ib35)
-      : Problem<Eigen::VectorX<double>>() {
-    this->sp_500 = loadCSV(sp500, 2765, 457);
-    this->sp_100 = loadCSV(sp100, 2765, 97);
-    this->ib_35 = loadCSV(sp100, 2765, 30);
+      : Problem<double>() {
+    this->sp_500 = loadCSV(sp500, 2765, this->n500);
+    this->sp_100 = loadCSV(sp100, 2765, this->n100);
+    this->ib_35 = loadCSV(sp100, 2765, this->n35);
   }
 
-  virtual size_t getSolutionSize() override { return solution.size(); }
-  virtual Eigen::VectorX<double> getSolutionDomainRange() override {
-		Eigen::VectorX<double> v(this->sp_100.cols()*this->sp_500.cols()*this->ib_35.cols());
-		v.setZero();
-    return v;
+  virtual size_t getSolutionSize() override {
+    return this->n500 * this->n100 * this->n35;
+  }
+  virtual std::pair<double, double> getSolutionDomainRange() override {
+    return std::pair<double, double>(this->low, this->hi35);
   }
 
-  tFitness fitness(const tSolution < std::vector<> & solution) override {
+  tFitness fitness(const std::vector<double> &solution) override {
     tFitness count = 0;
 
-    for (int i = 0; i < solution.size(); i++) {
-      if (solution[i]) {
-        if (i % 2 == 0) {
-          count += 1;
-        } else {
-          count -= 1;
-        }
-      }
-    }
     return count;
   }
 
-  tSolution<int> createSolution() override {
-    tSolution<int> solution(size);
-    for (int i = 0; i < solution.size(); i++) {
-      solution[i] = Random::get<bool>();
+  tSolution<double> createSolution() override {
+    int size = this->getSolutionSize();
+    tSolution<double> solution(size);
+
+    for (int i = 0; i < this->n35; i++) {
+      solution[i] = Random::get(this->low, this->hi35);
     }
+
+    for (int i = this->n35; i < this->n100; i++) {
+      solution[i] = Random::get(this->low, this->hi100);
+    }
+
+    for (int i = this->n100; i < this->n500; i++) {
+      solution[i] = Random::get(this->low, this->hi500);
+    }
+
+    int numberZeros = Random::get<int>(1, size - 1);
+		std::vector<int> indexZeros = std::vector<int>(size);
+		std::iota(indexZeros.begin(),indexZeros.end(),0);
+		Random::shuffle(indexZeros);
+		for (int i=0; i<numberZeros;i++){
+			solution[indexZeros[i]]=0;
+		}
+
+    this->fix(solution);
     return solution;
   }
 
-  virtual bool isValid(const tSolution<int> &solution) override { return true; }
+  virtual bool isValid(const tSolution<double> &solution) override {
+    double total_sum = std::accumulate(solution.begin(),solution.end(),0.0);
+		double error = 0.003;
+		if(std::abs(total_sum-1)<=error){
+			return true;
+		}
+		else{
+			return false;
+		}
+  }
 
-  virtual void fix(tSolution<int> &solution) override {}
+  virtual void fix(tSolution<double> &solution) override {
+		double total_sum = std::accumulate(solution.begin(),solution.end(),0.0);
+	}
   /**
    * Loads a CSV file directly into an Eigen Matrix.
    * @param path The file system path to the .csv file.
@@ -66,8 +98,8 @@ public:
     if (!file.is_open()) {
       throw std::runtime_error("No se pudo abrir el archivo en: " + path);
     }
-		int nrows = rows-1; // quito header de empresas
-		int ncols = cols-1; //quito fechas
+    int nrows = rows - 1; // quito header de empresas
+    int ncols = cols - 1; // quito fechas
     Eigen::MatrixXd mat(nrows, ncols);
     std::string line;
     int currentRow = 0;
