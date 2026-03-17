@@ -1,12 +1,7 @@
-#include "src/random.hpp"
+#include "include/random.hpp"
 #include <eigen3/Eigen/Core>
 #include <eigen3/Eigen/Dense>
-#include <fstream>
 #include <iostream>
-#include <ostream>
-#include <sstream>
-#include <string>
-#include <vector>
 
 using namespace std;
 using Random = effolkronium::random_static;

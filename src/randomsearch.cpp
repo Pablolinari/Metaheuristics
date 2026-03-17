@@ -1,5 +1,5 @@
-#include "randomsearch.h"
-#include "pportfolio.h"
+#include "../include/randomsearch.h"
+#include "../include/pportfolio.h"
 #include "solution.h"
 #include <vector>
 
@@ -13,18 +13,18 @@
  */
 ResultMHDouble RandomSearch::optimize(ProblemDouble &problem, int maxevals) {
   assert(maxevals > 0);
-	
-	tSolution<double> temporalSolution;
-	tSolution<double> bestSolution;
-	tFitness bestFitness = 0.0;
 
-	for (size_t i = 0;i<maxevals;i++){
-		temporalSolution = problem.createSolution();
-		if(problem.fitness(temporalSolution) > bestFitness){
-			bestSolution = temporalSolution;
-			bestFitness=problem.fitness(temporalSolution);
-		}
-	}
-  
+  tSolution<double> temporalSolution;
+  tSolution<double> bestSolution;
+  tFitness bestFitness = 0.0;
+
+  for (size_t i = 0; i < maxevals; i++) {
+    temporalSolution = problem.createSolution();
+    if (problem.fitness(temporalSolution) > bestFitness) {
+      bestSolution = temporalSolution;
+      bestFitness = problem.fitness(temporalSolution);
+    }
+  }
+
   return ResultMH(bestSolution, bestFitness, maxevals);
 }

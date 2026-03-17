@@ -1,4 +1,4 @@
-#include "greedy.h"
+#include "../include/greedy.h"
 
 /**
  * Create random solutions until maxevals has been achieved, and returns the
