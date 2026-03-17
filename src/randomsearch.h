@@ -14,12 +14,12 @@ using namespace std;
 //
 using MHDouble = MH<double>;
 using ProblemDouble= Problem<double>;
-using ResultMDouble = ResultMH<double>;
+using ResultMHDouble = ResultMH<double>;
 
 class RandomSearch : public MHDouble {
 
 public:
   RandomSearch() : MH() {}
   virtual ~RandomSearch() {}
-  virtual ResultMH<double> optimize(Problem<int> &problem, int maxevals);
+  virtual ResultMHDouble optimize(Problem<double> &problem, int maxevals);
 };

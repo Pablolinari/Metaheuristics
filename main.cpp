@@ -11,11 +11,9 @@
 using namespace std;
 using Random = effolkronium::random_static;
 int main() {
-  vector<int> v = {1, 2, 3, 4};
-  Random::shuffle(v);
-	cout <<endl;
-		cout<< std::accumulate(v.begin(), v.end(), 0);
-	cout << endl;
-
+  int numberZeros = Random::get<int>(1, 10 - 1);
+  Eigen::VectorXd indexZeros = Eigen::VectorXd::LinSpaced(10, 10 - 1, 0);
+  Random::shuffle(indexZeros);
+  cout << indexZeros;
   return 0;
 }

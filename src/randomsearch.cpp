@@ -1,4 +1,7 @@
 #include "randomsearch.h"
+#include "pportfolio.h"
+#include "solution.h"
+#include <vector>
 
 /**
  * Create random solutions until maxevals has been achieved, and returns the
@@ -8,9 +11,20 @@
  * @param maxevals Maximum number of evaluations allowed
  * @return A pair containing the best solution found and its fitness
  */
-ResultMHInt RandomSearch::optimize(ProblemDouble &problem, int maxevals) {
+ResultMHDouble RandomSearch::optimize(ProblemDouble &problem, int maxevals) {
   assert(maxevals > 0);
-  vector<bool> values;
+	
+	tSolution<double> temporalSolution;
+	tSolution<double> bestSolution;
+	tFitness bestFitness = 0.0;
+
+	for (size_t i = 0;i<maxevals;i++){
+		temporalSolution = problem.createSolution();
+		if(problem.fitness(temporalSolution) > bestFitness){
+			bestSolution = temporalSolution;
+			bestFitness=problem.fitness(temporalSolution);
+		}
+	}
   
-  return ResultMH(sol, fitness, 1);
+  return ResultMH(bestSolution, bestFitness, maxevals);
 }
