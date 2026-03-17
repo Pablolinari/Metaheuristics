@@ -92,7 +92,7 @@ public:
 		}
 		if (solution.sum()<1){
 			double waste = 1-solution.sum();
-			if(waste >this->low)
+			if(waste >this->low){}
 
 		}
 

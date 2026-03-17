@@ -1,6 +1,6 @@
 #include "../include/randomsearch.h"
 #include "../include/pportfolio.h"
-#include "solution.h"
+#include "../include/solution.h"
 #include <vector>
 
 /**
