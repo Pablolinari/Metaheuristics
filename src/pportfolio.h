@@ -21,6 +21,7 @@ class ProblemPort : public Problem<double> {
   double hi500 = 0.02;
   double hi100 = 0.05;
   double hi35 = 0.08;
+	int lambda = 500;
 
 public:
   ProblemPort(std::string sp500, std::string sp100, std::string ib35)
@@ -38,9 +39,8 @@ public:
   }
 
   tFitness fitness(const std::vector<double> &solution) override {
-    tFitness count = 0;
 
-    return count;
+    return ;
   }
 
   tSolution<double> createSolution() override {
