@@ -90,6 +90,11 @@ public:
 				solution(i)=this->high;
 			}
 		}
+		if (solution.sum()<1){
+			double waste = 1-solution.sum();
+			if(waste >this->low)
+
+		}
 
   }
 };
