@@ -1,3 +1,4 @@
+#pragma once
 #include <eigen3/Eigen/Eigen>
 #include <fstream>
 /**
@@ -8,7 +9,7 @@
  * @return An Eigen::MatrixXd populated with the CSV data.
  */
 
-Eigen::MatrixXd loadCSV(const std::string &path, int rows, int cols) {
+inline Eigen::MatrixXd loadCSV(const std::string &path, int rows, int cols) {
   std::ifstream file(path);
   if (!file.is_open()) {
     throw std::runtime_error("No se pudo abrir el archivo en: " + path);

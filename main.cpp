@@ -1,3 +1,4 @@
+#include "include/pportfolio.h"
 #include "include/random.hpp"
 #include <eigen3/Eigen/Core>
 #include <eigen3/Eigen/Dense>
@@ -6,9 +7,13 @@
 using namespace std;
 using Random = effolkronium::random_static;
 int main() {
-  int numberZeros = Random::get<int>(1, 10 - 1);
-  Eigen::VectorXd indexZeros = Eigen::VectorXd::LinSpaced(10, 10 - 1, 0);
-  Random::shuffle(indexZeros);
-  cout << indexZeros;
-  return 0;
+
+  ProblemPort problem("data/ibex_35.csv", 2813, 30, 0.005, 0.08);
+
+	Eigen::VectorXd v= problem.createSolution();
+  cout << endl;
+  cout << v.sum()<< endl;
+
+
+      return 0;
 }

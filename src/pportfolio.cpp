@@ -1,0 +1,118 @@
+#include "../include/pportfolio.h"
+#include <eigen3/Eigen/Core>
+#include <strings.h>
+
+ProblemPort::ProblemPort(std::string path, int days, int ncompany, double low,
+                         double high, int lambda)
+    : Problem<double>(), days(days), ncompany(ncompany), low(low), high(high),
+      lambda(lambda) {
+
+  this->data = loadCSV(path, days, ncompany);
+}
+
+size_t ProblemPort::getSolutionSize() { return this->ncompany; }
+std::pair<double, double> ProblemPort::getSolutionDomainRange() {
+  return std::make_pair(this->low, this->high);
+}
+double ProblemPort::actionMean(int i) {
+  Eigen::VectorX<double> column = data.col(i);
+  return column.mean();
+}
+
+double ProblemPort::covariance(int i, int j) {
+  Eigen::VectorX<double> centerColumni = data.col(i).array() - actionMean(i);
+  Eigen::VectorX<double> cenrterColumnj = data.col(j).array() - actionMean(j);
+  Eigen::VectorX<double> product =
+      centerColumni.array() * cenrterColumnj.array();
+
+  return product.sum() / this->days;
+}
+
+double ProblemPort::profit(const tSolution<double> &solution) {
+  Eigen::MatrixXd logdata = data.array().log() + 1;
+  Eigen::VectorXd logmeans = logdata.colwise().mean();
+  return (solution.array() * logmeans.array()).sum();
+}
+double ProblemPort::risk(const tSolution<double> &solution) { return 0; }
+
+tFitness ProblemPort::fitness(const tSolution<double> &solution) {
+  return profit(solution) - this->lambda * risk(solution);
+}
+
+tSolution<double> ProblemPort::createSolution() {
+  int size = this->getSolutionSize();
+  tSolution<double> solution(size);
+
+  for (int i = 0; i < size; i++) {
+    solution(i) = Random::get(this->low, this->high);
+  }
+
+  int numberZeros = Random::get<int>(1, size - 1);
+
+  std::vector<int> index(size);
+  for (int i = 0; i < size; ++i)
+    index[i] = i;
+  Random::shuffle(index);
+  for (int i = 0; i < numberZeros; i++) {
+    solution(index[i]) = 0;
+  }
+
+  this->fix(solution);
+  return solution;
+}
+
+bool ProblemPort::isValid(const tSolution<double> &solution) {
+  bool valid = true;
+  double error = 0.003;
+  if (std::abs(solution.sum() - 1) >= error) {
+    valid = false;
+  }
+  if (!(solution.array() <= this->high && solution.array() >= this->low)
+           .all()) {
+    valid = false;
+  }
+  return valid;
+}
+
+void ProblemPort::fix(tSolution<double> &solution) {
+  solution = solution.array() / solution.sum();
+
+  for (int i = 0; i < solution.size(); i++) {
+    if (solution(i) < this->low) {
+      solution(i) = 0.0;
+    } else if (solution(i) > this->high) {
+      solution(i) = this->high;
+    }
+  }
+  if (solution.sum() < 1) {
+    double waste = 1 - solution.sum();
+
+    if (waste < this->low) {
+      std::vector<int> validIndexs;
+      for (int i = 0; i < solution.size(); i++) {
+        if (solution(i) > this->low && solution(i) < this->high) {
+          validIndexs.push_back(i);
+        }
+      }
+      if (!validIndexs.empty()) {
+        double spreadWaste = waste / validIndexs.size();
+        for (int i : validIndexs) {
+          solution(i) += spreadWaste;
+        }
+      }
+    } else {
+      std::vector<int> zerosIndex;
+      for (int i = 0; i < solution.size(); i++) {
+        if (solution(i) > this->low && solution(i) < this->high) {
+          zerosIndex.push_back(i);
+        }
+      }
+      if (!zerosIndex.empty()) {
+        auto randomit = Random::get(zerosIndex);
+        solution(*randomit) = waste;
+      }
+    }
+  }
+}
+
+void ProblemPort::testclass() {}

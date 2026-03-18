@@ -7,7 +7,7 @@
  * @param problem The problem to be optimized
  * @param maxevals Maximum number of evaluations allowed
  * @return A pair containing the best solution found and its fitness
- */
+ *
 ResultMHInt Greedy::optimize(ProblemDouble &problem, int maxevals) {
   assert(maxevals > 0);
   vector<bool> values;
@@ -41,3 +41,4 @@ ResultMHInt Greedy::optimize(ProblemDouble &problem, int maxevals) {
   tFitness fitness = problem.fitness(sol);
   return ResultMH(sol, fitness, 1);
 }
+*/

@@ -1,7 +1,5 @@
 #include "../include/randomsearch.h"
-#include "../include/pportfolio.h"
 #include "../include/solution.h"
-#include <vector>
 
 /**
  * Create random solutions until maxevals has been achieved, and returns the
