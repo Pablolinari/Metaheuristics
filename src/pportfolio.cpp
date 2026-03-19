@@ -29,11 +29,20 @@ double ProblemPort::covariance(int i, int j) {
 }
 
 double ProblemPort::profit(const tSolution<double> &solution) {
-  Eigen::MatrixXd logdata = data.array().log() + 1;
+  Eigen::MatrixXd logdata = data.array() + 1;
+	logdata = logdata.array().log();
   Eigen::VectorXd logmeans = logdata.colwise().mean();
   return (solution.array() * logmeans.array()).sum();
 }
-double ProblemPort::risk(const tSolution<double> &solution) { return 0; }
+Eigen::MatrixX<double> ProblemPort::covarianceMatrix(const Eigen::MatrixX<double> &mat) {
+  Eigen::VectorXd columnsMean = mat.colwise().mean();
+  Eigen::MatrixX<double> centered =
+      mat.rowwise() - columnsMean.transpose();
+  return (centered.transpose() * centered)/(mat.rows());
+}
+double ProblemPort::risk(const tSolution<double> &solution) {
+  return (solution.transpose() * covarianceMatrix(this->data) * solution).value();
+}
 
 tFitness ProblemPort::fitness(const tSolution<double> &solution) {
   return profit(solution) - this->lambda * risk(solution);
@@ -94,16 +103,15 @@ void ProblemPort::fix(tSolution<double> &solution) {
           validIndexs.push_back(i);
         }
       }
-      if (!validIndexs.empty()) {
-        double spreadWaste = waste / validIndexs.size();
-        for (int i : validIndexs) {
-          solution(i) += spreadWaste;
-        }
+      double spreadWaste = waste / validIndexs.size();
+      for (int i : validIndexs) {
+        solution(i) += spreadWaste;
       }
+
     } else {
       std::vector<int> zerosIndex;
       for (int i = 0; i < solution.size(); i++) {
-        if (solution(i) > this->low && solution(i) < this->high) {
+        if (solution(i) == 0.0) {
           zerosIndex.push_back(i);
         }
       }

@@ -1,19 +1,47 @@
+#include "include/mh.h"
 #include "include/pportfolio.h"
 #include "include/random.hpp"
 #include <eigen3/Eigen/Core>
 #include <eigen3/Eigen/Dense>
 #include <iostream>
 
+// All all algorithms
+#include "include/randomsearch.h"
+
 using namespace std;
-using Random = effolkronium::random_static;
-int main() {
+int main(int argc, char *argv[]) {
+  long int seed;
+ // Seed the random number generator
+  if (argc == 1) {
+    // Use a fixed seed for reproducibility
+    seed = 42;
+  } else {
+    seed = atoi(argv[1]);
+  }
 
-  ProblemPort problem("data/ibex_35.csv", 2813, 30, 0.005, 0.08);
+  // Create the algorithms
+  RandomSearch ralg = RandomSearch();
+  // Create the specific problem path ,days , company , low, high
+  ProblemPort pproblem = ProblemPort("data/ibex_35.csv", 2813, 30, 0.005, 0.08);
+  /*
+    // Solve using evaluations
+    vector<pair<string, MH<int> *> > algoritmos = {make_pair("RandomSearch",
+    &ralg), make_pair("Greedy", &rgreedy)}; Problem<int> *problem =
+    dynamic_cast<Problem<int> *>(&rproblem);
 
-	Eigen::VectorXd v= problem.createSolution();
-  cout << endl;
-  cout << v.sum()<< endl;
-
-
-      return 0;
+    for (int i = 0; i < algoritmos.size(); i++) {
+      Random::seed(seed);
+      cout << algoritmos[i].first << endl;
+      auto mh = algoritmos[i].second;
+      ResultMH result = mh->optimize(*problem, 1000);
+      cout << "Best solution: " << result.solution << endl;
+      cout << "Best fitness: " << result.fitness << endl;
+      cout << "Evaluations: " << result.evaluations << endl;
+    }
+  */
+  ResultMH result = ralg.optimize(pproblem, 10000);
+  cout << "Best solution: " << result.solution << endl;
+  cout << "Best fitness: " << result.fitness << endl;
+  cout << "Evaluations: " << result.evaluations << endl;
+  return 0;
 }

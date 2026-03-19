@@ -14,7 +14,7 @@ class ProblemPort : public Problem<double> {
   int lambda;
 
 public:
-  ProblemPort(std::string path, int days,int ncompany, double low, double high,
+  ProblemPort(std::string path, int days, int ncompany, double low, double high,
               int lambda = 500);
 
   virtual size_t getSolutionSize() override;
@@ -23,6 +23,7 @@ public:
 
   double covariance(int i, int j);
 
+  Eigen::MatrixX<double> covarianceMatrix(const Eigen::MatrixX<double> &mat);
   double profit(const tSolution<double> &solution);
   double risk(const tSolution<double> &solution);
 
@@ -33,5 +34,5 @@ public:
   virtual bool isValid(const tSolution<double> &solution) override;
 
   virtual void fix(tSolution<double> &solution) override;
-	void testclass();
+  void testclass();
 };
