@@ -14,19 +14,17 @@ inline Eigen::MatrixXd loadCSV(const std::string &path, int rows, int cols) {
   if (!file.is_open()) {
     throw std::runtime_error("No se pudo abrir el archivo en: " + path);
   }
-  int nrows = rows - 1; // quito header de empresas
-  int ncols = cols - 1; // quito fechas
-  Eigen::MatrixXd mat(nrows, ncols);
+  Eigen::MatrixXd mat(rows, cols);
   std::string line;
   int currentRow = 0;
   std::string trash;
   getline(file, trash);
-  while (getline(file, line) && currentRow < nrows) {
+  while (getline(file, line) && currentRow < rows) {
     std::stringstream ss(line);
     std::string cell;
     int currentCol = 0;
     getline(ss, trash, ',');
-    while (getline(ss, cell, ',') && currentCol < ncols) {
+    while (getline(ss, cell, ',') && currentCol < cols) {
       if (!cell.empty()) {
         mat(currentRow, currentCol) = stod(cell);
       } else {

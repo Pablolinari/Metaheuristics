@@ -1,4 +1,5 @@
 #include "../include/pportfolio.h"
+#include "iostream"
 #include <eigen3/Eigen/Core>
 #include <strings.h>
 
@@ -8,6 +9,7 @@ ProblemPort::ProblemPort(std::string path, int days, int ncompany, double low,
       lambda(lambda) {
 
   this->data = loadCSV(path, days, ncompany);
+  this->covarianceMat = covarianceMatrix(this->data);
 }
 
 size_t ProblemPort::getSolutionSize() { return this->ncompany; }
@@ -30,18 +32,18 @@ double ProblemPort::covariance(int i, int j) {
 
 double ProblemPort::profit(const tSolution<double> &solution) {
   Eigen::MatrixXd logdata = data.array() + 1;
-	logdata = logdata.array().log();
+  logdata = logdata.array().log();
   Eigen::VectorXd logmeans = logdata.colwise().mean();
   return (solution.array() * logmeans.array()).sum();
 }
-Eigen::MatrixX<double> ProblemPort::covarianceMatrix(const Eigen::MatrixX<double> &mat) {
+Eigen::MatrixX<double>
+ProblemPort::covarianceMatrix(const Eigen::MatrixX<double> &mat) {
   Eigen::VectorXd columnsMean = mat.colwise().mean();
-  Eigen::MatrixX<double> centered =
-      mat.rowwise() - columnsMean.transpose();
-  return (centered.transpose() * centered)/(mat.rows());
+  Eigen::MatrixX<double> centered = mat.rowwise() - columnsMean.transpose();
+  return (centered.transpose() * centered) / (mat.rows());
 }
 double ProblemPort::risk(const tSolution<double> &solution) {
-  return (solution.transpose() * covarianceMatrix(this->data) * solution).value();
+  return (solution.transpose() * this->covarianceMat * solution).value();
 }
 
 tFitness ProblemPort::fitness(const tSolution<double> &solution) {
@@ -59,7 +61,7 @@ tSolution<double> ProblemPort::createSolution() {
   int numberZeros = Random::get<int>(1, size - 1);
 
   std::vector<int> index(size);
-  for (int i = 0; i < size; ++i)
+  for (int i = 0; i < size; i++)
     index[i] = i;
   Random::shuffle(index);
   for (int i = 0; i < numberZeros; i++) {
@@ -73,7 +75,7 @@ tSolution<double> ProblemPort::createSolution() {
 bool ProblemPort::isValid(const tSolution<double> &solution) {
   bool valid = true;
   double error = 0.003;
-  if (std::abs(solution.sum() - 1) >= error) {
+  if (std::fabs(solution.sum() - 1) >= error) {
     valid = false;
   }
   if (!(solution.array() <= this->high && solution.array() >= this->low)
@@ -122,5 +124,13 @@ void ProblemPort::fix(tSolution<double> &solution) {
     }
   }
 }
+
+double ProblemPort::heuristic(int i) {
+  Eigen::VectorX<double> vectorFormat = data.col(i).array() + 1;
+  double logmean = (vectorFormat.array().log().sum()) / this->days;
+  double sigmamean = this->covarianceMat.col(i).sum() / this->days;
+  return logmean + (this->lambda * sigmamean);
+}
+
 
 void ProblemPort::testclass() {}

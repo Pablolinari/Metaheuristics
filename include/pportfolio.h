@@ -6,14 +6,15 @@
 #include <string>
 
 class ProblemPort : public Problem<double> {
-  Eigen::MatrixXd data;
   int days;
   int ncompany;
   double low;
   double high;
   int lambda;
-
+  Eigen::MatrixXd data;
+  Eigen::MatrixXd covarianceMat;
 public:
+
   ProblemPort(std::string path, int days, int ncompany, double low, double high,
               int lambda = 500);
 
@@ -35,4 +36,5 @@ public:
 
   virtual void fix(tSolution<double> &solution) override;
   void testclass();
+	virtual double heuristic(int i)override;
 };

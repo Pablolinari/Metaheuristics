@@ -1,3 +1,4 @@
+#include "include/greedy.h"
 #include "include/mh.h"
 #include "include/pportfolio.h"
 #include "include/random.hpp"
@@ -11,7 +12,7 @@
 using namespace std;
 int main(int argc, char *argv[]) {
   long int seed;
- // Seed the random number generator
+  // Seed the random number generator
   if (argc == 1) {
     // Use a fixed seed for reproducibility
     seed = 42;
@@ -21,27 +22,29 @@ int main(int argc, char *argv[]) {
 
   // Create the algorithms
   RandomSearch ralg = RandomSearch();
+  Greedy rgreedy = Greedy();
   // Create the specific problem path ,days , company , low, high
   ProblemPort pproblem = ProblemPort("data/ibex_35.csv", 2813, 30, 0.005, 0.08);
-  /*
-    // Solve using evaluations
-    vector<pair<string, MH<int> *> > algoritmos = {make_pair("RandomSearch",
-    &ralg), make_pair("Greedy", &rgreedy)}; Problem<int> *problem =
-    dynamic_cast<Problem<int> *>(&rproblem);
+/*
+  // Solve using evaluations
+  vector<pair<string, MH<double> *>> algoritmos = {
+      make_pair("RandomSearch", &ralg), make_pair("Greedy", &rgreedy)};
 
-    for (int i = 0; i < algoritmos.size(); i++) {
-      Random::seed(seed);
-      cout << algoritmos[i].first << endl;
-      auto mh = algoritmos[i].second;
-      ResultMH result = mh->optimize(*problem, 1000);
-      cout << "Best solution: " << result.solution << endl;
-      cout << "Best fitness: " << result.fitness << endl;
-      cout << "Evaluations: " << result.evaluations << endl;
-    }
+  for (int i = 0; i < algoritmos.size(); i++) {
+    Random::seed(seed);
+    cout << algoritmos[i].first << endl;
+    auto mh = algoritmos[i].second;
+    ResultMH result = mh->optimize(pproblem, 1000);
+    cout << "Best solution: " << result.solution << endl;
+    cout << "Best fitness: " << result.fitness << endl;
+    cout << "Evaluations: " << result.evaluations << endl;
+  }
   */
-  ResultMH result = ralg.optimize(pproblem, 10000);
+        Random::seed(seed);
+  ResultMH result = rgreedy.optimize(pproblem, 10000);
   cout << "Best solution: " << result.solution << endl;
   cout << "Best fitness: " << result.fitness << endl;
   cout << "Evaluations: " << result.evaluations << endl;
+        
   return 0;
 }

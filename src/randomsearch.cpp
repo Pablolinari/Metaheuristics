@@ -1,5 +1,7 @@
 #include "../include/randomsearch.h"
 #include "../include/solution.h"
+#include <iostream>
+#include <limits>
 
 /**
  * Create random solutions until maxevals has been achieved, and returns the
@@ -14,7 +16,7 @@ ResultMHDouble RandomSearch::optimize(ProblemDouble &problem, int maxevals) {
 
   tSolution<double> temporalSolution;
   tSolution<double> bestSolution;
-  tFitness bestFitness = 0.0;
+  tFitness bestFitness = -std::numeric_limits<double>::infinity();
 
   for (size_t i = 0; i < maxevals; i++) {
     temporalSolution = problem.createSolution();

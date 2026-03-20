@@ -103,6 +103,7 @@ public:
    * @param solution to fix.
    */
   virtual void fix(tSolution<tDomain> &solution) = 0;
+  virtual double heuristic(int i);
 };
 
 #endif
