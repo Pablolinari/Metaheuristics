@@ -24,7 +24,11 @@ int main(int argc, char *argv[]) {
   RandomSearch ralg = RandomSearch();
   Greedy rgreedy = Greedy();
   // Create the specific problem path ,days , company , low, high
-  ProblemPort pproblem = ProblemPort("data/ibex_35.csv", 2813, 30, 0.005, 0.08);
+  ProblemPort ib35problem = ProblemPort("data/ibex_35.csv", 2813, 30, 0.005, 0.08);
+  ProblemPort sp100problem = ProblemPort("data/sp_100.csv", 2813, 30, 0.005, 0.05);
+  ProblemPort sp500problem = ProblemPort("data/sp_500.csv", 2813, 30, 0.005, 0.02);
+
+	
   /*
     // Solve using evaluations
     vector<pair<string, MH<double> *>> algoritmos = {
