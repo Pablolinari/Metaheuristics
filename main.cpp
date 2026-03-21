@@ -25,26 +25,26 @@ int main(int argc, char *argv[]) {
   Greedy rgreedy = Greedy();
   // Create the specific problem path ,days , company , low, high
   ProblemPort pproblem = ProblemPort("data/ibex_35.csv", 2813, 30, 0.005, 0.08);
-/*
-  // Solve using evaluations
-  vector<pair<string, MH<double> *>> algoritmos = {
-      make_pair("RandomSearch", &ralg), make_pair("Greedy", &rgreedy)};
+  /*
+    // Solve using evaluations
+    vector<pair<string, MH<double> *>> algoritmos = {
+        make_pair("RandomSearch", &ralg), make_pair("Greedy", &rgreedy)};
 
-  for (int i = 0; i < algoritmos.size(); i++) {
-    Random::seed(seed);
-    cout << algoritmos[i].first << endl;
-    auto mh = algoritmos[i].second;
-    ResultMH result = mh->optimize(pproblem, 1000);
-    cout << "Best solution: " << result.solution << endl;
-    cout << "Best fitness: " << result.fitness << endl;
-    cout << "Evaluations: " << result.evaluations << endl;
-  }
-  */
-        Random::seed(seed);
-  ResultMH result = rgreedy.optimize(pproblem, 10000);
+    for (int i = 0; i < algoritmos.size(); i++) {
+      Random::seed(seed);
+      cout << algoritmos[i].first << endl;
+      auto mh = algoritmos[i].second;
+      ResultMH result = mh->optimize(pproblem, 1000);
+      cout << "Best solution: " << result.solution << endl;
+      cout << "Best fitness: " << result.fitness << endl;
+      cout << "Evaluations: " << result.evaluations << endl;
+    }
+    */
+  Random::seed(seed);
+  ResultMH result = rgreedy.optimize(pproblem, 1);
   cout << "Best solution: " << result.solution << endl;
   cout << "Best fitness: " << result.fitness << endl;
   cout << "Evaluations: " << result.evaluations << endl;
-        
+
   return 0;
 }
