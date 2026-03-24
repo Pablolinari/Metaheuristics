@@ -1,6 +1,7 @@
 #include "../include/localsearch.h"
 #include "../include/greedy.h"
 #include "../include/random.hpp"
+#include <iostream>
 #include <utility>
 
 ResultMH<double> LocalSearch::optimize(Problem<double> &problem, int maxevals) {
@@ -8,27 +9,38 @@ ResultMH<double> LocalSearch::optimize(Problem<double> &problem, int maxevals) {
   double ratio = 0.4;
   Greedy greedyAlg;
   tSolution<double> startSolution = greedyAlg.optimize(problem, 1).solution;
-  tSolution<double> bestSolution = startSolution;
-  double bestFitness = problem.fitness(bestSolution);
+  double bestFitness = problem.fitness(startSolution);
+  bool improved = true;
   std::vector<std::pair<int, int>> neighbors;
-
 
   for (int i = 0; i < problem.getSolutionSize(); i++) {
     for (int j = 0; j < problem.getSolutionSize(); j++) {
       neighbors.emplace_back(make_pair(i, j));
     }
   }
-  Random::shuffle(neighbors);
+  int evals = 0;
+  double amount = 0;
+  while (evals < maxevals && improved) {
+    improved = false;
+    Random::shuffle(neighbors);
+    for (std::pair<int, int> p : neighbors) {
+      amount = ratio * startSolution(p.first);
+      startSolution(p.second) += amount;
+      startSolution(p.first) -= amount;
 
-  for (std::pair<int, int> p : neighbors) {
-    startSolution(p.first) *= (1 - ratio);
-    startSolution(p.second) += (ratio * startSolution(p.first));
-    if (problem.fitness(startSolution) > bestFitness&&problem.isValid(startSolution)) {
-      bestSolution = startSolution;
-      bestFitness = problem.fitness(bestSolution);
-      Random::shuffle(neighbors);
+      if (problem.fitness(startSolution) > bestFitness &&
+          problem.isValid(startSolution)) {
+        bestFitness = problem.fitness(startSolution);
+        improved = true;
+        break;
+
+      } else {
+        startSolution(p.first) += amount;
+        startSolution(p.second) -= amount;
+      }
     }
-  }
 
-  return ResultMH(bestSolution, problem.fitness(bestSolution), maxevals);
+    evals++;
+  }
+  return ResultMH(startSolution, problem.fitness(startSolution), evals);
 }

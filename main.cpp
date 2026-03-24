@@ -1,4 +1,3 @@
-#include "include/greedy.h"
 #include "include/mh.h"
 #include "include/pportfolio.h"
 #include "include/random.hpp"
@@ -8,7 +7,8 @@
 
 // All all algorithms
 #include "include/randomsearch.h"
-
+#include "include/greedy.h"
+#include "include/localsearch.h"
 using namespace std;
 int main(int argc, char *argv[]) {
   long int seed;
@@ -22,12 +22,14 @@ int main(int argc, char *argv[]) {
 
   // Create the algorithms
   RandomSearch ralg = RandomSearch();
-  Greedy rgreedy = Greedy();
+  Greedy greedyalg = Greedy();
+	LocalSearch localalg = LocalSearch();
   // Create the specific problem path ,days , company , low, high
   ProblemPort ib35problem = ProblemPort("data/ibex_35.csv", 2813, 30, 0.005, 0.08);
-  ProblemPort sp100problem = ProblemPort("data/sp_100.csv", 2813, 30, 0.005, 0.05);
-  ProblemPort sp500problem = ProblemPort("data/sp_500.csv", 2813, 30, 0.005, 0.02);
-
+  ProblemPort sp100problem = ProblemPort("data/syp_100.csv", 2813, 30, 0.005, 0.05);
+  ProblemPort sp500problem = ProblemPort("data/syp_500.csv", 2813, 30, 0.005, 0.02);
+	
+  ProblemPort problem = ProblemPort(argv[2], 2813, 97, 0.005, 0.05);
 	
   /*
     // Solve using evaluations
@@ -45,10 +47,20 @@ int main(int argc, char *argv[]) {
     }
     */
   Random::seed(seed);
-  ResultMH result = rgreedy.optimize(pproblem, 1);
-  cout << "Best solution: " << result.solution << endl;
-  cout << "Best fitness: " << result.fitness << endl;
-  cout << "Evaluations: " << result.evaluations << endl;
-
+  ResultMH ralgresult = ralg.optimize(problem,10);
+  ResultMH greedyresult = greedyalg.optimize(problem,1);
+  ResultMH localresult = localalg.optimize(problem,200);
+	cout << "Random Search"<<endl;
+  cout << "Best solution: " << ralgresult.solution.transpose() << endl;
+  cout << "Best fitness: " << ralgresult.fitness << endl;
+  cout << "Evaluations: " << ralgresult.evaluations << endl;
+	cout << "Greedy"<<endl;
+  cout << "Best solution: " << greedyresult.solution.transpose() << endl;
+  cout << "Best fitness: " << greedyresult.fitness << endl;
+  cout << "Evaluations: " << greedyresult.evaluations << endl;
+	cout << "Local Search"<<endl;
+  cout << "Best solution: " << localresult.solution.transpose() << endl;
+  cout << "Best fitness: " << localresult.fitness << endl;
+  cout << "Evaluations: " << localresult.evaluations << endl;
   return 0;
 }

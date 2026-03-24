@@ -1,7 +1,6 @@
 #include "../include/greedy.h"
 #include <algorithm>
 #include <cassert>
-#include <iostream>
 #include <numeric>
 #include <utility>
 #include <vector>
@@ -20,7 +19,6 @@ ResultMH<double> Greedy::optimize(Problem<double> &problem , int maxevals) {
   pair<double, double> domain = problem.getSolutionDomainRange();
   while (bestSolution.sum() < 1.0) {
     company = bestcompanies.front();
-		std::cout<<company<<endl;
     bestcompanies.erase(bestcompanies.begin());
     bestSolution(company) = std::min(domain.second, 1 - bestSolution.sum());
   }

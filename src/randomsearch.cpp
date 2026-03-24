@@ -1,6 +1,5 @@
 #include "../include/randomsearch.h"
 #include "../include/solution.h"
-#include <iostream>
 #include <limits>
 
 /**
