@@ -15,8 +15,8 @@ class ProblemPort : public Problem<double> {
   Eigen::MatrixXd covarianceMat;
 public:
 
-  ProblemPort(std::string path, int days, int ncompany, double low, double high,
-              int lambda = 500);
+  ProblemPort(std::string path, double low, double high,
+              bool inc2025,int lambda = 500);
 
   virtual size_t getSolutionSize() override;
   virtual std::pair<double, double> getSolutionDomainRange() override;

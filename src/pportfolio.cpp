@@ -3,16 +3,16 @@
 #include <eigen3/Eigen/Core>
 #include <strings.h>
 
-ProblemPort::ProblemPort(std::string path, int days, int ncompany, double low,
-                         double high, int lambda)
-    : Problem<double>(), days(days), ncompany(ncompany), low(low), high(high),
+ProblemPort::ProblemPort(std::string path, double low,
+                         double high, bool inc2025,int lambda)
+    : Problem<double>(), low(low), high(high),
       lambda(lambda) {
 
-  this->data = loadCSV(path, days, ncompany);
+  this->data = loadCSV(path,inc2025);
   this->covarianceMat = covarianceMatrix(this->data);
 }
 
-size_t ProblemPort::getSolutionSize() { return this->ncompany; }
+size_t ProblemPort::getSolutionSize() { return this->data.cols(); }
 std::pair<double, double> ProblemPort::getSolutionDomainRange() {
   return std::make_pair(this->low, this->high);
 }
@@ -74,7 +74,7 @@ tSolution<double> ProblemPort::createSolution() {
 
 bool ProblemPort::isValid(const tSolution<double> &solution) {
   bool valid = true;
-  double error = 0.003;
+  double error = 0.0003;
   if (std::fabs(solution.sum() - 1) >= error) {
     valid = false;
   }
@@ -133,4 +133,8 @@ double ProblemPort::heuristic(int i) {
 }
 
 
-void ProblemPort::testclass() {}
+void ProblemPort::testclass() {
+	
+	std::cout << this->data.rows()<<std::endl;
+	std::cout << this->data.block(0,0,5,20)<<std::endl;
+}
