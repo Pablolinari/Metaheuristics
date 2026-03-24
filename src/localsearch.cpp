@@ -1,22 +1,34 @@
 #include "../include/localsearch.h"
 #include "../include/greedy.h"
+#include "../include/random.hpp"
+#include <utility>
 
 ResultMH<double> LocalSearch::optimize(Problem<double> &problem, int maxevals) {
   assert(maxevals > 0);
-  tSolution<double> bestSolution(problem.getSolutionSize());
-  std::vector<int> bestcompanies(problem.getSolutionSize());
-  int company = 0;
-  std::iota(bestcompanies.begin(), bestcompanies.end(), 0);
-  std::sort(bestcompanies.begin(), bestcompanies.end(), [&](int i, int j) {
-    return problem.heuristic(i) > problem.heuristic(j);
-  });
+  double ratio = 0.4;
+  Greedy greedyAlg;
+  tSolution<double> startSolution = greedyAlg.optimize(problem, 1).solution;
+  tSolution<double> bestSolution = startSolution;
+  double bestFitness = problem.fitness(bestSolution);
+  std::vector<std::pair<int, int>> neighbors;
 
-  bestSolution.setZero();
-  pair<double, double> domain = problem.getSolutionDomainRange();
-  while (bestSolution.sum() < 1.0) {
-    company = bestcompanies.front();
-    bestcompanies.erase(bestcompanies.begin());
-    bestSolution(company) = std::min(domain.second, 1 - bestSolution.sum());
+
+  for (int i = 0; i < problem.getSolutionSize(); i++) {
+    for (int j = 0; j < problem.getSolutionSize(); j++) {
+      neighbors.emplace_back(make_pair(i, j));
+    }
   }
+  Random::shuffle(neighbors);
+
+  for (std::pair<int, int> p : neighbors) {
+    startSolution(p.first) *= (1 - ratio);
+    startSolution(p.second) += (ratio * startSolution(p.first));
+    if (problem.fitness(startSolution) > bestFitness) {
+      bestSolution = startSolution;
+      bestFitness = problem.fitness(bestSolution);
+      Random::shuffle(neighbors);
+    }
+  }
+
   return ResultMH(bestSolution, problem.fitness(bestSolution), maxevals);
 }
