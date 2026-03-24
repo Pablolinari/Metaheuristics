@@ -14,7 +14,7 @@ int main(int argc, char *argv[]) {
   long int seed;
   // Seed the random number generator
   if (argc == 1) {
-    // Use a fixed seed for reproducibility
+		cout<< "Modo de uso : \n ./program <nombre_archivo> <dias> <empresas> <numero de algoritmo> <seed>"<<endl;
     seed = 42;
   } else {
     seed = atoi(argv[1]);
