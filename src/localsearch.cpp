@@ -23,7 +23,7 @@ ResultMH<double> LocalSearch::optimize(Problem<double> &problem, int maxevals) {
   for (std::pair<int, int> p : neighbors) {
     startSolution(p.first) *= (1 - ratio);
     startSolution(p.second) += (ratio * startSolution(p.first));
-    if (problem.fitness(startSolution) > bestFitness) {
+    if (problem.fitness(startSolution) > bestFitness&&problem.isValid(startSolution)) {
       bestSolution = startSolution;
       bestFitness = problem.fitness(bestSolution);
       Random::shuffle(neighbors);
