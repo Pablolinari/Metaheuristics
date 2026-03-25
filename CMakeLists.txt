@@ -16,7 +16,7 @@ set(CMAKE_CXX_FLAGS_DEBUG "-g -O0 -Wall")
 
 # RELEASE: Máxima optimización (-O3) y arquitectura nativa (-march=native)
 # IMPORTANTE: Se añade -DNDEBUG para que Eigen desactive las comprobaciones de aserción y vuele.
-set(CMAKE_CXX_FLAGS_RELEASE "-O3 -march=native -DNDEBUG")
+set(CMAKE_CXX_FLAGS_RELEASE "-O3  -DNDEBUG")
 
 message(STATUS "Configurando proyecto en modo: ${CMAKE_BUILD_TYPE}")
 

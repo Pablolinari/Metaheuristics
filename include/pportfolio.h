@@ -80,9 +80,13 @@ public:
     for (int i = 0; i < numberZeros; i++) {
       solution(index[i]) = 0;
     }
+    if (isValid(solution)) {
+      return solution;
+    } else {
+      this->fix(solution);
 
-    this->fix(solution);
-    return solution;
+      return solution;
+    }
   }
 
   bool isValid(const tSolution<double> &solution) override {
@@ -142,7 +146,7 @@ public:
     Eigen::VectorX<double> vectorFormat = data.col(i).array() + 1;
     double logmean = (vectorFormat.array().log().sum()) / this->days;
     double sigmamean = this->covarianceMat.col(i).sum() / this->days;
-    return logmean -(this->lambda * sigmamean);
+    return logmean - (this->lambda * sigmamean);
   }
 
   void testclass() {

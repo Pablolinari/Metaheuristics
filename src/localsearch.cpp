@@ -28,11 +28,12 @@ ResultMH<double> LocalSearch::optimize(Problem<double> &problem, int maxevals) {
       startSolution(p.first) -= amount;
       startSolution(p.second) += amount;
 
+      double currentFitness = problem.fitness(startSolution);
       evals++;
-      if (problem.fitness(startSolution) > bestFitness &&
+      if (currentFitness> bestFitness &&
           problem.isValid(startSolution)) {
 
-        bestFitness = problem.fitness(startSolution);
+        bestFitness =currentFitness; 
 
         improved = true;
         break;

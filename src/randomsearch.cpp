@@ -19,9 +19,10 @@ ResultMHDouble RandomSearch::optimize(ProblemDouble &problem, int maxevals) {
 
   for (size_t i = 0; i < maxevals; i++) {
     temporalSolution = problem.createSolution();
-    if (problem.fitness(temporalSolution) > bestFitness) {
+		double currentFitness = problem.fitness(temporalSolution);
+    if ( currentFitness> bestFitness) {
       bestSolution = temporalSolution;
-      bestFitness = problem.fitness(temporalSolution);
+      bestFitness = currentFitness;
     }
   }
 
