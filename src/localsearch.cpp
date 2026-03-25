@@ -1,5 +1,4 @@
 #include "../include/localsearch.h"
-#include "../include/greedy.h"
 #include "../include/random.hpp"
 #include <iostream>
 #include <utility>
@@ -32,7 +31,7 @@ ResultMH<double> LocalSearch::optimize(Problem<double> &problem, int maxevals) {
       evals++;
       if (problem.fitness(startSolution) > bestFitness &&
           problem.isValid(startSolution)) {
-        std::cout << "cambio";
+
         bestFitness = problem.fitness(startSolution);
 
         improved = true;
