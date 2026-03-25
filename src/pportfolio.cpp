@@ -10,6 +10,8 @@ ProblemPort::ProblemPort(std::string path, double low,
 
   this->data = loadCSV(path,inc2025);
   this->covarianceMat = covarianceMatrix(this->data);
+	this->days=data.rows();
+	this->ncompany = data.cols();
 }
 
 size_t ProblemPort::getSolutionSize() { return this->data.cols(); }
@@ -129,7 +131,7 @@ double ProblemPort::heuristic(int i) {
   Eigen::VectorX<double> vectorFormat = data.col(i).array() + 1;
   double logmean = (vectorFormat.array().log().sum()) / this->days;
   double sigmamean = this->covarianceMat.col(i).sum() / this->days;
-  return logmean + (this->lambda * sigmamean);
+  return logmean -(this->lambda * sigmamean);
 }
 
 

@@ -2,9 +2,12 @@
 #include "include/pportfolio.h"
 #include "include/problem.h"
 #include "include/random.hpp"
+#include <complex>
 #include <eigen3/Eigen/Core>
 #include <eigen3/Eigen/Dense>
 #include <iostream>
+#include <string>
+#include <time.h>
 #include <utility>
 #include <vector>
 
@@ -13,6 +16,7 @@
 #include "include/localsearch.h"
 #include "include/randomsearch.h"
 using namespace std;
+using namespace std::chrono;
 int main(int argc, char *argv[]) {
   long int seed;
   long int evaluations = 1;
@@ -20,16 +24,25 @@ int main(int argc, char *argv[]) {
 
   // Seed the random number generator
   if (argc == 1) {
-    cout
-        << "Modo de uso : \n ./program <path archivo csv> <evaluaciones> <seed>"
-        << endl;
+    cout << "Modo de uso : \n ./program <path archivo csv>  <evaluaciones> "
+            "<seed> "
+         << endl;
+    cout << "El numero de evaluaciones es opcional , por defecto es 1" << endl;
     cout << "El seed es opcional , por defecto es 42" << endl;
     cout << "Para cada evaluacion de los algoritmos el seed se incrementa 10 "
             "unidades"
          << endl;
-    seed = 42;
+		return 0;
   }
-  if (argc == 3) {
+	if(argc == 2){
+		path = argv[1];
+		seed = 42;
+		evaluations =1;
+	}
+  if (argc == 4) {
+		path = argv[1];
+		evaluations =stoi(argv[2]);
+		seed = stoi(argv[3]);
   }
 
   // Create the algorithms
@@ -40,42 +53,35 @@ int main(int argc, char *argv[]) {
 
   ProblemPort problem = ProblemPort(argv[2], 0.005, 0.05, false);
   ProblemPort problem25 = ProblemPort(argv[2], 0.005, 0.05, true);
-	Eigen::VectorX<double> randomFitness(evaluations,0);
-	Eigen::VectorX<double> randomEvals(evaluations,0);
-	Eigen::VectorX<double>localSearchFitness(evaluations,0);
-	Eigen::VectorX<double> localSearchEvals(evaluations,0);
-  for (int i = 0; i < evaluations; i++) {
-    Random::seed(seed);
-		ResultMH resultado =ralg.optimize(problem, 10000);
-		randomFitness(i)=resultado.fitness;
-		randomEvals(i)=resultado.evaluations;
-		seed+=10;
+  std::vector<pair<std::string, MH<double> *>> algorithms = {
+      make_pair("Random", &ralg), make_pair("Greedy", &greedyalg),
+      make_pair("Local Search", &localalg)};
+  Eigen::MatrixX<double> fitness(evaluations, algorithms.size(), 0);
+  Eigen::MatrixX<double> evals(evaluations, algorithms.size(), 0);
+  Eigen::MatrixX<double> times(evaluations, algorithms.size(), 0);
+  int maxevals = 1;
+  for (int i = 0; i < algorithms.size(); i++) {
+    for (int j = 0; j < evaluations; j++) {
+      Random::seed(seed);
+      auto mh = algorithms[i].second;
+      auto start = high_resolution_clock::now();
+      ResultMH<double> result = mh->optimize(problem, 10000);
+      auto end = high_resolution_clock::now();
+
+      times(i, j) =
+          duration_cast<std::chrono::milliseconds>(start - end).count();
+      fitness(i, j) = result.fitness;
+      evals(i, j) = result.evaluations;
+      seed += 10;
+    }
   }
-  for (int i = 0; i < evaluations; i++) {
-    Random::seed(seed);
-		ResultMH resultado = localalg.optimize(problem, 10000);
-		localSearchFitness(i)=resultado.fitness;
-		localSearchEvals(i)=resultado.evaluations;
-		seed+=10;
+  for (int i = 0; i < algorithms.size(); i++) {
+    cout << algorithms[i].first << endl;
+    cout << "Mean fitness of " << evaluations
+         << " evaluations : " << fitness.col(i).mean() << endl;
+    cout << "Mean evaluations " << evals.col(i).mean() << endl;
+    cout << "Mean time : " << times.col(i).mean() << endl;
   }
-  Random::seed(seed);
-  ResultMH ralgresult = ralg.optimize(problem, 10);
-  ResultMH greedyresult = greedyalg.optimize(problem, 1);
-  ResultMH localresult = localalg.optimize(problem, 8000);
-  cout << "Random Search" << endl;
-  // cout << "Best solution: " << ralgresult.solution.transpose() << endl;
-  cout << "Best fitness: " << ralgresult.fitness << endl;
-  cout << "Evaluations: " << ralgresult.evaluations << endl;
-  cout << "Profit :" << problem.profit(ralgresult.solution) << endl;
-  cout << "Greedy" << endl;
-  // cout << "Best solution: " << greedyresult.solution.transpose() << endl;
-  cout << "Best fitness: " << greedyresult.fitness << endl;
-  cout << "Evaluations: " << greedyresult.evaluations << endl;
-  cout << "Profit :" << problem.profit(greedyresult.solution) << endl;
-  cout << "Local Search" << endl;
-  // cout << "Best solution: " << localresult.solution.transpose() << endl;
-  cout << "Best fitness: " << localresult.fitness << endl;
-  cout << "Evaluations: " << localresult.evaluations << endl;
-  cout << "Profit :" << problem.profit(localresult.solution) << endl;
+
   return 0;
 }
