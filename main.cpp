@@ -54,8 +54,8 @@ int main(int argc, char *argv[]) {
   RandomSearch ralg = RandomSearch();
   Greedy greedyalg = Greedy();
   LocalSearch localalg = LocalSearch();
-  // Create the specific problem
 
+  // Create the specific problem
   ProblemPort problem = ProblemPort(path, low, high, false);
   ProblemPort problem25 = ProblemPort(path, low, high, true);
   std::vector<pair<std::string, MH<double> *>> algorithms = {
@@ -93,6 +93,5 @@ int main(int argc, char *argv[]) {
     cout << "Mean evaluations " << evals.col(i).mean() << endl;
     cout << "Mean time : " << times.col(i).mean() << endl;
   }
-
   return 0;
 }

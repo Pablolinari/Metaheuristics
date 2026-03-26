@@ -22,5 +22,5 @@ ResultMH<double> Greedy::optimize(Problem<double> &problem , int maxevals) {
     bestcompanies.erase(bestcompanies.begin());
     bestSolution(company) = std::min(domain.second, 1 - bestSolution.sum());
   }
-  return ResultMH(bestSolution,problem.fitness(bestSolution), maxevals);
+  return ResultMH(bestSolution,problem.fitness(bestSolution), 1);
 }

@@ -49,10 +49,10 @@ public:
     Eigen::MatrixX<double> centered = mat.rowwise() - columnsMean.transpose();
     return (centered.transpose() * centered) / (mat.rows());
   }
+
   double profit(const tSolution<double> &solution) {
-    Eigen::MatrixXd logdata = data.array() + 1;
-    logdata = logdata.array().log();
-    Eigen::VectorXd logmeans = logdata.colwise().mean();
+    Eigen::MatrixXd logdata = (data.array() + 1).log();
+    Eigen::VectorXd logmeans = logdata.colwise().sum();
     return (solution.array() * logmeans.array()).sum();
   }
   double risk(const tSolution<double> &solution) {
@@ -80,13 +80,10 @@ public:
     for (int i = 0; i < numberZeros; i++) {
       solution(index[i]) = 0;
     }
-    if (isValid(solution)) {
-      return solution;
-    } else {
+    if (!isValid(solution)) {
       this->fix(solution);
-
-      return solution;
     }
+    return solution;
   }
 
   bool isValid(const tSolution<double> &solution) override {
@@ -95,8 +92,8 @@ public:
     if (std::fabs(solution.sum() - 1) >= error) {
       valid = false;
     }
-    if (!(solution.array() <= this->high && solution.array() >= this->low)
-             .all()) {
+    if (!(solution.array() <= this->high).all() &&
+        !(solution.array() >= this->low).all()) {
       valid = false;
     }
     return valid;
@@ -118,7 +115,7 @@ public:
       if (waste < this->low) {
         std::vector<int> validIndexs;
         for (int i = 0; i < solution.size(); i++) {
-          if (solution(i) > this->low && solution(i) < this->high) {
+          if (solution(i) > this->low && solution(i)< this->high) {
             validIndexs.push_back(i);
           }
         }
@@ -141,17 +138,18 @@ public:
       }
     }
   }
-
   double heuristic(int i) override {
     Eigen::VectorX<double> vectorFormat = data.col(i).array() + 1;
-    double logmean = (vectorFormat.array().log().sum()) / this->days;
-    double sigmamean = this->covarianceMat.col(i).sum() / this->days;
+    double logmean = (vectorFormat.array().log().sum());
+    double sigmamean = this->covarianceMat.col(i).sum() / this->ncompany;
     return logmean - (this->lambda * sigmamean);
   }
 
   void testclass() {
 
     std::cout << this->data.rows() << std::endl;
-    std::cout << this->data.block(0, 0, 5, 20) << std::endl;
+    std::cout << this->data.block(0, 0, 10, 5) << std::endl;
+    std::cout << "----------------" << std::endl;
+    std::cout << this->covarianceMat.block(0, 0, 10, 5) << std::endl;
   }
 };

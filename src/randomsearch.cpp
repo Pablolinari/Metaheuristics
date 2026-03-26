@@ -13,12 +13,11 @@
 ResultMHDouble RandomSearch::optimize(ProblemDouble &problem, int maxevals) {
   assert(maxevals > 0);
 
-  tSolution<double> temporalSolution(problem.getSolutionSize());
   tSolution<double> bestSolution(problem.getSolutionSize());
   tFitness bestFitness = -std::numeric_limits<double>::infinity();
 
   for (size_t i = 0; i < maxevals; i++) {
-    temporalSolution = problem.createSolution();
+    auto temporalSolution = problem.createSolution();
 		double currentFitness = problem.fitness(temporalSolution);
     if ( currentFitness> bestFitness) {
       bestSolution = temporalSolution;

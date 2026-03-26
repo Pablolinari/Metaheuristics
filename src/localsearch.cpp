@@ -20,7 +20,7 @@ ResultMH<double> LocalSearch::optimize(Problem<double> &problem, int maxevals) {
   }
   int evals = 0;
   double amount = 0;
-  while (evals < maxevals) {
+  while (evals < maxevals && improved) {
     improved = false;
     Random::shuffle(neighbors);
     for (std::pair<int, int> p : neighbors) {
@@ -46,5 +46,5 @@ ResultMH<double> LocalSearch::optimize(Problem<double> &problem, int maxevals) {
       }
     }
   }
-  return ResultMH(startSolution, problem.fitness(startSolution), evals);
+  return ResultMH(startSolution, bestFitness, evals);
 }
