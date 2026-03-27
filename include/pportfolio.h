@@ -103,33 +103,88 @@ public:
     return valid;
   }
 
-	void fix(tSolution<double>&solution)override{
-		solution = solution.array()/solution.sum();
+  void fix(tSolution<double> &solution) override {
+    int n = solution.size();
+    if (n == 0)
+      return;
 
-		double currentSum = solution.sum();
-		std::vector<int> zerosIdx;
-		while(fabs(currentSum-1)>=this->ERROR){
-			for(int i =0;i<solution.size();i++){
-				if(solution(i)<this->low){
-					solution(i)=0.0;
-					zerosIdx.push_back(i);
-				}
-				else if(solution(i)>this->high){
-					solution(i) =this->high;
-				}
-			}
-			currentSum = solution.sum();
-			if(fabs(currentSum-1)>=this->ERROR){break;}
+    // 1. Normalizar inicialmente para que la suma sea 1
+    double current_sum = std::accumulate(solution.begin(), solution.end(), 0.0);
+    if (current_sum > 0) {
+      for (double &w : solution) {
+        w /= current_sum;
+      }
+    }
 
-			if(1-currentSum<this->low){
-				
-				
-			}else {
+    // 2. Asegurar que estén en el rango [lo, hi]
+    // Nota: La imagen dice "w_i <- 0 si w_i < lo", esto implica un posible
+    // incumplimiento del rango inferior a menos que lo sea 0.
+    for (double &w : solution) {
+      if (w < this->low)
+        w = 0.0;
+      else if (w > this->high)
+        w = this->high;
+    }
 
-			}
-		}
+    // 3. Comprobar la suma de nuevo
+    current_sum = std::accumulate(solution.begin(), solution.end(), 0.0);
 
-	}
+    // 4. Si la suma es menor que 1
+    if (current_sum < 1.0) {
+      double diff = 1.0 - current_sum;
+
+      // Identificar candidatos: pesos > 0 y < hi
+      std::vector<int> candidates;
+      for (int i = 0; i < n; ++i) {
+        if (solution[i] > 0 && solution[i] < this->high) {
+          candidates.push_back(i);
+        }
+      }
+
+      if (!candidates.empty()) {
+        double share = diff / candidates.size();
+        for (int idx : candidates) {
+          double can_add = this->high - solution[idx];
+          double to_add = std::min(share, can_add);
+          solution[idx] += to_add;
+          diff -= to_add;
+        }
+      }
+
+      // Si aún falta (diff > 0), incrementar pesos que son 0 (aleatorios)
+      if (diff > 0.000001) { // Margen de error de punto flotante
+        for (int i = 0; i < n && diff > 0; ++i) {
+          if (solution[i] == 0) {
+            double to_add = std::min(diff, this->high);
+            solution[i] = to_add;
+            diff -= to_add;
+          }
+        }
+      }
+    }
+    // 5. Si la suma es mayor que 1
+    else if (current_sum > 1.0) {
+      double diff = current_sum - 1.0;
+
+      // Identificar candidatos: pesos > lo
+      std::vector<int> candidates;
+      for (int i = 0; i < n; ++i) {
+        if (solution[i] > this->low) {
+          candidates.push_back(i);
+        }
+      }
+
+      if (!candidates.empty()) {
+        double share = diff / candidates.size();
+        for (int idx : candidates) {
+          double can_subtract = solution[idx] - this->low;
+          double to_subtract = std::min(share, can_subtract);
+          solution[idx] -= to_subtract;
+          diff -= to_subtract;
+        }
+      }
+    }
+  }
 
   /*
 void fix(tSolution<double> &solution) override {
