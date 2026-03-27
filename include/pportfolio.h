@@ -1,10 +1,14 @@
 #pragma once
+#include "../include/random.hpp"
 #include "problem.h"
 #include "solution.h"
 #include "utils.hpp"
+#include <cmath>
 #include <eigen3/Eigen/Eigen>
 #include <iostream>
+#include <ostream>
 #include <string>
+#include <vector>
 
 class ProblemPort : public Problem<double> {
   int days;
@@ -12,6 +16,7 @@ class ProblemPort : public Problem<double> {
   double low;
   double high;
   int lambda;
+  const double ERROR = 0.00005;
   Eigen::MatrixXd data;
   Eigen::MatrixXd covarianceMat;
 
@@ -88,8 +93,7 @@ public:
 
   bool isValid(const tSolution<double> &solution) override {
     bool valid = true;
-    double error = 0.0003;
-    if (std::fabs(solution.sum() - 1) >= error) {
+    if (std::fabs(solution.sum() - 1) >= this->ERROR) {
       valid = false;
     }
     if (!(solution.array() <= this->high).all() &&
@@ -99,45 +103,79 @@ public:
     return valid;
   }
 
-  void fix(tSolution<double> &solution) override {
-    solution = solution.array() / solution.sum();
+	void fix(tSolution<double>&solution)override{
+		solution = solution.array()/solution.sum();
 
-    for (int i = 0; i < solution.size(); i++) {
-      if (solution(i) < this->low) {
-        solution(i) = 0.0;
-      } else if (solution(i) > this->high) {
-        solution(i) = this->high;
-      }
-    }
-    if (solution.sum() < 1) {
-      double waste = 1 - solution.sum();
+		double currentSum = solution.sum();
+		std::vector<int> zerosIdx;
+		while(fabs(currentSum-1)>=this->ERROR){
+			for(int i =0;i<solution.size();i++){
+				if(solution(i)<this->low){
+					solution(i)=0.0;
+					zerosIdx.push_back(i);
+				}
+				else if(solution(i)>this->high){
+					solution(i) =this->high;
+				}
+			}
+			currentSum = solution.sum();
+			if(fabs(currentSum-1)>=this->ERROR){break;}
 
-      if (waste < this->low) {
-        std::vector<int> validIndexs;
-        for (int i = 0; i < solution.size(); i++) {
-          if (solution(i) > this->low && solution(i)< this->high) {
-            validIndexs.push_back(i);
-          }
-        }
-        double spreadWaste = waste / validIndexs.size();
-        for (int i : validIndexs) {
-          solution(i) += spreadWaste;
-        }
+			if(1-currentSum<this->low){
+				
+				
+			}else {
 
-      } else {
-        std::vector<int> zerosIndex;
-        for (int i = 0; i < solution.size(); i++) {
-          if (solution(i) == 0.0) {
-            zerosIndex.push_back(i);
-          }
-        }
-        if (!zerosIndex.empty()) {
-          auto randomit = Random::get(zerosIndex);
-          solution(*randomit) = waste;
-        }
-      }
+			}
+		}
+
+	}
+
+  /*
+void fix(tSolution<double> &solution) override {
+solution = solution.array() / solution.sum();
+
+for (int i = 0; i < solution.size(); i++) {
+if (solution(i) < this->low) {
+  solution(i) = 0.0;
+} else if (solution(i) > this->high) {
+  solution(i) = this->high;
+}
+}
+if (solution.sum() < 1) {
+double waste = 1 - solution.sum();
+
+if (waste < this->low) {
+  std::vector<int> validIndexs;
+  for (int i = 0; i < solution.size(); i++) {
+    if (solution(i) > this->low && solution(i)< this->high) {
+      validIndexs.push_back(i);
     }
   }
+  double spreadWaste = waste / validIndexs.size();
+  for (int i : validIndexs) {
+                                  if(solution(i)+spreadWaste<=high){
+                                          solution(i)+=spreadWaste;
+                                  }
+  }
+
+} else{
+  std::vector<int> zerosIndex;
+                          double waste = 1- solution.sum();
+  for (int i = 0; i < solution.size(); i++) {
+    if (solution(i) == 0.0) {
+      zerosIndex.push_back(i);
+    }
+  }
+  while(!(std::fabs(solution.sum()-1)<= 0.00003)||!zerosIndex.empty()) {
+    auto randomidx = Random::get(zerosIndex);
+    solution(*randomidx) = waste;
+                                  zerosIndex.erase(randomidx);
+  }
+}
+}
+}
+*/
   double heuristic(int i) override {
     Eigen::VectorX<double> vectorFormat = data.col(i).array() + 1;
     double logmean = (vectorFormat.array().log().sum());
@@ -146,10 +184,20 @@ public:
   }
 
   void testclass() {
+    int notvalid = 0;
+    for (int i = 0; i < 10000; i++) {
+      tSolution<double> sol = this->createSolution();
+      if (!this->isValid(sol)) {
+        std::cout << "No es valida" << std::endl;
+        double error = 0.0003;
+        if (std::fabs(sol.sum() - 1) >= error) {
 
-    std::cout << this->data.rows() << std::endl;
-    std::cout << this->data.block(0, 0, 10, 5) << std::endl;
-    std::cout << "----------------" << std::endl;
-    std::cout << this->covarianceMat.block(0, 0, 10, 5) << std::endl;
+          std::cout << "no cumple suma : " << 1 - sol.sum() << std::endl;
+        }
+        // std::cout << sol.transpose() << std::endl;
+        notvalid++;
+      }
+    }
+    std::cout << "total no validas : " << notvalid << std::endl;
   }
 };
