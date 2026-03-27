@@ -51,9 +51,7 @@ int main(int argc, char *argv[]) {
     return 0;
   }
 
-  ProblemPort problem = ProblemPort(path, low, high, false);
-	problem.testclass();
-	/*
+
   // Create the algorithms
   RandomSearch ralg = RandomSearch();
   Greedy greedyalg = Greedy();
@@ -97,6 +95,5 @@ int main(int argc, char *argv[]) {
     cout << "Mean evaluations " << evals.col(i).mean() << endl;
     cout << "Mean time : " << times.col(i).mean() << endl;
   }
-	*/
   return 0;
 }

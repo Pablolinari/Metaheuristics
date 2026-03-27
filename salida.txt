@@ -1,17 +1,1 @@
-No es valida
-No es valida
-No es valida
-No es valida
-No es valida
-No es valida
-No es valida
-No es valida
-No es valida
-No es valida
-No es valida
-No es valida
-No es valida
-No es valida
-No es valida
-No es valida
-total no validas : 16
+total no validas : 0

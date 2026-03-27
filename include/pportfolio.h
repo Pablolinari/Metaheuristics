@@ -103,89 +103,103 @@ public:
     return valid;
   }
 
-  void fix(tSolution<double> &solution) override {
+void fix(tSolution<double>& solution) override {
     int n = solution.size();
-    if (n == 0)
-      return;
+    if (n <= 0) return;
 
-    // 1. Normalizar inicialmente para que la suma sea 1
-    double current_sum = std::accumulate(solution.begin(), solution.end(), 0.0);
-    if (current_sum > 0) {
-      for (double &w : solution) {
-        w /= current_sum;
-      }
+    // --- PASO 1: Normalización inicial ---
+    double sum = std::accumulate(solution.begin(), solution.end(), 0.0);
+    if (sum > 0) {
+        for (double& w : solution) w /= sum;
+    } else {
+        // Si la suma es 0, inicializamos equitativamente para evitar errores
+        for (double& w : solution) w = 1.0 / n;
     }
 
-    // 2. Asegurar que estén en el rango [lo, hi]
-    // Nota: La imagen dice "w_i <- 0 si w_i < lo", esto implica un posible
-    // incumplimiento del rango inferior a menos que lo sea 0.
-    for (double &w : solution) {
-      if (w < this->low)
-        w = 0.0;
-      else if (w > this->high)
-        w = this->high;
+    // --- PASO 2: Ajuste estricto al rango [lo, hi] ---
+    for (double& w : solution) {
+        if (w < this->low) w = 0.0;
+        else if (w > this->high) w = this->high;
     }
 
-    // 3. Comprobar la suma de nuevo
-    current_sum = std::accumulate(solution.begin(), solution.end(), 0.0);
+    // --- PASO 3: Corrección iterativa de la suma ---
+    // Aumentamos MAX_ITER y refinamos la lógica de reparto
+    const int MAX_ITER = 20; 
+    for (int iter = 0; iter < MAX_ITER; ++iter) {
+        double current_sum = std::accumulate(solution.begin(), solution.end(), 0.0);
+        double diff = 1.0 - current_sum;
 
-    // 4. Si la suma es menor que 1
-    if (current_sum < 1.0) {
-      double diff = 1.0 - current_sum;
+        if (std::abs(diff) < 1e-12) break; 
 
-      // Identificar candidatos: pesos > 0 y < hi
-      std::vector<int> candidates;
-      for (int i = 0; i < n; ++i) {
-        if (solution[i] > 0 && solution[i] < this->high) {
-          candidates.push_back(i);
+        if (diff > 0) { // Falta para llegar a 1
+            std::vector<int> can_grow;
+            for (int i = 0; i < n; ++i) {
+                if (solution[i] < this->high) can_grow.push_back(i);
+            }
+            
+            if (can_grow.empty()) {
+                // Si nadie puede crecer y falta suma, forzamos a los que son 0 a ser 'low'
+                for (int i = 0; i < n && diff > 0; ++i) {
+                    if (solution[i] == 0) {
+                        solution[i] = std::min(this->low, diff);
+                        diff -= solution[i];
+                    }
+                }
+                break; 
+            }
+            
+            double share = diff / can_grow.size();
+            for (int idx : can_grow) {
+                double added = std::min(share, this->high - solution[idx]);
+                solution[idx] += added;
+            }
+        } 
+        else { // Sobra (diff es negativo)
+            std::vector<int> can_shrink;
+            for (int i = 0; i < n; ++i) {
+                if (solution[i] > this->low) can_shrink.push_back(i);
+                else if (solution[i] > 0 && solution[i] <= this->low) can_shrink.push_back(i);
+            }
+            
+            if (can_shrink.empty()) break;
+            
+            double amount_to_take = std::abs(diff);
+            double share = amount_to_take / can_shrink.size();
+            for (int idx : can_shrink) {
+                // No permitimos que baje de 'low' a menos que lo mandemos a 0
+                double can_take = solution[idx] - this->low;
+                if (can_take > 0) {
+                    double taken = std::min(share, can_take);
+                    solution[idx] -= taken;
+                } else {
+                    // Si ya está en 'low' o cerca, lo mandamos a 0 si hace falta
+                    solution[idx] = 0.0;
+                }
+            }
         }
-      }
-
-      if (!candidates.empty()) {
-        double share = diff / candidates.size();
-        for (int idx : candidates) {
-          double can_add = this->high - solution[idx];
-          double to_add = std::min(share, can_add);
-          solution[idx] += to_add;
-          diff -= to_add;
-        }
-      }
-
-      // Si aún falta (diff > 0), incrementar pesos que son 0 (aleatorios)
-      if (diff > 0.000001) { // Margen de error de punto flotante
-        for (int i = 0; i < n && diff > 0; ++i) {
-          if (solution[i] == 0) {
-            double to_add = std::min(diff, this->high);
-            solution[i] = to_add;
-            diff -= to_add;
-          }
-        }
-      }
     }
-    // 5. Si la suma es mayor que 1
-    else if (current_sum > 1.0) {
-      double diff = current_sum - 1.0;
 
-      // Identificar candidatos: pesos > lo
-      std::vector<int> candidates;
-      for (int i = 0; i < n; ++i) {
-        if (solution[i] > this->low) {
-          candidates.push_back(i);
-        }
-      }
-
-      if (!candidates.empty()) {
-        double share = diff / candidates.size();
-        for (int idx : candidates) {
-          double can_subtract = solution[idx] - this->low;
-          double to_subtract = std::min(share, can_subtract);
-          solution[idx] -= to_subtract;
-          diff -= to_subtract;
-        }
-      }
+    // --- PASO 4: El "Seguro de Vida" (Ajuste Final de Precisión) ---
+    // Forzamos que los valores estén en {0} U [low, high]
+    double final_sum = 0;
+    for (double& w : solution) {
+        if (w > 0 && w < this->low) w = this->low;
+        if (w > this->high) w = this->high;
+        final_sum += w;
     }
-  }
 
+    // Si después de limpiar el rango la suma no es 1, ajustamos el primer elemento disponible
+    double final_diff = 1.0 - final_sum;
+    if (std::abs(final_diff) > 1e-12) {
+        for (double& w : solution) {
+            double newValue = w + final_diff;
+            if ((newValue >= this->low && newValue <= this->high) || std::abs(newValue) < 1e-12) {
+                w = (std::abs(newValue) < 1e-12) ? 0.0 : newValue;
+                break;
+            }
+        }
+    }
+}
   /*
 void fix(tSolution<double> &solution) override {
 solution = solution.array() / solution.sum();
