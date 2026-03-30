@@ -3,6 +3,8 @@
 #include "include/random.hpp"
 #include <eigen3/Eigen/Core>
 #include <eigen3/Eigen/Dense>
+#include <eigen3/Eigen/SVD>
+#include <ios>
 #include <iostream>
 #include <string>
 #include <time.h>
@@ -13,6 +15,7 @@
 #include "include/greedy.h"
 #include "include/localsearch.h"
 #include "include/randomsearch.h"
+#include "include/solution.h"
 using namespace std;
 using namespace std::chrono;
 int main(int argc, char *argv[]) {
@@ -66,6 +69,7 @@ int main(int argc, char *argv[]) {
   Eigen::MatrixX<double> fitness(totalevaluations, algorithms.size());
   Eigen::MatrixX<double> evals(totalevaluations, algorithms.size());
   Eigen::MatrixX<double> times(totalevaluations, algorithms.size());
+	vector<tSolution<double>>sols;
   cout << endl << "..........Ejecutando ..........." << endl;
   for (int j = 0; j < algorithms.size(); j++) {
     for (int i = 0; i < totalevaluations; i++) {
@@ -79,6 +83,8 @@ int main(int argc, char *argv[]) {
           duration_cast<std::chrono::milliseconds>(end - start).count();
       fitness(i, j) = result.fitness;
       evals(i, j) = result.evaluations;
+			sols.push_back(result.solution);
+			
       seed += 10;
     }
 
@@ -95,5 +101,7 @@ int main(int argc, char *argv[]) {
     cout << "Mean evaluations " << evals.col(i).mean() << endl;
     cout << "Mean time : " << times.col(i).mean() << endl;
   }
+	cout<<sols[2]<<endl<<boolalpha<<problem.isValid(sols[2]);
+	
   return 0;
 }

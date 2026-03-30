@@ -1,10 +1,11 @@
 #include "../include/localsearch.h"
 #include "../include/random.hpp"
 #include <iostream>
+#include <ostream>
 #include <utility>
 
 ResultMH<double> LocalSearch::optimize(Problem<double> &problem, int maxevals) {
-  assert(maxevals > 0);
+  assert(maxevals >=1);
   double ratio = 0.4;
   tSolution<double> startSolution = problem.createSolution();
   double bestFitness = problem.fitness(startSolution);
@@ -19,28 +20,30 @@ ResultMH<double> LocalSearch::optimize(Problem<double> &problem, int maxevals) {
     }
   }
   int evals = 0;
-  double amount = 0;
   while (evals < maxevals && improved) {
     improved = false;
     Random::shuffle(neighbors);
     for (std::pair<int, int> p : neighbors) {
-      amount = startSolution(p.first) * ratio;
+      double amount = startSolution(p.first) * ratio;
+			double originalFirst = startSolution(p.first);
+			double originalSecond = startSolution(p.second);
       startSolution(p.first) -= amount;
       startSolution(p.second) += amount;
 
-      double currentFitness = problem.fitness(startSolution);
-      evals++;
-      if (currentFitness> bestFitness &&
-          problem.isValid(startSolution)) {
+      if (problem.isValid(startSolution)) {
+        double currentFitness = problem.fitness(startSolution);
+        evals++;
+        if (currentFitness > bestFitness) {
 
-        bestFitness =currentFitness; 
+          bestFitness = currentFitness;
 
-        improved = true;
-        break;
-      } else {
-        startSolution(p.first) += amount;
-        startSolution(p.second) -= amount;
+          improved = true;
+          break;
+        }
       }
+      startSolution(p.first) =originalFirst;
+      startSolution(p.second) =originalSecond;
+      
       if (evals == maxevals) {
         break;
       }
@@ -48,3 +51,4 @@ ResultMH<double> LocalSearch::optimize(Problem<double> &problem, int maxevals) {
   }
   return ResultMH(startSolution, bestFitness, evals);
 }
+
