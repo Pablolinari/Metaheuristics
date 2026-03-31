@@ -78,9 +78,50 @@ De esta manera podemos ajustar el codigo ajustando el parametro $lambda$ de la e
 
 #pagebreak()
 = Algoritmos empleados y estructura del problema
-Para modelar el portfolio se define un vector de pesos $w$ con una componente por empresa, cumpliendo $ sum_i w_i = 1 $ y $ w_i >= 0 $ (inversión larga y totalmente distribuida). A partir de los retornos diarios 2015-2025 se calculan la media $mu$ de cada activo y la matriz de covarianzas $Sigma$. La función a maximizar es $ f(w) = mu^T w - lambda \; w^T Sigma w $, donde $lambda$ controla la aversión al riesgo: cuanto mayor es, más se penaliza la volatilidad del conjunto. Cada evaluación del algoritmo implica generar un $w$ factible, normalizarlo y calcular su fitness con la ecuación anterior.
 
-La estructura general se basa en tres heurísticas complementarias. Todas comparten el mismo evaluador, un control de factibilidad (recorte de pesos negativos y normalización) y un número máximo de evaluaciones para que la comparación sea justa.
+== Estructura del problema 
+Para modelar el problema del portfolio se ha usado la clase Pportfolio la cual es hija de la clase Problem que viene ya predefinnida con varios métodos virtuales , los cuales se implementan en la clase hija. Para representar el problema usando estas clases se tienen en cuenta los siguientes atributos privados :
+
+- *days* : número entero de días de los que se tienen datos. 
+- *ncompany* : número entero  de empresas de las que se tienen datos.
+- *low* : mínimo porcentaje de inversión en una empresa (double).
+- *high* : máximo porcentaje de inversión en una empresa (double).
+- *lambda* : parámetro entero  usado en el fitness.
+- *data* : matriz de la libreria Eigen con valores double que contienen los beneficios diarios de cada empresa, en las columnas se representan las empresas y en las filas los dias.
+- *covarianceMat* : matriz de la libreria Eigen con valores double que contiene la  covarianza de las empresas.
+- *ERROR* : Error permitido en la suma total del vector solución (double).
+
+Podemos observar que se ha optado por usar la libreria Eigen de C++ par poder manejar las operaciones de matrices y vectores como la suma total , la media total , la media por columnas o por filas , multiplicación escalar a escalar, etc... . Esto hace que el código sea más compacto y fácil de seguir a la vez que más preciso y cómodo de utilizar. 
+
+Las principales funciones que se usan en la clase *Pportfolio* son las siguientes : 
+
+ #block(fill: luma(240), inset: 8pt, radius: 4pt, width: 100%)[
+ ```py
+ # Pseudocódigo del calculo de la matriz de covarianza 
+  funcion covarianceMatrix(matrix):
+    columnmean=matrix.colwise.mean
+    centered =  mat.rowwise - columnsmean.transpose;
+    return (centered.transpose * centered) / (matrix.rows);
+      
+ ```]
+ #block(fill: luma(240), inset: 8pt, radius: 4pt, width: 100%)[
+ ```py
+ # Pseudocódigo del calculo del beneficio
+  funcion profit(solution): 
+    
+    logdata = log((data+1)) # la operación se aplica a todos las componentes
+    return (solution * logdata.colwise.sum).sum; #multiplicación componente a componente
+ 
+ ```]
+ #block(fill: luma(240), inset: 8pt, radius: 4pt, width: 100%)[
+ ```py
+ # Pseudocódigo del calculo driesgo
+  funcion risk(solution): 
+    return (solution.transpose * covarianceMat * solution);
+ #devuelve un número resultado de las dimensiones  1xn * nxn *nx1
+ ```]
+
+
 
 = Estructura de los algoritmos 
 == Random Search
