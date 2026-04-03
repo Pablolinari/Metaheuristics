@@ -80,7 +80,7 @@ De esta manera podemos ajustar el codigo ajustando el parametro $lambda$ de la e
 = Algoritmos empleados y estructura del problema
 
 == Estructura del problema 
-Para modelar el problema del portfolio se ha usado la clase Pportfolio la cual es hija de la clase Problem que viene ya predefinnida con varios métodos virtuales , los cuales se implementan en la clase hija. Para representar el problema usando estas clases se tienen en cuenta los siguientes atributos privados :
+Para modelar el problema del portfolio se ha usado la clase Pportfolio la cual es hija de la clase Problem que viene ya predefinnida con varios métodos virtuales , los cuales se implementan en la clase hija. Para representar el problema usando estas clases se tienen en cuenta los siguientes atributos:
 
 - *days* : número entero de días de los que se tienen datos. 
 - *ncompany* : número entero  de empresas de las que se tienen datos.
@@ -91,19 +91,48 @@ Para modelar el problema del portfolio se ha usado la clase Pportfolio la cual e
 - *covarianceMat* : matriz de la libreria Eigen con valores double que contiene la  covarianza de las empresas.
 - *ERROR* : Error permitido en la suma total del vector solución (double).
 
-Podemos observar que se ha optado por usar la libreria Eigen de C++ par poder manejar las operaciones de matrices y vectores como la suma total , la media total , la media por columnas o por filas , multiplicación escalar a escalar, etc... . Esto hace que el código sea más compacto y fácil de seguir a la vez que más preciso y cómodo de utilizar. 
+Podemos observar que se ha optado por usar la libreria Eigen de C++ para poder manejar las operaciones de matrices y vectores como la suma total , la media total , la media por columnas o por filas , multiplicación escalar a escalar, etc... . Esto hace que el código sea más compacto y fácil de seguir a la vez que más preciso y cómodo de utilizar. 
 
-Las principales funciones que se usan en la clase *Pportfolio* son las siguientes : 
+== Representación de las soluciones
+
+Para este problema las soluciones se representan por vectores de la biblioteca Eigen con tipo de dato double donde cada posición del vector representa la i-ésima empresa del fichero de datos de entrada , todos estos vectores deben cumplir las siguientes restricciones: 
+
+- El tamaño de la solución debe ser el mismo que el número de empresas en los datos de entrada. 
+- La suma de todos sus valores debe ser igual a 1.
+- Cada posición del vector tiene que tener un valor entre *low* y *high*
+- Puede haber posiciones del vector con valor 0(representando que en esa empresa no se invierte).
+
+== Funciones comunes usadas por los algoritmos
+
+En primer lugar la función que permite cargar los datos en nuestra clase Pportfolio es una función implementada en un archivo auxiliar ya que no debe pertenecer  necesariamente al problema ---revisar
+
+Las principales funciones que se usan de la clase *Pportfolio* para implementar los algoritmos  son las siguientes : 
+
+La función *createSolution* Se usa en dos algoritmos , en la Búsqueda Aleatoria para generar soluciones aleatorias y escoger finalmente la que mejor fitness tenga y en la Búsqueda Local para generar la solución desde la cual se comienza a buscar la mejor solución posible.
+#pagebreak()
 
  #block(fill: luma(240), inset: 8pt, radius: 4pt, width: 100%)[
  ```py
- # Pseudocódigo del calculo de la matriz de covarianza 
-  funcion covarianceMatrix(matrix):
-    columnmean=matrix.colwise.mean
-    centered =  mat.rowwise - columnsmean.transpose;
-    return (centered.transpose * centered) / (matrix.rows);
-      
+  funcion createSolution():
+    vector solucion;
+
+    for i<solucion.size : 
+      solucion(i) = Aleatorio entre high y low
+    
+
+    numeroceros = Aleatorio entre 1 y solucion.size-1
+    vectorindices = {0,1,2, ......,solucion.size-1}
+    desordenar(vectorindices)
+     ## Seleccionamos valores aleatorios que ponemos a 0
+    for i<solucion.size:
+      solucion(vectorindices[i])=0
+    
+    if la solucion no es valida
+      fix(solucion)
+    
+    return solution;
  ```]
+
  #block(fill: luma(240), inset: 8pt, radius: 4pt, width: 100%)[
  ```py
  # Pseudocódigo del calculo del beneficio
@@ -120,6 +149,16 @@ Las principales funciones que se usan en la clase *Pportfolio* son las siguiente
     return (solution.transpose * covarianceMat * solution);
  #devuelve un número resultado de las dimensiones  1xn * nxn *nx1
  ```]
+
+ #block(fill: luma(240), inset: 8pt, radius: 4pt, width: 100%)[
+ ```py
+ # Pseudocódigo del calculo del fitness
+  funcion fitness(solution): 
+    return (profit - lambda*risk);
+ #devuelve un número resultado de las dimensiones  1xn * nxn *nx1
+ ```]
+
+El principal objetivo de los algoritmos es maximizar la función fitness , la cual trata de maximizar el beneficio y minimizar el riesgo en una sola fórmula.
 
 
 
