@@ -87,6 +87,7 @@ public:
     for (int i = 0; i < numberZeros; i++) {
       solution(index[i]) = 0;
     }
+		solution.array()/=solution.sum();
     if (!isValid(solution)) {
       this->fix(solution);
     }

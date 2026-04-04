@@ -16,7 +16,7 @@ ResultMHDouble RandomSearch::optimize(ProblemDouble &problem, int maxevals) {
   tSolution<double> bestSolution(problem.getSolutionSize());
   tFitness bestFitness = -std::numeric_limits<double>::infinity();
 
-  for (size_t i = 0; i < maxevals; i++) {
+  for (int i = 0; i < maxevals; i++) {
     auto temporalSolution = problem.createSolution();
 		double currentFitness = problem.fitness(temporalSolution);
     if ( currentFitness> bestFitness && problem.isValid(temporalSolution))  {

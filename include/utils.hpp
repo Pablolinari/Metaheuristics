@@ -49,11 +49,7 @@ inline Eigen::MatrixXd loadCSV(const std::string &path, bool only2025) {
     std::vector<double> rowValues;
     std::string cell;
     while (getline(ss, cell, ',')) {
-      try {
         rowValues.push_back(cell.empty() ? 0.0 : std::stod(cell));
-      } catch (...) {
-        rowValues.push_back(0.0);
-      }
     }
 
     if (!rowValues.empty()) {

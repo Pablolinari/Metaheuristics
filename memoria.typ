@@ -102,14 +102,47 @@ Para este problema las soluciones se representan por vectores de la biblioteca E
 - Cada posición del vector tiene que tener un valor entre *low* y *high*
 - Puede haber posiciones del vector con valor 0(representando que en esa empresa no se invierte).
 
+La mejor solución será aquella que consiga maximizar la función objetivo.
+
 == Funciones comunes usadas por los algoritmos
 
-En primer lugar la función que permite cargar los datos en nuestra clase Pportfolio es una función implementada en un archivo auxiliar ya que no debe pertenecer  necesariamente al problema ---revisar
+En primer lugar la función que permite cargar los datos en nuestra clase Pportfolio es una función implementada en un archivo auxiliar ya que no tiene por qué pertenecer  necesariamente al problema que se plantea.Esta función lee datos de un fichero en formato CSV. Tras abrir el archivo la función descarta la primera linea con los nombre de las empresas y comienza a leer las siguientes lineas, una vez escogida una linea , se salta el string que contiene la fecha y comienza a insertar datos al vector usando como separador la coma.
+El código comprueba los valores de la fecha leida , si el parametro only2025 es True , solo se leen datos de 2025 , de lo contrario se leen todos los datos hasta el último día del 2024. Una vez leidos todos los datos, la matriz obtenida se convierte a una matriz Eigen para poder manejarla con más facilidad.
+
+#block(fill: luma(240), inset: 8pt, radius: 4pt, width: 100%)[
+ ```py
+  funcion LoadCSV(archivo, only2025):
+    matrix data
+    leer(primera_linea)
+    abrir archivo
+    while(leer(linea_archivo)):
+      if es fecha el primer string :
+        continue
+      if(es fecha el primer string and not only2025):
+        solo leer valores de 2014-2024
+      if(es fecha el primer string and only2025):
+        solo leer valores de 2025
+      vector valores
+
+      while(leer(dato)):
+        if(dato no vacio):
+          valores.pushback(dato)
+        else:
+          valores.pushback(0.0)
+        
+      data.pushback(valores)
+
+    cerrar archivo
+    
+    if(data no vacio):
+      matriz_eigen = data
+    return matriz_eigen
+ ```]
 
 Las principales funciones que se usan de la clase *Pportfolio* para implementar los algoritmos  son las siguientes : 
 
 La función *createSolution* Se usa en dos algoritmos , en la Búsqueda Aleatoria para generar soluciones aleatorias y escoger finalmente la que mejor fitness tenga y en la Búsqueda Local para generar la solución desde la cual se comienza a buscar la mejor solución posible.
-#pagebreak()
+
 
  #block(fill: luma(240), inset: 8pt, radius: 4pt, width: 100%)[
  ```py
@@ -139,7 +172,7 @@ La función *createSolution* Se usa en dos algoritmos , en la Búsqueda Aleatori
   funcion profit(solution): 
     
     logdata = log((data+1)) # la operación se aplica a todos las componentes
-    return (solution * logdata.colwise.sum).sum; #multiplicación componente a componente
+    return (solution * logdata.colwise.sum).sum #multiplicación componente a componente
  
  ```]
  #block(fill: luma(240), inset: 8pt, radius: 4pt, width: 100%)[
@@ -158,40 +191,68 @@ La función *createSolution* Se usa en dos algoritmos , en la Búsqueda Aleatori
  #devuelve un número resultado de las dimensiones  1xn * nxn *nx1
  ```]
 
-El principal objetivo de los algoritmos es maximizar la función fitness , la cual trata de maximizar el beneficio y minimizar el riesgo en una sola fórmula.
+
+ #block(fill: luma(240), inset: 8pt, radius: 4pt, width: 100%)[
+ ```py
+ # Pseudocódigo del calculo de la heurística
+  funcion heuristic(i): 
+    datalogaritmo = (data.columna(i)+1).log().sum()
+    mediacovarianza = matrizcovarianza.columna(i).sum()/ncompany
+    return datalogaritmo - (lambda * mediacovarianza);
+  
+
+ ```]
 
 
+El principal objetivo de los algoritmos es maximizar la función fitness , la cual trata de maximizar el beneficio y minimizar el riesgo en una sola fórmula.El parámetro lambda se usará a modo de ajuste , cuando más alto sea su valor el algoritmo valorará mejor soluciones con poco beneficio pero que sean seguras , es decir que tengan poco riesgo , mientras que cuanto más cercano a 0 sea lambda , el algoritmo valorará mejor las soluciones con máximo beneficio posible , ignorando el riesgo.
 
+
+#pagebreak()
 = Estructura de los algoritmos 
 == Random Search
-Explora el espacio de soluciones de forma uniforme para obtener un punto de partida robusto sin asumir estructura. Cada candidato se genera al azar, se normaliza y se acepta como mejor si supera el valor actual.
+
+El algoritmo de Búsqueda aleatoria consiste en generar un número determinado de soluciones válidas de forma aleatoria y seleccionar la solución que maximice o minimice la función del problema, en este caso en concreto , se selecciona la solución que maximice el fitness del problema.
+
  #block(fill: luma(240), inset: 8pt, radius: 4pt, width: 100%)[
  ```py
  # Pseudocódigo del algoritmo Random Search
  función RandomSearch(max_evals):
-     mejor = solucion_aleatoria_factible()
-     repetir max_evals veces:
-         candidata = solucion_aleatoria_factible()
-         si f(candidata) > f(mejor):
-             mejor = candidata
-     devolver mejor
+    mejorfitnes = -infinito
+     for 0 hasta max_evals:
+      soluciontemporal = solucion_aleatoria
+      if fitnes_soluciontemporal > mejorfitness:
+             solucion = mejorsolucion
+            fitness =mejorfitness
+    return (solucion,fitness,max_evals)
  ```]
+Como se puede observar , el algoritmo de Búsqueda aleatoria dependerá de la suerte que tengamos a la hora de generar soluciones aleatorias ya que el espacio de búsqueda de la solución son todas las soluciones posibles a generar en el intervalo dado de número de evaluaciones por tanto no podemos esperar que obtenga una solución que sea mejor que la de otros algoritmos más avanzados , en caso de que esto ocurriese sería por una cuestión de suerte.
+
 
 == Greedy
-Construye la cartera de forma incremental asignando peso primero a los activos con mejor cociente retorno-riesgo estimado. Se usa un tamaño de paso fijo para repartir el presupuesto y se renormaliza al final para cumplir las restricciones.
+
+El algorítmo Greedy trata de construir una solución ordenando las empresas de mayor a menor según la heurística establecida en el guión . Una vez obtenidas las empresas ordenadas selecciona por orden descendente y construye una solución seleccionado en cada iteración la mejor opción disponible según la heuristica hasta completar el total de la inversión (llegar a suma 1).Como en cada iteración se ha seleccionado la mejor opción posible, el algoritmo intentará asignar el mayor porcentaje posible a esta empresa siempre que le sea posible , de lo contrario , le asignará el porcentaje restante para llegar al cien por cien , consiguiendo así construir siempre una solución valida. 
+
+La heurística usada en el problema es la siguiente :
+$ h e u r(i) = (sum_t log(1 + mu_(i t))) - lambda dot (sum_j Sigma_(i j)) / (|N|) $
+
+
+
+ #block(fill: luma(240), inset: 8pt, radius: 4pt, width: 100%)[
+ ```py
+ # Pseudocódigo del calculo de la heurística
+  funcion heuristic(i): 
+    datalogaritmo = (data.columna(i)+1).log.sum
+    mediacovarianza = matrizcovarianza.columna(i).sum/ncompany
+    return datalogaritmo - (lambda * mediacovarianza);
+  
+
+ ```]
 #block(fill: luma(240), inset: 8pt, radius: 4pt, width: 100%)[
 ```py
 # Pseudocódigo del algoritmo Greedy
-función Greedy(paso):
-    pesos = vector_ceros()
-    presupuesto = 1.0
-    orden = activos_ordenados_por_ratio(mu, varianza)
-    para activo en orden mientras presupuesto > 0:
-        asignacion = min(paso, presupuesto)
-        pesos[activo] += asignacion
-        presupuesto -= asignacion
-    normalizar(pesos)
-    devolver pesos
+función greedy(maxevals):
+  mejorescompanias = vector{0,1,2,......,ncompany-1} 
+
 ```]
 
 == Local Search
