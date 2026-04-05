@@ -16,9 +16,9 @@ ResultMH<double> LocalSearch::optimize(Problem<double> &problem, int maxevals) {
     }
   }
   int evals = 0;
-  Random::shuffle(neighbors);
   while (evals < maxevals && improved) {
     improved = false;
+  	Random::shuffle(neighbors);
     for (std::pair<int, int> p : neighbors) {
       double amount = startSolution(p.first) * ratio;
       double originalFirst = startSolution(p.first);

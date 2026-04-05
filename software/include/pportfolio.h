@@ -14,6 +14,7 @@ private:
   const double ERROR = 0.0000000005;
   Eigen::MatrixXd data;
   Eigen::MatrixXd covarianceMat;
+  Eigen::VectorXd logSums; 
 
 public:
   ProblemPort(std::string path, double low, double high, bool inc2025, int lambda = 500);
@@ -21,9 +22,9 @@ public:
   size_t getSolutionSize() override;
   std::pair<double, double> getSolutionDomainRange() override;
   
-  double actionMean(int i);
-  double covariance(int i, int j);
-  Eigen::MatrixX<double> covarianceMatrix(Eigen::MatrixX<double> mat);
+	Eigen::VectorXd logSumsVector();
+
+  Eigen::MatrixXd covarianceMatrix();
   
   double profit(const tSolution<double> &solution);
   double risk(const tSolution<double> &solution);

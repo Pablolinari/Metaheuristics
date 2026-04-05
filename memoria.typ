@@ -330,8 +330,203 @@ Si la solución generada no es valida o no mejora la solución actual , restaura
 
 Mientras que no se superen las restricciones de las evaluaciones y se sigan encontrando vecinos mejores en cada vecindario seguiremos intentando encontrar la mejor solución . En caso de recorrer todo el vecindario y no encontrar una solución mejor o que se superen las evaluciones permitidas , se detendrá la búsqueda.
 
-== Estructura del código
+= Estructura del código
 
+El código de la práctica está organizado en una estructura modular que facilita la compilación y ejecución. A continuación se describe la organización del proyecto y el manual de usuario para compilar y ejecutar el programa.
+
+== Organización de archivos
+
+El proyecto está organizado de la siguiente manera:
+
+- `software/` : Directorio raíz que contiene todo el código fuente
+  - `main.cpp` : Archivo principal que ejecuta los algoritmos
+  - `src/` : Contiene las implementaciones (.cpp)
+    - `pportfolio.cpp` : Implementación de la clase del problema
+    - `randomsearch.cpp` : Implementación del algoritmo de búsqueda aleatoria
+    - `greedy.cpp` : Implementación del algoritmo Greedy
+    - `localsearch.cpp` : Implementación del algoritmo de búsqueda local
+  - `include/` : Contiene los archivos de cabecera (.h y .hpp)
+    - `pportfolio.h`, `greedy.h`, `localsearch.h`, `randomsearch.h`
+    - `problem.h` : Clase base abstracta
+    - `mh.h` : Clase base para los algoritmos de metaheurísticas
+    - `solution.h` : Estructura para representar soluciones
+    - `random.hpp`, `utils.hpp` : Utilidades auxiliares
+    - `Eigen/` : Biblioteca para operaciones con matrices y vectores
+  - `data/` : Contiene los archivos CSV con los datos de entrada
+  - `CMakeLists.txt` : Archivo de configuración de CMake
+  - `script.sh` : Script de compilación automatizada
+  - `Makefile` : Archivo generado automáticamente por CMake
+
+== Compilación
+
+El proyecto utiliza *CMake* como sistema de compilación automática. Se proporcionan dos modos de compilación:
+
+*Opción 1: Usando el script de compilación (Recomendado)*
+
+El script *script.sh* automatiza el proceso de compilación:
+
+#block(fill: luma(240), inset: 8pt, radius: 4pt, width: 100%)[
+```bash
+# Para compilar en modo debug (con símbolos de depuración):
+./script.sh debug
+
+# Para compilar en modo release (optimización máxima):
+./script.sh release
+```
+]
+
+- *Modo debug*: Compila con la flag -O0 (sin optimización) y -g (símbolos de depuración), útil para detectar errores.
+- *Modo release*: Compila con -O3 (máxima optimización) y -DNDEBUG (desactiva comprobaciones de Eigen), recomendado para evaluar el rendimiento real.
+
+*Opción 2: Usando CMake directamente*
+
+#block(fill: luma(240), inset: 8pt, radius: 4pt, width: 100%)[
+```bash
+# Configurar el proyecto en modo release:
+cmake CMakeLists.txt -DCMAKE_BUILD_TYPE=Release
+
+# Compilar:
+make
+```
+]
+
+Tras cualquiera de estos procesos se generará el ejecutable *program* en el directorio software/.
+
+== Manual de usuario: Ejecución
+
+Una vez compilado el programa, se puede ejecutar de las siguientes formas:
+
+*Ejecución estándar (comparación de algoritmos):*
+
+#block(fill: luma(240), inset: 8pt, radius: 4pt, width: 100%)[
+```bash
+./program <ruta_archivo_csv> <low> <high> <evaluaciones> <seed>
+```
+]
+
+*Parámetros:*
+- *ruta_archivo_csv*: Ruta al archivo CSV con los datos de retornos diarios (ejemplo: data/portfolio.csv)
+- *low*: Porcentaje mínimo de inversión permitido por empresa (ejemplo: 0.005)
+- *high*: Porcentaje máximo de inversión permitido por empresa (ejemplo: 0.08)
+- *evaluaciones*: Número de ejecuciones de cada algoritmo con diferentes seeds
+- *seed*: Semilla inicial para el generador de números aleatorios (se incrementa en 10 por cada evaluación)
+
+*Ejemplo de ejecución:*
+
+#block(fill: luma(240), inset: 8pt, radius: 4pt, width: 100%)[
+```bash
+./program data/portfolio.csv 0.005 0.08 5 42
+```
+]
+
+Este comando ejecutará cada uno de los tres algoritmos (Random Search, Greedy y Local Search) 5 veces con seeds diferentes (42, 52, 62, 72, 82), evaluando hasta 10000 soluciones por ejecución. Al finalizar mostrará para cada algoritmo:
+- Fitness medio obtenido
+- Número medio de evaluaciones realizadas
+- Tiempo medio de ejecución (en segundos)
+- Beneficio obtenido en el año 2025
+
+*Ejecución simplificada (valores por defecto):*
+
+#block(fill: luma(240), inset: 8pt, radius: 4pt, width: 100%)[
+```bash
+./program data/portfolio.csv 0.005 0.08
+```
+]
+
+Ejecuta una sola evaluación con seed 42.
+
+*Ejecución de ayuda:*
+
+#block(fill: luma(240), inset: 8pt, radius: 4pt, width: 100%)[
+```bash
+./program
+```
+]
+
+Muestra el mensaje de ayuda con las instrucciones de uso.
+
+*Ejecución alternativa con make:*
+
+También se puede ejecutar directamente tras compilar usando:
+
+#block(fill: luma(240), inset: 8pt, radius: 4pt, width: 100%)[
+```bash
+make run
+```
+]
+
+Esto ejecuta el programa sin argumentos, mostrando el mensaje de ayuda.
+
+
+= Análisi de resultados 
+
+A continuación se presentan los resultados obtenidos tras la ejecución de los tres algoritmos implementados con los datos del portfolio desde 2015 hasta 2025.
+
+#figure(
+  table(
+    columns: 6,
+    align: center,
+    stroke: (x, y) => if y == 0 or y == 4 { (bottom: 0.8pt) } else { none },
+    inset: 8pt,
+    
+    [*Algoritmo*], [*2015-2024*\ *Fitness*], [*2025*\ *Fitness*], [*Beneficio*], [*Evaluaciones*], [*Tiempo*\ *(segundos)*],
+    
+    [Greedy], [-0.212], [0.090], [0.115], [1], [0.01],
+    [Random], [-0.621], [0.121], [0.149], [10000], [0.005],
+    [BL], [-0.35], [0.079], [0.103], [1382], [0.01],
+  ),
+  caption: [Resultados de Ibex 35 (Medias)]
+)
+#figure(
+  table(
+    columns: 6,
+    align: center,
+    stroke: (x, y) => if y == 0 or y == 4 { (bottom: 0.8pt) } else { none },
+    inset: 8pt,
+    
+    [*Algoritmo*], [*2015-2024*\ *Fitness*], [*2025*\ *Fitness*], [*Beneficio*], [*Evaluaciones*], [*Tiempo*\ *(segundos)*],
+    
+    [Greedy], [0.866], [-0.040], [0.009], [1], [0.001],
+    [Random], [0.467], [0.046], [0.083], [10000], [0.019],
+    [BL], [0.591], [-0.002], [0.045], [9074], [0.011],
+  ),
+  caption: [Resultados de S&P100 (Medias)]
+)
+#figure(
+  table(
+    columns: 6,
+    align: center,
+    stroke: (x, y) => if y == 0 or y == 4 { (bottom: 0.8pt) } else { none },
+    inset: 8pt,
+    
+    [*Algoritmo*], [*2015-2024*\ *Fitness*], [*2025*\ *Fitness*], [*Beneficio*], [*Evaluaciones*], [*Tiempo*\ *(segundos)*],
+    
+    [Greedy], [1.042], [-0.115], [-0.062], [1], [0.001],
+    [Random], [0.2844], [-0.025], [0.018], [10000], [0.201],
+    [BL], [0.326], [-0.028], [0.015], [10000], [0.229],
+  ),
+  caption: [Resultados de S&P500 (Medias)]
+)
+Los valores presentados en la tabla corresponden a las medias de 5 ejecuciones independientes con diferentes semillas aleatorias.
+
+== Análisis gráfico de resultados
+
+A continuación se muestran los boxplots de los resultados obtenidos para cada conjunto de datos:
+
+#figure(
+  image("ib35.png", width: 80%),
+  caption: [Boxplot de resultados para Ibex 35]
+)
+
+#figure(
+  image("syp100.png", width: 80%),
+  caption: [Boxplot de resultados para S&P100]
+)
+
+#figure(
+  image("syp500.png", width: 80%),
+  caption: [Boxplot de resultados para S&P500]
+)
 
 = Conclusión
 El documento está listo para crecer con un estilo profesional y académico.
