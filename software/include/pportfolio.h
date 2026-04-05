@@ -1,0 +1,38 @@
+#pragma once
+#include "../include/Eigen/Core"
+#include "problem.h"
+#include "solution.h"
+#include <string>
+
+class ProblemPort : public Problem<double> {
+private:
+  int days;
+  int ncompany;
+  double low;
+  double high;
+  int lambda;
+  const double ERROR = 0.0000000005;
+  Eigen::MatrixXd data;
+  Eigen::MatrixXd covarianceMat;
+
+public:
+  ProblemPort(std::string path, double low, double high, bool inc2025, int lambda = 500);
+
+  size_t getSolutionSize() override;
+  std::pair<double, double> getSolutionDomainRange() override;
+  
+  double actionMean(int i);
+  double covariance(int i, int j);
+  Eigen::MatrixX<double> covarianceMatrix(Eigen::MatrixX<double> mat);
+  
+  double profit(const tSolution<double> &solution);
+  double risk(const tSolution<double> &solution);
+  
+  tFitness fitness(const tSolution<double> &solution) override;
+  tSolution<double> createSolution() override;
+  bool isValid(const tSolution<double> &solution) override;
+  void fix(tSolution<double> &solution) override;
+  double heuristic(int i) override;
+  
+  void testclass();
+};
