@@ -11,7 +11,7 @@ private:
   double low;
   double high;
   int lambda;
-  const double ERROR = 0.0000000005;
+  const double ERROR = 1e-14;
   Eigen::MatrixXd data;
   Eigen::MatrixXd covarianceMat;
   Eigen::VectorXd logSums; 
