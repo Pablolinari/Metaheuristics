@@ -3,11 +3,12 @@
 ResultMH<double> LocalSearch::optimize(Problem<double> &problem, int maxevals) {
   assert(maxevals >= 1);
   double ratio = 0.4;
+	//primera solución aleatoria
   tSolution<double> startSolution = problem.createSolution();
   double bestFitness = problem.fitness(startSolution);
   bool improved = true;
   std::vector<std::pair<int, int>> neighbors;
-
+	//genero el vector vecindario 
   for (int i = 0; i < problem.getSolutionSize(); i++) {
     for (int j = 0; j < problem.getSolutionSize(); j++) {
       if (i != j) {
@@ -16,16 +17,25 @@ ResultMH<double> LocalSearch::optimize(Problem<double> &problem, int maxevals) {
     }
   }
   int evals = 0;
+	//mientras no gaste las evaluaciones o no haya recorrido 
+	//el vecindario entero sigo probando
   while (evals < maxevals && improved) {
     improved = false;
+		//genero un vecindario 
   	Random::shuffle(neighbors);
     for (std::pair<int, int> p : neighbors) {
+			//guardo los valores originales para poder restaurar la solucion
       double amount = startSolution(p.first) * ratio;
       double originalFirst = startSolution(p.first);
       double originalSecond = startSolution(p.second);
+
+			//cambio el valor en las posiciones indicadas 
       startSolution(p.first) -= amount;
       startSolution(p.second) += amount;
-
+			//si la solución es valida calculo su fitness 
+			//si el fitness es mejor , me quedo con la modificación hecha 
+			//y me salgo del for para generar un nuevo vecindario para 
+			//la nueva solución escogida 
       if (problem.isValid(startSolution)) {
         double currentFitness = problem.fitness(startSolution);
         evals++;
@@ -37,6 +47,7 @@ ResultMH<double> LocalSearch::optimize(Problem<double> &problem, int maxevals) {
           break;
         }
       }
+			//si la solución no mejora el fitness deshago el cambio
       startSolution(p.first) = originalFirst;
       startSolution(p.second) = originalSecond;
 

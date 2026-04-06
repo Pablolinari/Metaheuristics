@@ -10,12 +10,16 @@
  * @param maxevals Maximum number of evaluations allowed
  * @return A pair containing the best solution found and its fitness
  */
+
 ResultMHDouble RandomSearch::optimize(ProblemDouble &problem, int maxevals) {
   assert(maxevals > 0);
 
   tSolution<double> bestSolution(problem.getSolutionSize());
+	
+	//valor inicial del fitness
   tFitness bestFitness = -std::numeric_limits<double>::infinity();
-
+	//mientras no se gasten las evaluaciones , busco soluciones aleatorias
+	//que vayan maximizando el fitness
   for (int i = 0; i < maxevals; i++) {
     auto temporalSolution = problem.createSolution();
 		double currentFitness = problem.fitness(temporalSolution);
