@@ -25,21 +25,7 @@ int main(int argc, char *argv[]) {
   string path = "";
   string output_csv = "";
 
-  // Seed the random number generator
-  if (argc == 2) {
-    path = argv[1];
-    double high = 0.08;
-    double low = 0.005;
-		seed=42;
-    ProblemPort problem = ProblemPort(path, low, high, false);
-    for (int i = 0; i < 50; i++) {
-      Random::seed(seed);
-      problem.testclass();
-			seed+=10;
-    }
-
-    return 0;
-  } else if (argc == 4) {
+  if (argc == 4) {
     path = argv[1];
     low = stod(argv[2]);
     high = stod(argv[3]);
@@ -64,8 +50,8 @@ int main(int argc, char *argv[]) {
             "<evaluaciones> "
             "<seed> <output_file_name>"
          << endl;
-    cout << "El <low> y <high> son las restricciones de  porcentaje cada "
-            "mercado que se deben cumplir"
+    cout << "El <low> y <high> son las restricciones de  porcentaje "
+            "que se debe cumplir"
          << endl;
     cout << "El numero de evaluaciones es opcional , por defecto es 1" << endl;
     cout << "El seed es opcional , por defecto es 42" << endl;
