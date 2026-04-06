@@ -163,8 +163,9 @@ La función *createSolution* Se usa en dos algoritmos , en la Búsqueda Aleatori
     vectorindices = {0,1,2, ......,solucion.size-1}
     desordenar(vectorindices)
      ## Seleccionamos valores aleatorios que ponemos a 0
-    for i<solucion.size:
+    for i<numeroceros:
       solucion(vectorindices[i])=0
+
     solucion = solucion/solucion.sum
     if la solucion no es valida
       fix(solucion)
@@ -221,9 +222,7 @@ pesos que ya estén activos , de no ser así si la diferencia es mayor que el li
  ```py
  # Pseudocódigo del calculo del beneficio
   funcion profit(solution): 
-    
-    logdata = log((data+1)) # la operación se aplica a todos las componentes
-    return (solution * logdata.colwise.sum).sum #multiplicación componente a componente
+    return (solution * logdSums).sum #multiplicación componente a componente
  
  ```]
  #block(fill: luma(240), inset: 8pt, radius: 4pt, width: 100%)[
@@ -261,8 +260,8 @@ El algoritmo de Búsqueda aleatoria consiste en generar un número determinado d
       soluciontemporal = solucion_aleatoria
       if fitnes_soluciontemporal > mejorfitness:
              solucion = mejorsolucion
-            fitness =mejorfitness
-    return (solucion,fitness,max_evals)
+            mejorfitness=fitnes_soluciontemporal
+    return (solucion,mejorfitness,max_evals)
  ```]
 Como se puede observar , el algoritmo de Búsqueda aleatoria dependerá de la suerte que tengamos a la hora de generar soluciones aleatorias ya que el espacio de búsqueda de la solución son todas las soluciones posibles a generar en el intervalo dado de número de evaluaciones por tanto no podemos esperar que obtenga una solución que sea mejor que la de otros algoritmos más avanzados , en caso de que esto ocurriese sería por una cuestión de suerte.
 
@@ -320,8 +319,9 @@ función LocalSearch(max_evals):
     vecinos = Generar vector de todas las parejas (i,j) posibles con i,j en [0,ncompany-1]
     # excepto en el caso i=j;
     
-    mezclar vecinos
     while evals < maxevals and haymejora:
+
+      mezclar vecinos
       for v in vecinos:
         cantidadmover = ratio*solucioninicial[v.primero]
         
@@ -450,7 +450,7 @@ El parámetro output_csv es opcional , si no se pone entonces no se guardan los 
 
 #block(fill: luma(240), inset: 8pt, radius: 4pt, width: 100%)[
 ```bash
-./program data/syp_100.csv 0.005 0.05 5 42 syp100.csv 
+./program data/syp_100.csv 0.005 0.05 50 42 syp100.csv 
 ```
 ]
 
