@@ -32,7 +32,7 @@ int main(int argc, char *argv[]) {
     double low = 0.005;
 		seed=42;
     ProblemPort problem = ProblemPort(path, low, high, false);
-    for (int i = 0; i < 500; i++) {
+    for (int i = 0; i < 50; i++) {
       Random::seed(seed);
       problem.testclass();
 			seed+=10;

@@ -486,8 +486,8 @@ La ejecución se ha hecho como se indicó en el apartado anterior , cambiando en
     [*Algoritmo*], [*2015-2024*\ *Fitness*], [*2025*\ *Fitness*], [*Beneficio*], [*Evaluaciones*], [*Tiempo*\ *(segundos)*],
     
     [Greedy], [-0.212], [0.090], [0.115], [1], [0.01],
-    [Random], [-0.621], [0.121], [0.149], [10000], [0.005],
-    [BL], [-0.35], [0.079], [0.103], [1382], [0.01],
+    [Random], [-0.603], [0.121], [0.149], [10000], [0.005],
+    [BL], [-0.350], [0.079], [0.103], [1404.9], [0.01],
   ),
   caption: [Resultados de Ibex 35 (Medias)]
 )
@@ -502,7 +502,7 @@ La ejecución se ha hecho como se indicó en el apartado anterior , cambiando en
     
     [Greedy], [0.866], [-0.040], [0.009], [1], [0.001],
     [Random], [0.467], [0.046], [0.083], [10000], [0.019],
-    [BL], [0.591], [-0.002], [0.045], [9074], [0.011],
+    [BL], [0.591], [-0.001], [0.047], [8979.72], [0.012],
   ),
   caption: [Resultados de S&P100 (Medias)]
 )
@@ -516,8 +516,8 @@ La ejecución se ha hecho como se indicó en el apartado anterior , cambiando en
     [*Algoritmo*], [*2015-2024*\ *Fitness*], [*2025*\ *Fitness*], [*Beneficio*], [*Evaluaciones*], [*Tiempo*\ *(segundos)*],
     
     [Greedy], [1.042], [-0.115], [-0.062], [1], [0.001],
-    [Random], [0.2844], [-0.025], [0.018], [10000], [0.201],
-    [BL], [0.326], [-0.028], [0.015], [10000], [0.229],
+    [Random], [0.2844], [-0.025], [0.018], [10000], [0.256],
+    [BL], [0.319], [-0.034], [0.009], [10000], [0.225],
   ),
   caption: [Resultados de S&P500 (Medias)]
 )
@@ -540,6 +540,23 @@ A continuación se muestran los boxplots de los resultados obtenidos para cada c
 #figure(
   image("syp500.png", width: 80%),
   caption: [Boxplot de resultados para S&P500]
+)
+== Comparación fitness (2014-2024)
+
+#figure(
+  image("ib35_linea.png", width: 80%),
+  caption: [Comparación fitness para Ibex 35]
+
+)
+
+#figure(
+  image("syp100_linea.png", width: 80%),
+  caption: [Comparación fitness para S&P100]
+)
+
+#figure(
+  image("syp500_linea.png", width: 80%),
+  caption: [Boxplot de resultados  para S&P500]
 )
 #pagebreak()
 = Análisis de los resultados

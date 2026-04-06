@@ -119,32 +119,28 @@ tSolution<double> ProblemPort::createSolution() {
 /*
  * @brief Verifica si una solución es válida
  * @params solution: vector de pesos del portfolio a verificar
- * @returns true si la solución cumple todas las restricciones, false en caso contrario
+ * @returns true si la solución cumple todas las restricciones, false en caso
+ * contrario
  * */
 bool ProblemPort::isValid(const tSolution<double> &solution) {
   bool valid = true;
 
-  // La suma puede tener tolerancia ERROR
-  if (std::abs(solution.sum() - 1.0) > this->ERROR) {
+  if (std::fabs(solution.sum() - 1.0) > this->ERROR) {
     valid = false;
   }
 
-  // Los valores low y high deben ser exactos (sin tolerancia)
   for (int i = 0; i < solution.size(); i++) {
     double val = solution(i);
-    // Valor debe ser 0 (con tolerancia) o estar EXACTAMENTE en [low, high]
-    if (std::abs(val)==0) {
-      // Es efectivamente cero, OK
+    if (val == 0) {
       continue;
     } else if (val >= this->low && val <= this->high) {
       continue;
     } else {
-      // Fuera de rango
       valid = false;
       break;
     }
   }
-  
+
   return valid;
 }
 
@@ -154,13 +150,13 @@ bool ProblemPort::isValid(const tSolution<double> &solution) {
  * @returns ninguno (modifica la solución in-place)
  * */
 void ProblemPort::fix(tSolution<double> &solution) {
-  // Paso 1: Normalizar
+  // normalizo la solución
   double suma = solution.sum();
   if (suma > 0) {
     solution = solution.array() / suma;
   }
-  
-  // Paso 2: Aplicar restricciones [low, high] o 0
+
+  // Aplico las restricciones
   for (int i = 0; i < this->ncompany; i++) {
     if (solution(i) < this->low) {
       solution(i) = 0.0;
@@ -168,89 +164,59 @@ void ProblemPort::fix(tSolution<double> &solution) {
       solution(i) = this->high;
     }
   }
-  
-  // Paso 3: Ajustar para que sume 1.0
+
   double diff = 1.0 - solution.sum();
   int max_iter = 100;
   int iter = 0;
-  
-  while (std::abs(diff) > this->ERROR && iter < max_iter) {
+  // hasta que se gaste la diferencia que tengo que repartir
+  // sigo rellenando donde sea posible, pongo un máximo de iteraciones
+  // para evitar un bucle infinito en el caso de que el valor sea muy pequenio
+  while (std::fabs(diff) > this->ERROR && iter < max_iter) {
     iter++;
-    
-    if (diff > 0) {
-      // Falta peso: aumentar valores
-      bool ajustado = false;
-      int i=0;
-      // Intentar ajustar valores existentes en [low, high)
-      while (i < this->ncompany && !ajustado) {
-        if (solution(i) >= this->low && solution(i) < this->high) {
-          double espacio = this->high - solution(i);
-          if (espacio >= diff) {
-            solution(i) += diff;
-            ajustado = true;
-          } else {
-            solution(i) = this->high;
-            diff -= espacio;
-          }
-        }
-				i++;
-      }
-      
-      // Si no pudimos ajustar, activar un cero
-      if (!ajustado && diff >= this->low) {
-        for (int i = 0; i < this->ncompany && !ajustado; i++) {
-          if (solution(i) == 0.0) {
-            solution(i) = std::min(diff, this->high);
-            ajustado = true;
-          }
+
+    bool ajustado = false;
+    int i = 0;
+    // ajusto valores que no son 0
+    // voy poniendo lo que cabe de diferencia en cada peso
+    // si puedo poner toda la diferencia en uno lo pongo
+
+    while (i < this->ncompany && !ajustado) {
+      if (solution(i) >= this->low && solution(i) < this->high) {
+        double espacio = this->high - solution(i);
+        if (espacio >= diff) {
+          solution(i) += diff;
+          ajustado = true;
+        } else {
+          solution(i) = this->high;
+          diff -= espacio;
         }
       }
-      
-      // Si diff < low, distribuir entre valores no en límite
-      if (!ajustado && diff < this->low) {
-        for (int i = 0; i < this->ncompany && !ajustado; i++) {
-          if (solution(i) > this->low && solution(i) < this->high) {
-            solution(i) += diff;
-            ajustado = true;
-          }
-        }
-      }
-      
-      if (!ajustado) break;
-      
-    } else {
-      /*// Sobra peso: reducir valores
-      bool ajustado = false;
-      double falta = -diff;
-      
-      // Reducir valores mayores que low
-      for (int i = 0; i < this->ncompany && !ajustado; i++) {
-        if (solution(i) > this->low) {
-          double margen = solution(i) - this->low;
-          if (margen >= falta) {
-            solution(i) -= falta;
-            ajustado = true;
-          } else {
-            solution(i) = this->low;
-            falta -= margen;
-          }
-        }
-      }
-      
-      // Si no fue suficiente, poner valores a 0
-      if (!ajustado) {
-        for (int i = 0; i < this->ncompany && !ajustado; i++) {
-          if (solution(i) >= this->low) {
-            solution(i) = 0.0;
-            ajustado = true;
-          }
-        }
-      }
-      
-      if (!ajustado) break;
-			*/
+      i++;
     }
-    
+
+    // Si no se ha podido ajustar toda la diferencia
+    // busco un cero donde pueda ponerla , siempre que diff>low
+    if (!ajustado && diff >= this->low) {
+      for (int i = 0; i < this->ncompany && !ajustado; i++) {
+        if (solution(i) == 0.0) {
+          solution(i) = std::min(diff, this->high);
+          ajustado = true;
+        }
+      }
+    }
+
+    // Si diff < low distribuyo entre valores que no son cero y
+    // todavia tienen espacio para almacenar
+    int j = 0;
+    if (!ajustado && diff < this->low) {
+      while (j < this->ncompany && !ajustado) {
+        if (solution(j) > this->low && (solution(j) + diff) < this->high) {
+          solution(j) += diff;
+          ajustado = true;
+        }
+        j++;
+      }
+    }
     diff = 1.0 - solution.sum();
   }
 }
@@ -267,7 +233,8 @@ double ProblemPort::heuristic(int i) {
 }
 
 /*
- * @brief Función de testeo para verificar la validez de las soluciones generadas
+ * @brief Función de testeo para verificar la validez de las soluciones
+ * generadas
  * @params ninguno
  * @returns ninguno (imprime resultados de las pruebas por consola)
  * */
