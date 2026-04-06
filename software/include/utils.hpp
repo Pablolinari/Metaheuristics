@@ -30,11 +30,10 @@ inline Eigen::MatrixXd loadCSV(const std::string &path, bool only2025) {
     std::stringstream ss(line);
     std::string dateCell;
 
-    // 1. Extraer la primera columna (la fecha: DD-MM-YYYY)
+    //Extraer la primera columna
     if (!getline(ss, dateCell, ','))
       continue;
 
-    // 2. Lógica de filtrado por año
     // Buscamos si la fecha contiene "2025"
     bool is2025 = (dateCell.find("2025") != std::string::npos);
 
