@@ -76,8 +76,7 @@ double ProblemPort::profit(const tSolution<double> &solution) {
  * @returns valor del riesgo calculado usando la matriz de covarianza
  * */
 double ProblemPort::risk(const tSolution<double> &solution) {
-	Eigen::MatrixXd resultado = this->covarianceMat.array().sqrt();
-  return (solution.transpose() * resultado * solution).value();
+  return sqrt((solution.transpose() * this->covarianceMat * solution).value());
 }
 /*
  * @brief Calcula la función fitness del problema
