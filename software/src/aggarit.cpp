@@ -1,4 +1,4 @@
-#include "../include/greedy.h"
+#include "../include/agg.h"
 #include <algorithm>
 #include <cassert>
 #include <limits>
@@ -6,7 +6,7 @@
 #include <utility>
 #include <vector>
 
-ResultMH<double> Greedy::optimize(Problem<double> &problem, int maxevals) {
+ResultMH<double> Agg::optimize(Problem<double> &problem, int maxevals) {
   assert(maxevals > 0);
   int npob = 0;
   double probcruce = 0.8;
@@ -33,6 +33,9 @@ ResultMH<double> Greedy::optimize(Problem<double> &problem, int maxevals) {
       }
     }
     idxparents.push_back(idxBestSolution);
+
   }
+	crossover(const tSolution<double> &p1, const tSolution<double> &p2)
+
   return ResultMH(bestSolution, problem.fitness(bestSolution), 1);
 }

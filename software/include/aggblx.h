@@ -1,18 +1,20 @@
 #pragma once
 
-#include "aggarit.h"
+#include "agg.h"
 
-class AggARitBLX : public AggARit {
+class AggBLX : public Agg {
 public:
-  AggARitBLX(int populationSize, double crossoverProb, double mutationProb,
+  AggBLX(int populationSize, double crossoverProb, double mutationProb,
              double alpha, int tournamentSize = 3)
-      : AggARit(populationSize, crossoverProb, mutationProb, tournamentSize),
+      : Agg(populationSize, crossoverProb, mutationProb, tournamentSize),
         alpha(alpha) {}
 
 protected:
   std::pair<tSolution<double>, tSolution<double>>
   crossover(const tSolution<double> &p1,
-            const tSolution<double> &p2) override;
+            const tSolution<double> &p2) override{
+		return op.blxAlpha(p1,p2,this->alpha);
+	}
 
 private:
   double alpha;
