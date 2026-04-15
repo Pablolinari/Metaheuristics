@@ -64,7 +64,10 @@ ResultMH<double> Agg::optimize(Problem<double> &problem, int maxevals) {
   }
 
 	//mutación
-	
+	bool mutado =false;
+	while(!mutado){
+
+	}
 
 	
 	return ResultMH(bestSolution,bestFitness,evals);
