@@ -67,5 +67,5 @@ ResultMH<double> Agg::optimize(Problem<double> &problem, int maxevals) {
 	
 
 	
-	return ResultMH(bestSolution,bestFitness,evals)
+	return ResultMH(bestSolution,bestFitness,evals);
 }
