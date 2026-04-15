@@ -13,7 +13,7 @@ Operator::arithmetic(const tSolution<double> &p1, const tSolution<double> &p2) {
       son1(i) = p1(i);
       son2(i) = p1(i);
     } else {
-      double sigma = Random::get(0, 1);
+      double sigma = Random::get<double>(0.0, 1.0);
       son1(i) = sigma * p1(i) + (1 - sigma) * p2(i);
       son2(i) = sigma * p2(i) + (1 - sigma) * p1(i);
     }
