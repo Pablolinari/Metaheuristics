@@ -1,6 +1,7 @@
 #include "../include/agg.h"
 #include <algorithm>
 #include <cassert>
+#include <cmath>
 #include <limits>
 #include <set>
 #include <utility>
@@ -8,13 +9,13 @@
 
 ResultMH<double> Agg::optimize(Problem<double> &problem, int maxevals) {
   assert(maxevals > 0);
-	int evals;
+  int evals;
   int npob = 100;
   double probcruce = 0.8;
   double probmut = 0.8;
   int k = 3;
-	double bestFitness = -std::numeric_limits<double>::infinity();
-	tSolution<double> bestSolution(problem.getSolutionSize());
+  double bestFitness = -std::numeric_limits<double>::infinity();
+  tSolution<double> bestSolution(problem.getSolutionSize());
   std::vector<tSolution<double>> poblation;
   std::vector<tSolution<double>> parents;
   std::vector<tSolution<double>> sons;
@@ -22,13 +23,13 @@ ResultMH<double> Agg::optimize(Problem<double> &problem, int maxevals) {
   for (int i = 0; i < npob; i++) {
     poblation.push_back(problem.createSolution());
   }
-	for(int i=0;i<npob;i++){
-		double tempFitness = problem.fitness(poblation[i]);
-		if(tempFitness>bestFitness){
-			bestFitness = tempFitness;
-			bestSolution = poblation[i];
-		}
-	}
+  for (int i = 0; i < npob; i++) {
+    double tempFitness = problem.fitness(poblation[i]);
+    if (tempFitness > bestFitness) {
+      bestFitness = tempFitness;
+      bestSolution = poblation[i];
+    }
+  }
   std::vector<int> idx;
   // torneo para npob veces
   for (int i = 0; i < npob; i++) {
@@ -51,24 +52,24 @@ ResultMH<double> Agg::optimize(Problem<double> &problem, int maxevals) {
   for (auto it = idxparents.begin(); it != idxparents.end(); it++) {
     parents.push_back(poblation[*it]);
   }
-	//cruce
-  for (int i = 0; i <= npob - 2; i += 2) {
-    if (Random::get<bool>(this->crossoverProb)) {
+  // cruce
+  // TODO revisar limites que hacer cuando es impar
+  int expectedCrossover =
+      std::ceil(this->crossoverProb * (this->populationSize / 2.0));
+  for (int i = 0; i <= expectedCrossover; i += 2) {
 
-      std::pair<tSolution<double>, tSolution<double>> son =
-          crossover(parents[i], parents[i + 1]);
-    }else{
-			sons.push_back(parents[i]);
-			sons.push_back(parents[i+1]);
-		}
+    std::pair<tSolution<double>, tSolution<double>> son =
+        crossover(parents[i], parents[i + 1]);
+  }
+  for (int i = expectedCrossover; i <= npob - 2; i += 2) {
+    sons.push_back(parents[i]);
+    sons.push_back(parents[i + 1]);
   }
 
-	//mutación
-	bool mutado =false;
-	while(!mutado){
+  // mutación
+	int expectedMutation =
+      std::ceil(this->crossoverProb * (this->populationSize / 2.0));
 
-	}
 
-	
-	return ResultMH(bestSolution,bestFitness,evals);
+  return ResultMH(bestSolution, bestFitness, evals);
 }
