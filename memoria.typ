@@ -555,17 +555,17 @@ Los valores presentados en la tabla corresponden a las medias de 5 ejecuciones i
 A continuación se muestran los boxplots de los resultados obtenidos para cada conjunto de datos tras 50 ejecuciones de cada algoritmo:
 
 #figure(
-  image("ib35.png", width: 80%),
+  image("img/ib35.png", width: 80%),
   caption: [Boxplot de resultados para Ibex 35]
 )
 
 #figure(
-  image("syp100.png", width: 80%),
+  image("img/syp100.png", width: 80%),
   caption: [Boxplot de resultados para S&P100]
 )
 
 #figure(
-  image("syp500.png", width: 80%),
+  image("img/syp500.png", width: 80%),
   caption: [Boxplot de resultados para S&P500]
 )
 
@@ -623,18 +623,18 @@ Los tiempos de ejecución de Búsqueda Local son parecidos a los de Random Searc
 == Comparación Gráfica fitness 2014-2024 (50 ejecuciones)
 
 #figure(
-  image("ib35_linea.png", width: 80%),
+  image("img/ib35_linea.png", width: 80%),
   caption: [Comparación fitness para Ibex 35]
 
 )
 
 #figure(
-  image("syp100_linea.png", width: 80%),
+  image("img/syp100_linea.png", width: 80%),
   caption: [Comparación fitness para S&P100]
 )
 
 #figure(
-  image("syp500_linea.png", width: 80%),
+  image("img/syp500_linea.png", width: 80%),
   caption: [Boxplot de resultados  para S&P500]
 )
 
