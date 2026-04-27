@@ -1,6 +1,7 @@
 #include "include/Eigen/Core"
 #include "include/mh.h"
 #include "include/pportfolio.h"
+#include "include/problem.h"
 #include "include/random.hpp"
 #include <algorithm>
 #include <fstream>
@@ -16,7 +17,7 @@
 #include "include/localsearch.h"
 #include "include/randomsearch.h"
 #include "include/solution.h"
-#include "include/agg.h"
+#include "include/aggarit.h"
 using namespace std;
 using namespace std::chrono;
 int main(int argc, char *argv[]) {
@@ -32,7 +33,14 @@ int main(int argc, char *argv[]) {
     high = stod(argv[3]);
     seed = 42;
     totalevaluations = 1;
+
+  	ProblemPort problem = ProblemPort(path, low, high, false);
+		AggArit agg(100,0.05,0.02,3);
 		
+		ResultMH<double> result = agg.optimize(problem, 10000);
+		cout<<""<<endl;
+		cout<<"Fitness :"<<result.fitness<<endl;
+		cout<<"Evals :"<<result.evaluations<<endl;
   } else if (argc == 6) {
     path = argv[1];
     low = stod(argv[2]);

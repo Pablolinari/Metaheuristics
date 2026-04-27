@@ -5,8 +5,8 @@
 std::pair<tSolution<double>, tSolution<double>>
 Operator::arithmetic(const tSolution<double> &p1, const tSolution<double> &p2) {
 
-  tSolution<double> son1;
-  tSolution<double> son2;
+  tSolution<double> son1(p1.size());
+  tSolution<double> son2(p1.size());
 
   for (int i = 0; i < p1.size(); i++) {
     if (p1(i) == p2(i)) {
@@ -25,8 +25,8 @@ std::pair<tSolution<double>, tSolution<double>>
 Operator::blxAlpha(const tSolution<double> &p1, const tSolution<double> &p2,
                    double alpha) {
 
-  tSolution<double> son1;
-  tSolution<double> son2;
+  tSolution<double> son1(p1.size());
+  tSolution<double> son2(p1.size());
 
   for (int i = 0; i < p1.size(); i++) {
     if (p1(i) == p2(i)) {
