@@ -13,137 +13,176 @@ Agg::Agg(int populationSize, double crossoverProb, double mutationProb,
 
 ResultMH<double> Agg::optimize(Problem<double> &problem, int maxevals) {
   assert(maxevals > 0);
-  int evals;
+  int evals = 0;
   int problemSize = problem.getSolutionSize();
   std::pair<double, double> problembounds = problem.getSolutionDomainRange();
   double bestFitness = -std::numeric_limits<double>::infinity();
   tSolution<double> bestSolution(problemSize);
   std::vector<tSolution<double>> poblation;
+  std::vector<double> fitnessPoblation;
   std::vector<tSolution<double>> parents;
   std::vector<tSolution<double>> sons;
-  std::set<int> idxparents;
+  std::vector<int> idxparents;
   for (int i = 0; i < this->populationSize; i++) {
     poblation.push_back(problem.createSolution());
   }
   for (int i = 0; i < this->populationSize; i++) {
     double tempFitness = problem.fitness(poblation[i]);
+		fitnessPoblation.push_back(tempFitness);
     if (tempFitness > bestFitness) {
       bestFitness = tempFitness;
       bestSolution = poblation[i];
     }
   }
-  std::vector<int> idx;
-  // torneo para npob veces
-  for (int i = 0; i < this->populationSize; i++) {
-    for (int j = 0; j < this->tournamentSize; j++) {
-      idx.push_back(Random::get(0, this->populationSize - 1));
-    }
-    double fitnessTournament = -std::numeric_limits<double>::infinity();
-    int idxBestSolution = 0;
-    for (int j = 0; j < this->tournamentSize; j++) {
-      double actualFitness = problem.fitness(poblation[idx[j]]);
-      if (actualFitness > fitnessTournament) {
-        fitnessTournament = actualFitness;
-        idxBestSolution = idx[j];
+  while (evals < maxevals) {
+
+    std::vector<int> idx;
+    // torneo para npob veces
+    for (int i = 0; i < this->populationSize; i++) {
+      for (int j = 0; j < this->tournamentSize; j++) {
+        idx.push_back(Random::get(0, this->populationSize - 1));
       }
+      double fitnessTournament = -std::numeric_limits<double>::infinity();
+      int idxBestSolution = 0;
+      for (int j = 0; j < this->tournamentSize; j++) {
+        if (fitnessPoblation[idx[j]] > fitnessTournament) {
+          fitnessTournament = fitnessPoblation[idx[j]];
+          idxBestSolution = idx[j];
+        }
+      }
+      idxparents.push_back(idxBestSolution);
+      idx.clear();
     }
-    idxparents.insert(idxBestSolution);
-  }
 
-  // genero los padres de la siguiente generación
-  for (auto it = idxparents.begin(); it != idxparents.end(); it++) {
-    parents.push_back(poblation[*it]);
-  }
-  // cruce
-  // TODO revisar limites que hacer cuando es impar
-  int expectedCrossover =
-      std::ceil(this->crossoverProb * (parents.size() / 2.0));
-  if (expectedCrossover % 2 != 0) {
-    expectedCrossover--;
-  }
-  for (int i = 0; i < expectedCrossover; i += 2) {
-
-    std::pair<tSolution<double>, tSolution<double>> son =
-        crossover(parents[i], parents[i + 1]);
-    if (!problem.isValid(son.first)) {
-      problem.fix(son.first);
+    // genero los padres de la siguiente generación
+    for (auto it = idxparents.begin(); it != idxparents.end(); it++) {
+      parents.push_back(poblation[*it]);
     }
-    if (!problem.isValid(son.second)) {
-      problem.fix(son.second);
+    // cruce
+		
+		//esta variable indica el numero de padres que tienen que cruzarse , no el 
+		//numero de cruces , es lo mismo que el guión pero sin dividir por 2.
+    int expectednParentsCrossover =
+        std::ceil(this->crossoverProb * (parents.size()));
+    if (expectednParentsCrossover % 2 != 0) {
+      expectednParentsCrossover--;
     }
-    sons.push_back(son.first);
-    sons.push_back(son.second);
-  }
-  for (int i = expectedCrossover; i < this->populationSize; i++) {
-    sons.push_back(parents[i]);
-  }
+    for (int i = 0; i < expectednParentsCrossover; i += 2) {
 
-  // mutación
-  int expectedMutation =
-      std::ceil(this->mutationProb * this->populationSize * problemSize);
+      std::pair<tSolution<double>, tSolution<double>> son =
+          crossover(parents[i], parents[i + 1]);
+      if (!problem.isValid(son.first)) {
+        problem.fix(son.first);
+      }
+      if (!problem.isValid(son.second)) {
+        problem.fix(son.second);
+      }
+      sons.push_back(son.first);
+      sons.push_back(son.second);
+    }
+    for (int i = expectednParentsCrossover; i < this->populationSize; i++) {
+      sons.push_back(parents[i]);
+    }
 
-  for (int i = 0; i < expectedMutation; i++) {
-    int idxSolution = Random::get(0, this->populationSize - 1);
-    tSolution<double> mutSol = sons[idxSolution];
+    // mutación
+    int expectedMutation =
+        std::ceil(this->mutationProb * this->populationSize * problemSize);
 
-    const double mutationRate = 0.15;
-    const int maxAttempts = std::max(10, problemSize * 4);
+    for (int i = 0; i < expectedMutation; i++) {
 
-    int idxGene = -1;
-    double amount = 0.0;
+      int idxSolution = Random::get(0, this->populationSize - 1);
+      tSolution<double> mutSol = sons[idxSolution];
 
-    for (int attempt = 0; attempt < maxAttempts; ++attempt) {
-      int candidateFirst = Random::get(0, problemSize - 1);
-      double candidateAmount = mutSol(candidateFirst) * mutationRate;
-      if (candidateAmount <= 0.0) {
+      const double mutationRate = 0.15;
+      const int maxAttempts = std::max(10, problemSize * 4);
+
+      int idxGene = -1;
+      double amount = 0.0;
+
+      for (int attempt = 0; attempt < maxAttempts; ++attempt) {
+        int candidateFirst = Random::get(0, problemSize - 1);
+        double candidateAmount = mutSol(candidateFirst) * mutationRate;
+        if (candidateAmount <= 0.0) {
+          continue;
+        }
+
+        double firstAfter = mutSol(candidateFirst) - candidateAmount;
+        bool firstValid =
+            firstAfter == 0.0 || (firstAfter >= problembounds.first &&
+                                  firstAfter <= problembounds.second);
+
+        if (firstValid) {
+          idxGene = candidateFirst;
+          amount = candidateAmount;
+          break;
+        }
+      }
+
+      if (idxGene == -1) {
         continue;
       }
 
-      double firstAfter = mutSol(candidateFirst) - candidateAmount;
-      bool firstValid = firstAfter == 0.0 ||
-                        (firstAfter >= problembounds.first &&
-                         firstAfter <= problembounds.second);
+      int idxNextGene = -1;
+      for (int attempt = 0; attempt < maxAttempts; ++attempt) {
+        int candidateSecond = Random::get(0, problemSize - 1);
+        if (candidateSecond == idxGene) {
+          continue;
+        }
 
-      if (firstValid) {
-        idxGene = candidateFirst;
-        amount = candidateAmount;
-        break;
+        double secondAfter = mutSol(candidateSecond) + amount;
+        bool secondValid =
+            secondAfter == 0.0 || (secondAfter >= problembounds.first &&
+                                   secondAfter <= problembounds.second);
+
+        if (secondValid) {
+          idxNextGene = candidateSecond;
+          break;
+        }
       }
-    }
 
-    if (idxGene == -1) {
-      continue;
-    }
-
-    int idxNextGene = -1;
-    for (int attempt = 0; attempt < maxAttempts; ++attempt) {
-      int candidateSecond = Random::get(0, problemSize - 1);
-      if (candidateSecond == idxGene) {
+      if (idxNextGene == -1) {
         continue;
       }
 
-      double secondAfter = mutSol(candidateSecond) + amount;
-      bool secondValid = secondAfter == 0.0 ||
-                         (secondAfter >= problembounds.first &&
-                          secondAfter <= problembounds.second);
+      mutSol(idxGene) -= amount;
+      mutSol(idxNextGene) += amount;
 
-      if (secondValid) {
-        idxNextGene = candidateSecond;
-        break;
+      if (problem.isValid(mutSol)) {
+        sons[idxSolution] = mutSol;
       }
     }
+    // reemplazo generacional
+    //  busco el peor de la generación nueva y lo elimino
+    //  busco el mejor de la generación nueva y compruebo si es mejor que el
+		fitnessPoblation.clear();
+    double bestFitnessSons = -std::numeric_limits<double>::infinity();
+    double worstFitnessSons = std::numeric_limits<double>::infinity();
+    int idxbest = 0;
+    int idxworst = 0;
+    for (int i = 0; i < this->populationSize; i++) {
+      double tempFitness = problem.fitness(sons[i]);
+			fitnessPoblation.push_back(tempFitness);
+      if (tempFitness > bestFitnessSons) {
+        bestFitnessSons = tempFitness;
+        idxbest = i;
+      }
 
-    if (idxNextGene == -1) {
-      continue;
+      if (tempFitness < worstFitnessSons) {
+        worstFitnessSons = tempFitness;
+        idxworst = i;
+      }
     }
-
-    mutSol(idxGene) -= amount;
-    mutSol(idxNextGene) += amount;
-
-    if (problem.isValid(mutSol)) {
-      sons[idxSolution] = mutSol;
+    sons[idxworst] = bestSolution;
+		fitnessPoblation[idxworst]=bestFitness;
+    if (bestFitnessSons > bestFitness) {
+      bestSolution = sons[idxbest];
+      bestFitness = bestFitnessSons;
     }
+    poblation = sons;
+		
+    sons.clear();
+    parents.clear();
+    idxparents.clear();
   }
-
   return ResultMH(bestSolution, bestFitness, evals);
 }
