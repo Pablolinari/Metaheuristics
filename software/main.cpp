@@ -13,11 +13,15 @@
 #include <vector>
 
 // All all algorithms
+#include "include/aggarit.h"
+#include "include/aggblx.h"
+#include "include/agearit.h"
+#include "include/ageblx.h"
 #include "include/greedy.h"
 #include "include/localsearch.h"
 #include "include/randomsearch.h"
 #include "include/solution.h"
-#include "include/aggarit.h"
+
 using namespace std;
 using namespace std::chrono;
 int main(int argc, char *argv[]) {
@@ -26,7 +30,7 @@ int main(int argc, char *argv[]) {
   double low, high;
   string path = "";
   string output_csv = "";
-	
+
   if (argc == 4) {
     path = argv[1];
     low = stod(argv[2]);
@@ -34,13 +38,20 @@ int main(int argc, char *argv[]) {
     seed = 42;
     totalevaluations = 1;
 
-  	ProblemPort problem = ProblemPort(path, low, high, false);
-		AggArit agg(100,0.05,0.02,3);
-		
-		ResultMH<double> result = agg.optimize(problem, 10000);
-		cout<<""<<endl;
-		cout<<"Fitness :"<<result.fitness<<endl;
-		cout<<"Evals :"<<result.evaluations<<endl;
+    ProblemPort problem = ProblemPort(path, low, high, false);
+    AgeArit agearit(100, 0.1, 3);
+    AgeBLX ageblx(100, 0.1, 0.3, 3);
+
+    ResultMH<double> result = agearit.optimize(problem, 10000);
+    ResultMH<double> result2 = ageblx.optimize(problem, 10000);
+    cout << "arit" << endl;
+    cout << "Fitness :" << result.fitness << endl;
+    cout << "Evals :" << result.evaluations << endl;
+    cout << "blx" << endl;
+    cout << "Fitness :" << result2.fitness << endl;
+    cout << "Evals :" << result2.evaluations << endl;
+
+    return 0;
   } else if (argc == 6) {
     path = argv[1];
     low = stod(argv[2]);
@@ -78,13 +89,18 @@ int main(int argc, char *argv[]) {
   RandomSearch ralg = RandomSearch();
   Greedy greedyalg = Greedy();
   LocalSearch localalg = LocalSearch();
+  AggArit aggarit(100, 0.8, 0.1, 3);
+  AggBLX aggblx(100, 0.8, 0.1, 0.3, 3);
 
+  AgeArit agearit(100, 0.1, 3);
+  AgeBLX ageblx(100, 0.1, 0.3, 3);
   // Create the specific problem
   ProblemPort problem = ProblemPort(path, low, high, false);
   ProblemPort problem25 = ProblemPort(path, low, high, true);
   std::vector<pair<std::string, MH<double> *>> algorithms = {
       make_pair("Greedy", &greedyalg), make_pair("Random", &ralg),
-      make_pair("Local Search", &localalg)};
+      make_pair("Local Search", &localalg),
+      make_pair("AGG Aritmetico", &aggarit),make_pair("AGG BLX",&aggblx),make_pair("AGE Aritmetico", &agearit),make_pair("AGE BLX",&ageblx)};
   Eigen::MatrixX<double> fitness(totalevaluations, algorithms.size());
   Eigen::MatrixX<double> evals(totalevaluations, algorithms.size());
   Eigen::MatrixX<double> times(totalevaluations, algorithms.size());

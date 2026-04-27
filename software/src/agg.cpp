@@ -2,9 +2,8 @@
 #include <algorithm>
 #include <cassert>
 #include <cmath>
+#include <iostream>
 #include <limits>
-#include <set>
-#include <utility>
 #include <vector>
 Agg::Agg(int populationSize, double crossoverProb, double mutationProb,
          int tournamentSize)
@@ -28,7 +27,7 @@ ResultMH<double> Agg::optimize(Problem<double> &problem, int maxevals) {
   }
   for (int i = 0; i < this->populationSize; i++) {
     double tempFitness = problem.fitness(poblation[i]);
-		fitnessPoblation.push_back(tempFitness);
+    fitnessPoblation.push_back(tempFitness);
     if (tempFitness > bestFitness) {
       bestFitness = tempFitness;
       bestSolution = poblation[i];
@@ -59,9 +58,9 @@ ResultMH<double> Agg::optimize(Problem<double> &problem, int maxevals) {
       parents.push_back(poblation[*it]);
     }
     // cruce
-		
-		//esta variable indica el numero de padres que tienen que cruzarse , no el 
-		//numero de cruces , es lo mismo que el guión pero sin dividir por 2.
+
+    // esta variable indica el numero de padres que tienen que cruzarse , no el
+    // numero de cruces , es lo mismo que el guión pero sin dividir por 2.
     int expectednParentsCrossover =
         std::ceil(this->crossoverProb * (parents.size()));
     if (expectednParentsCrossover % 2 != 0) {
@@ -93,7 +92,6 @@ ResultMH<double> Agg::optimize(Problem<double> &problem, int maxevals) {
       int idxSolution = Random::get(0, this->populationSize - 1);
       tSolution<double> mutSol = sons[idxSolution];
 
-      const double mutationRate = 0.15;
       const int maxAttempts = std::max(10, problemSize * 4);
 
       int idxGene = -1;
@@ -101,7 +99,7 @@ ResultMH<double> Agg::optimize(Problem<double> &problem, int maxevals) {
 
       for (int attempt = 0; attempt < maxAttempts; ++attempt) {
         int candidateFirst = Random::get(0, problemSize - 1);
-        double candidateAmount = mutSol(candidateFirst) * mutationRate;
+        double candidateAmount = mutSol(candidateFirst) * mutationProb;
         if (candidateAmount <= 0.0) {
           continue;
         }
@@ -136,6 +134,7 @@ ResultMH<double> Agg::optimize(Problem<double> &problem, int maxevals) {
 
         if (secondValid) {
           idxNextGene = candidateSecond;
+
           break;
         }
       }
@@ -154,14 +153,15 @@ ResultMH<double> Agg::optimize(Problem<double> &problem, int maxevals) {
     // reemplazo generacional
     //  busco el peor de la generación nueva y lo elimino
     //  busco el mejor de la generación nueva y compruebo si es mejor que el
-		fitnessPoblation.clear();
+    fitnessPoblation.clear();
     double bestFitnessSons = -std::numeric_limits<double>::infinity();
     double worstFitnessSons = std::numeric_limits<double>::infinity();
     int idxbest = 0;
     int idxworst = 0;
     for (int i = 0; i < this->populationSize; i++) {
       double tempFitness = problem.fitness(sons[i]);
-			fitnessPoblation.push_back(tempFitness);
+      evals++;
+      fitnessPoblation.push_back(tempFitness);
       if (tempFitness > bestFitnessSons) {
         bestFitnessSons = tempFitness;
         idxbest = i;
@@ -173,13 +173,13 @@ ResultMH<double> Agg::optimize(Problem<double> &problem, int maxevals) {
       }
     }
     sons[idxworst] = bestSolution;
-		fitnessPoblation[idxworst]=bestFitness;
+    fitnessPoblation[idxworst] = bestFitness;
     if (bestFitnessSons > bestFitness) {
       bestSolution = sons[idxbest];
       bestFitness = bestFitnessSons;
     }
     poblation = sons;
-		
+
     sons.clear();
     parents.clear();
     idxparents.clear();
