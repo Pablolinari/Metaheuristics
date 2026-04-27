@@ -16,6 +16,7 @@
 #include "include/localsearch.h"
 #include "include/randomsearch.h"
 #include "include/solution.h"
+#include "include/agg.h"
 using namespace std;
 using namespace std::chrono;
 int main(int argc, char *argv[]) {
@@ -24,13 +25,14 @@ int main(int argc, char *argv[]) {
   double low, high;
   string path = "";
   string output_csv = "";
-
+	
   if (argc == 4) {
     path = argv[1];
     low = stod(argv[2]);
     high = stod(argv[3]);
     seed = 42;
     totalevaluations = 1;
+		
   } else if (argc == 6) {
     path = argv[1];
     low = stod(argv[2]);
