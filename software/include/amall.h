@@ -6,8 +6,7 @@
 
 class AmAll : public MH<double> {
 public:
-  AmAll(int populationSize,double mutationProb,
-      int tournamentSize = 3);
+  AmAll(int populationSize, double mutationProb, int tournamentSize = 3);
   virtual ~AmAll() {}
 
   ResultMH<double> optimize(Problem<double> &problem, int maxevals) override;
