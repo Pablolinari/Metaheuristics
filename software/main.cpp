@@ -127,17 +127,16 @@ int main(int argc, char *argv[]) {
     cout << "Termina " << algorithms[j].first << endl;
   }
 
-  cout << endl << "----------Termina evaluacion-----------" << endl;
-  cout << endl;
+  cout <<"----------Termina evaluacion-----------";
   for (int i = 0; i < algorithms.size(); i++) {
     cout << endl;
     cout << algorithms[i].first << endl;
     cout << "Mean fitness of " << totalevaluations
          << " evaluations : " << fitness.col(i).mean() << endl;
-    cout << "Fitness 2025 :" << problem25.fitness(solutions[i]) << endl;
-    cout << "Profit 2025 :" << problem25.profit(solutions[i]) << endl;
-    cout << "Mean evaluations " << evals.col(i).mean() << endl;
-    cout << "Mean time (miliseconds): " << times.col(i).mean() << endl;
+    cout << "Fitness 2025 :" << problem25.fitness(solutions[i]);
+    cout << " | Profit 2025 :" << problem25.profit(solutions[i]) << endl;
+    cout << "Mean evaluations " << evals.col(i).mean();
+    cout << " | Mean time (miliseconds): " << times.col(i).mean() << endl;
   }
   if (argc == 7) {
     // Generate CSV if requested

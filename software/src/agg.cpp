@@ -19,7 +19,6 @@ ResultMH<double> Agg::optimize(Problem<double> &problem, int maxevals) {
   tSolution<double> bestSolution(problemSize);
   std::vector<tSolution<double>> poblation;
   std::vector<double> fitnessPoblation;
-  std::vector<tSolution<double>> parents;
   std::vector<tSolution<double>> sons;
   std::vector<int> idxparents;
   for (int i = 0; i < this->populationSize; i++) {
@@ -27,6 +26,7 @@ ResultMH<double> Agg::optimize(Problem<double> &problem, int maxevals) {
   }
   for (int i = 0; i < this->populationSize; i++) {
     double tempFitness = problem.fitness(poblation[i]);
+    evals++;
     fitnessPoblation.push_back(tempFitness);
     if (tempFitness > bestFitness) {
       bestFitness = tempFitness;
@@ -38,6 +38,7 @@ ResultMH<double> Agg::optimize(Problem<double> &problem, int maxevals) {
     std::vector<int> idx;
     // torneo para npob veces
     for (int i = 0; i < this->populationSize; i++) {
+      idx.clear();
       for (int j = 0; j < this->tournamentSize; j++) {
         idx.push_back(Random::get(0, this->populationSize - 1));
       }
@@ -50,26 +51,21 @@ ResultMH<double> Agg::optimize(Problem<double> &problem, int maxevals) {
         }
       }
       idxparents.push_back(idxBestSolution);
-      idx.clear();
     }
 
-    // genero los padres de la siguiente generación
-    for (auto it = idxparents.begin(); it != idxparents.end(); it++) {
-      parents.push_back(poblation[*it]);
-    }
     // cruce
 
     // esta variable indica el numero de padres que tienen que cruzarse , no el
     // numero de cruces , es lo mismo que el guión pero sin dividir por 2.
     int expectednParentsCrossover =
-        std::ceil(this->crossoverProb * (parents.size()));
+        std::ceil(this->crossoverProb * (idxparents.size()));
     if (expectednParentsCrossover % 2 != 0) {
       expectednParentsCrossover--;
     }
     for (int i = 0; i < expectednParentsCrossover; i += 2) {
 
       std::pair<tSolution<double>, tSolution<double>> son =
-          crossover(parents[i], parents[i + 1]);
+          crossover(poblation[idxparents[i]], poblation[idxparents[i + 1]]);
       if (!problem.isValid(son.first)) {
         problem.fix(son.first);
       }
@@ -80,26 +76,27 @@ ResultMH<double> Agg::optimize(Problem<double> &problem, int maxevals) {
       sons.push_back(son.second);
     }
     for (int i = expectednParentsCrossover; i < this->populationSize; i++) {
-      sons.push_back(parents[i]);
+      sons.push_back(poblation[idxparents[i]]);
     }
 
     // mutación
     int expectedMutation =
         std::ceil(this->mutationProb * this->populationSize * problemSize);
 
+    int maxAttempts = problemSize * 3;
+    double mutationRate = 0.15;
+
     for (int i = 0; i < expectedMutation; i++) {
 
       int idxSolution = Random::get(0, this->populationSize - 1);
       tSolution<double> mutSol = sons[idxSolution];
-
-      const int maxAttempts = std::max(10, problemSize * 4);
 
       int idxGene = -1;
       double amount = 0.0;
 
       for (int attempt = 0; attempt < maxAttempts; ++attempt) {
         int candidateFirst = Random::get(0, problemSize - 1);
-        double candidateAmount = mutSol(candidateFirst) * mutationProb;
+        double candidateAmount = mutSol(candidateFirst) * mutationRate;
         if (candidateAmount <= 0.0) {
           continue;
         }
@@ -171,17 +168,23 @@ ResultMH<double> Agg::optimize(Problem<double> &problem, int maxevals) {
         worstFitnessSons = tempFitness;
         idxworst = i;
       }
+      if (evals == maxevals) {
+        break;
+      }
     }
-    sons[idxworst] = bestSolution;
-    fitnessPoblation[idxworst] = bestFitness;
+    if (bestFitness > worstFitnessSons) {
+      sons[idxworst] = bestSolution;
+      fitnessPoblation[idxworst] = bestFitness;
+    }
+
     if (bestFitnessSons > bestFitness) {
       bestSolution = sons[idxbest];
       bestFitness = bestFitnessSons;
     }
+    poblation.clear();
     poblation = sons;
 
     sons.clear();
-    parents.clear();
     idxparents.clear();
   }
   return ResultMH(bestSolution, bestFitness, evals);

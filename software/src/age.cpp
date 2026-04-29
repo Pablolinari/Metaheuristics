@@ -76,10 +76,10 @@ ResultMH<double> Age::optimize(Problem<double> &problem, int maxevals) {
     son[1] = auxson.second;
 
     // mutación
-		//
-		// preguntar si la mutacion esta bien hecha , sobre todo en agg 
+    //
     for (int i = 0; i < 2; i++) {
-
+      if (Random::get<bool>(this->mutationProb)) {
+      }
       tSolution<double> mutSol = son[i];
       const double mutationRate = 0.15;
       const int maxAttempts = std::max(10, problemSize * 4);
@@ -144,8 +144,16 @@ ResultMH<double> Age::optimize(Problem<double> &problem, int maxevals) {
     //  busco el peor de la generación nueva y lo elimino
     //  busco el mejor de la generación nueva y compruebo si es mejor que el
     double fitnessFirst = problem.fitness(son[0]);
+    evals++;
+    if (evals == maxevals) {
+      break;
+    }
     double fitnessSecond = problem.fitness(son[1]);
-    evals += 2;
+
+    evals++;
+    if (evals == maxevals) {
+      break;
+    }
 
     if (fitnessSecond > fitnessFirst) {
       std::swap(fitnessFirst, fitnessSecond);
@@ -192,8 +200,6 @@ ResultMH<double> Age::optimize(Problem<double> &problem, int maxevals) {
       poblation[idxSecondWorst] = son[1];
       fitnessPoblation[idxSecondWorst] = fitnessSecond;
     }
-// preguntar si , inserto un hijo y recalculo el peor , o inserto directamente los dos hijos si se puede.
-
   }
   return ResultMH(bestSolution, bestFitness, evals);
 }

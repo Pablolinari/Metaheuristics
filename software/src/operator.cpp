@@ -37,8 +37,8 @@ Operator::blxAlpha(const tSolution<double> &p1, const tSolution<double> &p2,
       double cmin = std::min(p1(i), p2(i));
       double gap = cmax - cmin;
 
-      son1(i) = Random::get(cmin - gap * alpha, cmax - gap * alpha);
-      son2(i) = Random::get(cmin - gap * alpha, cmax - gap * alpha);
+      son1(i) = Random::get<double>(cmin - gap * alpha, cmax - gap * alpha);
+      son2(i) = Random::get<double>(cmin - gap * alpha, cmax - gap * alpha);
     }
   }
   return std::make_pair(son1, son2);
