@@ -18,6 +18,9 @@ public:
    * @author  author
    * @version 1.0
    */
-	std::pair<tSolution<double>, tSolution<double>>arithmetic(const tSolution<double> & p1,const tSolution<double>& p2);
-	std::pair<tSolution<double>, tSolution<double>>blxAlpha(const tSolution<double> & p1,const tSolution<double>& p2,double alpha);
+  std::pair<tSolution<double>, tSolution<double>>
+  arithmetic(const tSolution<double> &p1, const tSolution<double> &p2);
+  std::pair<tSolution<double>, tSolution<double>>
+  blxAlpha(const tSolution<double> &p1, const tSolution<double> &p2,
+           double alpha);
 };

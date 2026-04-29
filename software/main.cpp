@@ -13,10 +13,13 @@
 #include <vector>
 
 // All all algorithms
-#include "include/aggarit.h"
-#include "include/aggblx.h"
 #include "include/agearit.h"
 #include "include/ageblx.h"
+#include "include/aggarit.h"
+#include "include/aggblx.h"
+#include "include/amall.h"
+#include "include/amrand.h"
+#include "include/ambest.h"
 #include "include/greedy.h"
 #include "include/localsearch.h"
 #include "include/randomsearch.h"
@@ -94,13 +97,17 @@ int main(int argc, char *argv[]) {
 
   AgeArit agearit(100, 0.1, 3);
   AgeBLX ageblx(100, 0.1, 0.3, 3);
+  AmAll amall(100, 0.8, 0.1, 3);
+  AmRand amrand(100, 0.8, 0.1, 3);
+
   // Create the specific problem
   ProblemPort problem = ProblemPort(path, low, high, false);
   ProblemPort problem25 = ProblemPort(path, low, high, true);
   std::vector<pair<std::string, MH<double> *>> algorithms = {
-      make_pair("Greedy", &greedyalg), make_pair("Random", &ralg),
-      make_pair("Local Search", &localalg),
-      make_pair("AGG Aritmetico", &aggarit),make_pair("AGG BLX",&aggblx),make_pair("AGE Aritmetico", &agearit),make_pair("AGE BLX",&ageblx)};
+      make_pair("Greedy", &greedyalg),      make_pair("Random", &ralg),
+      make_pair("Local Search", &localalg), make_pair("AGG-Arit", &aggarit),
+      make_pair("AGG-BLX", &aggblx),        make_pair("AGE-Arit", &agearit),
+      make_pair("AGE-BLX", &ageblx),        make_pair("AM-ALL", &amall),make_pair("AM-RAND", &amrand)};
   Eigen::MatrixX<double> fitness(totalevaluations, algorithms.size());
   Eigen::MatrixX<double> evals(totalevaluations, algorithms.size());
   Eigen::MatrixX<double> times(totalevaluations, algorithms.size());
@@ -127,7 +134,7 @@ int main(int argc, char *argv[]) {
     cout << "Termina " << algorithms[j].first << endl;
   }
 
-  cout <<"----------Termina evaluacion-----------";
+  cout << "----------Termina evaluacion-----------";
   for (int i = 0; i < algorithms.size(); i++) {
     cout << endl;
     cout << algorithms[i].first << endl;
@@ -148,7 +155,7 @@ int main(int argc, char *argv[]) {
       // Write data for each algorithm and iteration
       for (int j = 0; j < algorithms.size(); j++) {
         for (int i = 0; i < totalevaluations; i++) {
-          csv_file << algorithms[j].first.substr(0, 3) << "," << fitness(i, j)
+          csv_file << algorithms[j].first.substr(0, 6) << "," << fitness(i, j)
                    << endl;
         }
       }

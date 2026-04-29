@@ -38,7 +38,7 @@
   #image("logo.jpg", width: 60%)
   #v(3cm)
 
-  #block(text(weight: "bold", 2.5em)[Práctica 1])
+  #block(text(weight: "bold", 2.5em)[Práctica 2])
   #v(0.5em)
   #block(text(weight: "bold", 1.8em)[Problema del portfolio])
   #v(1cm)
@@ -307,6 +307,7 @@ Como último detalle vemos que por la naturaleza de los valores low y high propu
 == Local Search
 
 El algortimo de búsqueda local (el primero el mejor) parte de una solución generada aleatoriamente y genera un vecindario alrededor de esta solución , una vez generado el vecindario , se comienza a recorrer cada vecino  y se evalúa su fitness. Si se encuentra un fitness mejor que el de la solución actual ,se escoge ese vecino como mejor solución y se genera un nuevo vecindario alrededor de el.El proceso termina cuando se llega al máximo de evaluaciones permitidas o cuando no se ha encontrado ningún vecino del vecindario actual generado que mejore la solución.
+ 
 
 #block(fill: luma(240), inset: 8pt, radius: 4pt, width: 100%)[
 ```py
@@ -363,6 +364,11 @@ Si la solución generada no es valida o no mejora la solución actual , restaura
 
 Mientras que no se superen las restricciones de las evaluaciones y se sigan encontrando vecinos mejores en cada vecindario seguiremos intentando encontrar la mejor solución . En caso de recorrer todo el vecindario y no encontrar una solución mejor o que se superen las evaluciones permitidas , se detendrá la búsqueda.
 
+== Algoritmo Genético Generacional
+
+== Algoritmo Genético Estacionario 
+
+== Algortimo Memético
 = Estructura del código
 
 El código de la práctica está organizado en una estructura modular que facilita la compilación y ejecución. A continuación se describe la organización del proyecto y el manual de usuario para compilar y ejecutar el programa.
@@ -507,14 +513,18 @@ La ejecución se ha hecho como se indicó en el apartado anterior , cambiando en
   table(
     columns: 6,
     align: center,
-    stroke: (x, y) => if y == 0 or y == 4 { (bottom: 0.8pt) } else { none },
+    stroke: (x, y) => if y == 0 or y == 7 { (bottom: 0.8pt) } else { none },
     inset: 8pt,
     
     [*Algoritmo*], [*2015-2024*\ *Fitness*], [*2025*\ *Fitness*], [*Beneficio*], [*Evaluaciones*], [*Tiempo*\ *(segundos)*],
     
-    [Greedy], [-0.212], [0.090], [0.115], [1], [0.01],
-    [Random], [-0.603], [0.121], [0.149], [10000], [0.005],
-    [BL], [-0.350], [0.079], [0.103], [1404.9], [0.01],
+    [Greedy], [-4.649], [-3.386], [0.115], [1], [0.001],
+    [Random], [-4.980], [-3.289], [0.096], [10000], [0.005],
+    [BL], [-4.608], [-3.109], [0.019], [1517.36], [0.001],
+    [AGG-Arit], [-4.613], [-3.139], [0.044], [10000], [0.004],
+    [AGG-BLX], [-4.557], [-3.220], [0.071], [10000], [0.006],
+    [AGE-Arit], [-4.572], [-3.143], [0.033], [10000], [0.002],
+    [AGE-BLX], [-4.518], [-3.139], [0.052], [10000], [0.003],
   ),
   caption: [Resultados de Ibex 35 (Medias)]
 )
@@ -522,14 +532,19 @@ La ejecución se ha hecho como se indicó en el apartado anterior , cambiando en
   table(
     columns: 6,
     align: center,
-    stroke: (x, y) => if y == 0 or y == 4 { (bottom: 0.8pt) } else { none },
+    stroke: (x, y) => if y == 0 or y == 7 { (bottom: 0.8pt) } else { none },
     inset: 8pt,
     
     [*Algoritmo*], [*2015-2024*\ *Fitness*], [*2025*\ *Fitness*], [*Beneficio*], [*Evaluaciones*], [*Tiempo*\ *(segundos)*],
     
-    [Greedy], [0.866], [-0.040], [0.009], [1], [0.001],
-    [Random], [0.467], [0.046], [0.083], [10000], [0.019],
-    [BL], [0.591], [-0.001], [0.047], [8979.72], [0.012],
+    [Greedy], [-3.663], [-5.020], [0.009], [1], [0.001],
+    [Random], [-3.408], [-3.968], [0.069], [10000], [0.02],
+    [BL], [-3.118], [-3.918], [0.094], [8984.76], [0.01],
+    [AGG-Arit], [-3.006], [-3.818], [0.105], [10000], [0.027],
+    [AGG-BLX], [-2.912], [-3.838], [0.141], [10000], [0.033],
+    [AGE-Arit], [-3.128], [-3.822], [0.087], [10000], [0.012],
+    [AGE-BLX], [-2.969], [-3.703], [0.111], [10000], [0.012],
+
   ),
   caption: [Resultados de S&P100 (Medias)]
 )
@@ -537,14 +552,19 @@ La ejecución se ha hecho como se indicó en el apartado anterior , cambiando en
   table(
     columns: 6,
     align: center,
-    stroke: (x, y) => if y == 0 or y == 4 { (bottom: 0.8pt) } else { none },
+    stroke: (x, y) => if y == 0 or y == 7 { (bottom: 0.8pt) } else { none },
     inset: 8pt,
     
     [*Algoritmo*], [*2015-2024*\ *Fitness*], [*2025*\ *Fitness*], [*Beneficio*], [*Evaluaciones*], [*Tiempo*\ *(segundos)*],
     
-    [Greedy], [1.042], [-0.115], [-0.062], [1], [0.001],
-    [Random], [0.2844], [-0.025], [0.018], [10000], [0.256],
-    [BL], [0.319], [-0.034], [0.009], [10000], [0.225],
+    [Greedy], [-3.438], [-5.204], [-0.062], [1], [0.001],
+    [Random], [-3.638], [-4.606], [-0.0583], [10000], [0.253],
+    [BL], [-3.517], [-4.313], [0.018], [10000], [0.220],
+    [AGG-Arit], [-3.090], [-4.124], [0.001], [10000], [0.443],
+    [AGG-BLX], [-2.867], [-4.042], [0.002], [10000], [2.281],
+    [AGE-Arit], [-3.358], [-4.232], [0.002], [10000], [0.202],
+    [AGE-BLX], [-3.100], [-4.208], [-0.018], [10000], [0.184],
+
   ),
   caption: [Resultados de S&P500 (Medias)]
 )
