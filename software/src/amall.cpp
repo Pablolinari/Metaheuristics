@@ -259,10 +259,13 @@ ResultMH<double> AmAll::optimize(Problem<double> &problem, int maxevals) {
     if (nGenerations % 10 == 0) {
 			for(int i=0;i<populationSize;i++){
 				ResultMH<double> result = localSearch(problem,100,poblation[i]);
-				if(result.fitness > bestFitness){
-					bestFitness =result.fitness;
-					bestSolution=result.solution;
+				if(result.fitness > fitnessPoblation[i]){
+					fitnessPoblation[i] =result.fitness;
 					poblation[i]=result.solution;
+				}
+				if(result.fitness>bestFitness){
+					bestFitness=result.fitness;
+					bestSolution=result.solution;
 				}
 				evals+=100;
 			}

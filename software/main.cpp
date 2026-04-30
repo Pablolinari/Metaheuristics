@@ -99,6 +99,7 @@ int main(int argc, char *argv[]) {
   AgeBLX ageblx(100, 0.1, 0.3, 3);
   AmAll amall(100, 0.8, 0.1, 3);
   AmRand amrand(100, 0.8, 0.1, 3);
+  AmBest ambest(100, 0.8, 0.1, 3);
 
   // Create the specific problem
   ProblemPort problem = ProblemPort(path, low, high, false);
@@ -107,7 +108,7 @@ int main(int argc, char *argv[]) {
       make_pair("Greedy", &greedyalg),      make_pair("Random", &ralg),
       make_pair("Local Search", &localalg), make_pair("AGG-Arit", &aggarit),
       make_pair("AGG-BLX", &aggblx),        make_pair("AGE-Arit", &agearit),
-      make_pair("AGE-BLX", &ageblx),        make_pair("AM-ALL", &amall),make_pair("AM-RAND", &amrand)};
+      make_pair("AGE-BLX", &ageblx),        make_pair("AM-ALL", &amall),make_pair("AM-RAND", &amrand),make_pair("AM-BEST", &ambest)};
   Eigen::MatrixX<double> fitness(totalevaluations, algorithms.size());
   Eigen::MatrixX<double> evals(totalevaluations, algorithms.size());
   Eigen::MatrixX<double> times(totalevaluations, algorithms.size());

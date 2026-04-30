@@ -256,9 +256,18 @@ ResultMH<double> AmBest::optimize(Problem<double> &problem, int maxevals) {
     sons.clear();
     idxparents.clear();
 		nGenerations++;
+		int nBest = this->populationSize*0.1;
+		std::vector<int>indices(100) ;
+		std::iota(indices.begin(),indices.end(),0);
 		/// implementar best
+		/// busco los indices de las diez mejores soluciones 
+		std::nth_element(indices.begin(), indices.begin() + nBest, indices.end(),
+                     [&fitnessPoblation](int i, int j) {
+                         return fitnessPoblation[i] > fitnessPoblation[j];
+                     });
+		indices.resize(10);
     if (nGenerations % 10 == 0) {
-			for(int i=0;i<populationSize;i++){
+			for(int i : indices){
 				ResultMH<double> result = localSearch(problem,100,poblation[i]);
 				if(result.fitness > bestFitness){
 					bestFitness =result.fitness;
