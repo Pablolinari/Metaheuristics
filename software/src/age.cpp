@@ -80,62 +80,8 @@ ResultMH<double> Age::optimize(Problem<double> &problem, int maxevals) {
     for (int i = 0; i < 2; i++) {
       if (Random::get<bool>(this->mutationProb)) {
         tSolution<double> mutSol = son[i];
-        const double mutationRate = 0.15;
-        const int maxAttempts = std::max(10, problemSize * 4);
-
-        int idxGene = -1;
-        double amount = 0.0;
-
-        for (int attempt = 0; attempt < maxAttempts; ++attempt) {
-          int candidateFirst = Random::get(0, problemSize - 1);
-          double candidateAmount = mutSol(candidateFirst) * mutationRate;
-          if (candidateAmount <= 0.0) {
-            continue;
-          }
-
-          double firstAfter = mutSol(candidateFirst) - candidateAmount;
-          bool firstValid =
-              firstAfter == 0.0 || (firstAfter >= problembounds.first &&
-                                    firstAfter <= problembounds.second);
-
-          if (firstValid) {
-            idxGene = candidateFirst;
-            amount = candidateAmount;
-            break;
-          }
-        }
-
-        if (idxGene == -1) {
-          continue;
-        }
-
-        int idxNextGene = -1;
-        for (int attempt = 0; attempt < maxAttempts; ++attempt) {
-          int candidateSecond = Random::get(0, problemSize - 1);
-          if (candidateSecond == idxGene) {
-            continue;
-          }
-
-          double secondAfter = mutSol(candidateSecond) + amount;
-          bool secondValid =
-              secondAfter == 0.0 || (secondAfter >= problembounds.first &&
-                                     secondAfter <= problembounds.second);
-
-          if (secondValid) {
-            idxNextGene = candidateSecond;
-
-            break;
-          }
-        }
-
-        if (idxNextGene == -1) {
-          continue;
-        }
-
-        mutSol(idxGene) -= amount;
-        mutSol(idxNextGene) += amount;
-
-        if (problem.isValid(mutSol)) {
+        bool mutated = op.mutation(mutSol, problem, 0.15, problemSize * 3);
+        if (mutated) {
           son[i] = mutSol;
         }
       }

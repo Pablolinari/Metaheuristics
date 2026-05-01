@@ -10,14 +10,16 @@ std::pair<tSolution<double>, tSolution<double>>
 AmBest::crossover(const tSolution<double> &p1, const tSolution<double> &p2) {
   return op.blxAlpha(p1, p2, 0.3);
 }
-AmBest::AmBest(int populationSize, double crossoverProb,double mutationProb, int tournamentSize)
-    : populationSize(populationSize),crossoverProb(crossoverProb), mutationProb(mutationProb),
-      tournamentSize(tournamentSize) {}
-ResultMH<double> AmBest::localSearch(Problem<double> &problem, int maxevals,tSolution<double> solInit) {
+AmBest::AmBest(int populationSize, double crossoverProb, double mutationProb,
+               int tournamentSize)
+    : populationSize(populationSize), crossoverProb(crossoverProb),
+      mutationProb(mutationProb), tournamentSize(tournamentSize) {}
+ResultMH<double> AmBest::localSearch(Problem<double> &problem, int maxevals,
+                                     tSolution<double> solInit) {
   assert(maxevals >= 1);
   double ratio = 0.15;
   // primera solución aleatoria
-  tSolution<double> startSolution =solInit; 
+  tSolution<double> startSolution = solInit;
   double bestFitness = problem.fitness(startSolution);
   bool improved = true;
   std::vector<std::pair<int, int>> neighbors;
@@ -55,7 +57,7 @@ ResultMH<double> AmBest::localSearch(Problem<double> &problem, int maxevals,tSol
       bool validSecond = (startSolution(p.second) >= bounds.first &&
                           startSolution(p.second) <= bounds.second) ||
                          (startSolution(p.second) == 0);
-      if (validSecond &&validFirst) {
+      if (validSecond && validFirst) {
         double currentFitness = problem.fitness(startSolution);
         evals++;
         if (currentFitness > bestFitness) {
@@ -151,67 +153,14 @@ ResultMH<double> AmBest::optimize(Problem<double> &problem, int maxevals) {
     int expectedMutation =
         std::ceil(this->mutationProb * this->populationSize * problemSize);
 
-    int maxAttempts = problemSize * 3;
-    double mutationRate = 0.15;
-
     for (int i = 0; i < expectedMutation; i++) {
 
       int idxSolution = Random::get(0, this->populationSize - 1);
       tSolution<double> mutSol = sons[idxSolution];
 
-      int idxGene = -1;
-      double amount = 0.0;
+      bool mutated = op.mutation(mutSol, problem, 0.15, problemSize * 3);
 
-      for (int attempt = 0; attempt < maxAttempts; ++attempt) {
-        int candidateFirst = Random::get(0, problemSize - 1);
-        double candidateAmount = mutSol(candidateFirst) * mutationRate;
-        if (candidateAmount <= 0.0) {
-          continue;
-        }
-
-        double firstAfter = mutSol(candidateFirst) - candidateAmount;
-        bool firstValid =
-            firstAfter == 0.0 || (firstAfter >= problembounds.first &&
-                                  firstAfter <= problembounds.second);
-
-        if (firstValid) {
-          idxGene = candidateFirst;
-          amount = candidateAmount;
-          break;
-        }
-      }
-
-      if (idxGene == -1) {
-        continue;
-      }
-
-      int idxNextGene = -1;
-      for (int attempt = 0; attempt < maxAttempts; ++attempt) {
-        int candidateSecond = Random::get(0, problemSize - 1);
-        if (candidateSecond == idxGene) {
-          continue;
-        }
-
-        double secondAfter = mutSol(candidateSecond) + amount;
-        bool secondValid =
-            secondAfter == 0.0 || (secondAfter >= problembounds.first &&
-                                   secondAfter <= problembounds.second);
-
-        if (secondValid) {
-          idxNextGene = candidateSecond;
-
-          break;
-        }
-      }
-
-      if (idxNextGene == -1) {
-        continue;
-      }
-
-      mutSol(idxGene) -= amount;
-      mutSol(idxNextGene) += amount;
-
-      if (problem.isValid(mutSol)) {
+      if (mutated) {
         sons[idxSolution] = mutSol;
       }
     }
@@ -255,27 +204,27 @@ ResultMH<double> AmBest::optimize(Problem<double> &problem, int maxevals) {
 
     sons.clear();
     idxparents.clear();
-		nGenerations++;
-		int nBest = this->populationSize*0.1;
-		std::vector<int>indices(100) ;
-		std::iota(indices.begin(),indices.end(),0);
-		/// implementar best
-		/// busco los indices de las diez mejores soluciones 
-		std::nth_element(indices.begin(), indices.begin() + nBest, indices.end(),
+    nGenerations++;
+    int nBest = this->populationSize * 0.1;
+    std::vector<int> indices(100);
+    std::iota(indices.begin(), indices.end(), 0);
+    /// implementar best
+    /// busco los indices de las diez mejores soluciones
+    std::nth_element(indices.begin(), indices.begin() + nBest, indices.end(),
                      [&fitnessPoblation](int i, int j) {
-                         return fitnessPoblation[i] > fitnessPoblation[j];
+                       return fitnessPoblation[i] > fitnessPoblation[j];
                      });
-		indices.resize(10);
+    indices.resize(10);
     if (nGenerations % 10 == 0) {
-			for(int i : indices){
-				ResultMH<double> result = localSearch(problem,100,poblation[i]);
-				if(result.fitness > bestFitness){
-					bestFitness =result.fitness;
-					bestSolution=result.solution;
-					poblation[i]=result.solution;
-				}
-				evals+=100;
-			}
+      for (int i : indices) {
+        ResultMH<double> result = localSearch(problem, 100, poblation[i]);
+        if (result.fitness > bestFitness) {
+          bestFitness = result.fitness;
+          bestSolution = result.solution;
+          poblation[i] = result.solution;
+        }
+        evals += 100;
+      }
     }
   }
   return ResultMH(bestSolution, bestFitness, evals);

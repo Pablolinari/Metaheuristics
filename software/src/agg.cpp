@@ -1,9 +1,12 @@
 #include "../include/agg.h"
+#include "../include/pportfolio.h"
+#include "../include/random.hpp"
 #include <algorithm>
 #include <cassert>
 #include <cmath>
 #include <iostream>
 #include <limits>
+#include <utility>
 #include <vector>
 Agg::Agg(int populationSize, double crossoverProb, double mutationProb,
          int tournamentSize)
@@ -83,67 +86,14 @@ ResultMH<double> Agg::optimize(Problem<double> &problem, int maxevals) {
     int expectedMutation =
         std::ceil(this->mutationProb * this->populationSize * problemSize);
 
-    int maxAttempts = problemSize * 3;
-    double mutationRate = 0.15;
-
     for (int i = 0; i < expectedMutation; i++) {
 
       int idxSolution = Random::get(0, this->populationSize - 1);
       tSolution<double> mutSol = sons[idxSolution];
 
-      int idxGene = -1;
-      double amount = 0.0;
+      bool mutated = op.mutation(mutSol, problem, 0.15, problemSize * 3);
 
-      for (int attempt = 0; attempt < maxAttempts; ++attempt) {
-        int candidateFirst = Random::get(0, problemSize - 1);
-        double candidateAmount = mutSol(candidateFirst) * mutationRate;
-        if (candidateAmount <= 0.0) {
-          continue;
-        }
-
-        double firstAfter = mutSol(candidateFirst) - candidateAmount;
-        bool firstValid =
-            firstAfter == 0.0 || (firstAfter >= problembounds.first &&
-                                  firstAfter <= problembounds.second);
-
-        if (firstValid) {
-          idxGene = candidateFirst;
-          amount = candidateAmount;
-          break;
-        }
-      }
-
-      if (idxGene == -1) {
-        continue;
-      }
-
-      int idxNextGene = -1;
-      for (int attempt = 0; attempt < maxAttempts; ++attempt) {
-        int candidateSecond = Random::get(0, problemSize - 1);
-        if (candidateSecond == idxGene) {
-          continue;
-        }
-
-        double secondAfter = mutSol(candidateSecond) + amount;
-        bool secondValid =
-            secondAfter == 0.0 || (secondAfter >= problembounds.first &&
-                                   secondAfter <= problembounds.second);
-
-        if (secondValid) {
-          idxNextGene = candidateSecond;
-
-          break;
-        }
-      }
-
-      if (idxNextGene == -1) {
-        continue;
-      }
-
-      mutSol(idxGene) -= amount;
-      mutSol(idxNextGene) += amount;
-
-      if (problem.isValid(mutSol)) {
+      if (mutated) {
         sons[idxSolution] = mutSol;
       }
     }

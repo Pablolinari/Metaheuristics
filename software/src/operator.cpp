@@ -43,3 +43,63 @@ Operator::blxAlpha(const tSolution<double> &p1, const tSolution<double> &p2,
   }
   return std::make_pair(son1, son2);
 }
+
+bool Operator::mutation(tSolution<double> &mutSol, Problem<double> &problem,
+                        double mutationRate, int maxAttempts) {
+  int idxGene = -1;
+  double amount = 0.0;
+  std::pair<double, double> problembounds = problem.getSolutionDomainRange();
+
+  for (int attempt = 0; attempt < maxAttempts; ++attempt) {
+    int candidateFirst = Random::get<int>(0, problem.getSolutionSize() - 1);
+    double candidateAmount = mutSol(candidateFirst) * mutationRate;
+    if (candidateAmount <= 0.0) {
+      continue;
+    }
+
+    double firstAfter = mutSol(candidateFirst) - candidateAmount;
+    bool firstValid = firstAfter == 0.0 || (firstAfter >= problembounds.first &&
+                                            firstAfter <= problembounds.second);
+
+    if (firstValid) {
+      idxGene = candidateFirst;
+      amount = candidateAmount;
+      break;
+    }
+  }
+
+  if (idxGene == -1) {
+    return false;
+  }
+
+  int idxNextGene = -1;
+  for (int attempt = 0; attempt < maxAttempts; ++attempt) {
+    int candidateSecond = Random::get<int>(0, problem.getSolutionSize() - 1);
+    if (candidateSecond == idxGene) {
+      continue;
+    }
+
+    double secondAfter = mutSol(candidateSecond) + amount;
+    bool secondValid =
+        secondAfter == 0.0 || (secondAfter >= problembounds.first &&
+                               secondAfter <= problembounds.second);
+
+    if (secondValid) {
+      idxNextGene = candidateSecond;
+
+      break;
+    }
+  }
+
+  if (idxNextGene == -1) {
+    return false;
+  }
+
+  mutSol(idxGene) -= amount;
+  mutSol(idxNextGene) += amount;
+  if (problem.isValid(mutSol)) {
+    return true;
+  } else {
+    return false;
+  }
+}

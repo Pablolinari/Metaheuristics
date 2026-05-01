@@ -23,4 +23,7 @@ public:
   std::pair<tSolution<double>, tSolution<double>>
   blxAlpha(const tSolution<double> &p1, const tSolution<double> &p2,
            double alpha);
+
+  bool mutation(tSolution<double> &mutSol, Problem<double> &problem,
+                double mutationRate, int maxAttempts);
 };

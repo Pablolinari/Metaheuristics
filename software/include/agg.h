@@ -15,6 +15,8 @@ public:
   virtual std::pair<tSolution<double>, tSolution<double>>
   crossover(const tSolution<double> &p1, const tSolution<double> &p2) = 0;
 
+bool mutation(tSolution<double> &mutSol, Problem<double> &problem,
+                   double mutationRate,int maxAttempts);
   Operator op;
   int populationSize;
   double crossoverProb;

@@ -10,14 +10,16 @@ std::pair<tSolution<double>, tSolution<double>>
 AmAll::crossover(const tSolution<double> &p1, const tSolution<double> &p2) {
   return op.blxAlpha(p1, p2, 0.3);
 }
-AmAll::AmAll(int populationSize, double crossoverProb,double mutationProb, int tournamentSize)
-    : populationSize(populationSize),crossoverProb(crossoverProb), mutationProb(mutationProb),
-      tournamentSize(tournamentSize) {}
-ResultMH<double> AmAll::localSearch(Problem<double> &problem, int maxevals,tSolution<double> solInit) {
+AmAll::AmAll(int populationSize, double crossoverProb, double mutationProb,
+             int tournamentSize)
+    : populationSize(populationSize), crossoverProb(crossoverProb),
+      mutationProb(mutationProb), tournamentSize(tournamentSize) {}
+ResultMH<double> AmAll::localSearch(Problem<double> &problem, int maxevals,
+                                    tSolution<double> solInit) {
   assert(maxevals >= 1);
   double ratio = 0.15;
   // primera solución aleatoria
-  tSolution<double> startSolution =solInit; 
+  tSolution<double> startSolution = solInit;
   double bestFitness = problem.fitness(startSolution);
   bool improved = true;
   std::vector<std::pair<int, int>> neighbors;
@@ -55,7 +57,7 @@ ResultMH<double> AmAll::localSearch(Problem<double> &problem, int maxevals,tSolu
       bool validSecond = (startSolution(p.second) >= bounds.first &&
                           startSolution(p.second) <= bounds.second) ||
                          (startSolution(p.second) == 0);
-      if (validSecond &&validFirst) {
+      if (validSecond && validFirst) {
         double currentFitness = problem.fitness(startSolution);
         evals++;
         if (currentFitness > bestFitness) {
@@ -151,67 +153,14 @@ ResultMH<double> AmAll::optimize(Problem<double> &problem, int maxevals) {
     int expectedMutation =
         std::ceil(this->mutationProb * this->populationSize * problemSize);
 
-    int maxAttempts = problemSize * 3;
-    double mutationRate = 0.15;
-
     for (int i = 0; i < expectedMutation; i++) {
 
       int idxSolution = Random::get(0, this->populationSize - 1);
       tSolution<double> mutSol = sons[idxSolution];
 
-      int idxGene = -1;
-      double amount = 0.0;
+      bool mutated = op.mutation(mutSol, problem, 0.15, problemSize * 3);
 
-      for (int attempt = 0; attempt < maxAttempts; ++attempt) {
-        int candidateFirst = Random::get(0, problemSize - 1);
-        double candidateAmount = mutSol(candidateFirst) * mutationRate;
-        if (candidateAmount <= 0.0) {
-          continue;
-        }
-
-        double firstAfter = mutSol(candidateFirst) - candidateAmount;
-        bool firstValid =
-            firstAfter == 0.0 || (firstAfter >= problembounds.first &&
-                                  firstAfter <= problembounds.second);
-
-        if (firstValid) {
-          idxGene = candidateFirst;
-          amount = candidateAmount;
-          break;
-        }
-      }
-
-      if (idxGene == -1) {
-        continue;
-      }
-
-      int idxNextGene = -1;
-      for (int attempt = 0; attempt < maxAttempts; ++attempt) {
-        int candidateSecond = Random::get(0, problemSize - 1);
-        if (candidateSecond == idxGene) {
-          continue;
-        }
-
-        double secondAfter = mutSol(candidateSecond) + amount;
-        bool secondValid =
-            secondAfter == 0.0 || (secondAfter >= problembounds.first &&
-                                   secondAfter <= problembounds.second);
-
-        if (secondValid) {
-          idxNextGene = candidateSecond;
-
-          break;
-        }
-      }
-
-      if (idxNextGene == -1) {
-        continue;
-      }
-
-      mutSol(idxGene) -= amount;
-      mutSol(idxNextGene) += amount;
-
-      if (problem.isValid(mutSol)) {
+      if (mutated) {
         sons[idxSolution] = mutSol;
       }
     }
@@ -255,20 +204,20 @@ ResultMH<double> AmAll::optimize(Problem<double> &problem, int maxevals) {
 
     sons.clear();
     idxparents.clear();
-		nGenerations++;
+    nGenerations++;
     if (nGenerations % 10 == 0) {
-			for(int i=0;i<populationSize;i++){
-				ResultMH<double> result = localSearch(problem,100,poblation[i]);
-				if(result.fitness > fitnessPoblation[i]){
-					fitnessPoblation[i] =result.fitness;
-					poblation[i]=result.solution;
-				}
-				if(result.fitness>bestFitness){
-					bestFitness=result.fitness;
-					bestSolution=result.solution;
-				}
-				evals+=100;
-			}
+      for (int i = 0; i < populationSize; i++) {
+        ResultMH<double> result = localSearch(problem, 100, poblation[i]);
+        if (result.fitness > fitnessPoblation[i]) {
+          fitnessPoblation[i] = result.fitness;
+          poblation[i] = result.solution;
+        }
+        if (result.fitness > bestFitness) {
+          bestFitness = result.fitness;
+          bestSolution = result.solution;
+        }
+        evals += 100;
+      }
     }
   }
   return ResultMH(bestSolution, bestFitness, evals);
