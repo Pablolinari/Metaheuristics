@@ -513,7 +513,7 @@ La ejecución se ha hecho como se indicó en el apartado anterior , cambiando en
   table(
     columns: 6,
     align: center,
-    stroke: (x, y) => if y == 0 or y == 7 { (bottom: 0.8pt) } else { none },
+    stroke: (x, y) => if y == 0 or y == 10 { (bottom: 0.8pt) } else { none },
     inset: 8pt,
     
     [*Algoritmo*], [*2015-2024*\ *Fitness*], [*2025*\ *Fitness*], [*Beneficio*], [*Evaluaciones*], [*Tiempo*\ *(segundos)*],
@@ -525,6 +525,9 @@ La ejecución se ha hecho como se indicó en el apartado anterior , cambiando en
     [AGG-BLX], [-4.557], [-3.220], [0.071], [10000], [0.006],
     [AGE-Arit], [-4.572], [-3.143], [0.033], [10000], [0.002],
     [AGE-BLX], [-4.518], [-3.139], [0.052], [10000], [0.003],
+    [AM-ALL], [-4.6538], [-3.195], [0.034], [10000], [0.004],
+    [AM-RAND], [-4.944], [-3.245], [0.056], [10000], [0.006],
+    [AM-BEST], [-4.510], [-3.111], [0.036], [10000], [0.004],
   ),
   caption: [Resultados de Ibex 35 (Medias)]
 )
@@ -532,7 +535,7 @@ La ejecución se ha hecho como se indicó en el apartado anterior , cambiando en
   table(
     columns: 6,
     align: center,
-    stroke: (x, y) => if y == 0 or y == 7 { (bottom: 0.8pt) } else { none },
+    stroke: (x, y) => if y == 0 or y == 10 { (bottom: 0.8pt) } else { none },
     inset: 8pt,
     
     [*Algoritmo*], [*2015-2024*\ *Fitness*], [*2025*\ *Fitness*], [*Beneficio*], [*Evaluaciones*], [*Tiempo*\ *(segundos)*],
@@ -544,6 +547,9 @@ La ejecución se ha hecho como se indicó en el apartado anterior , cambiando en
     [AGG-BLX], [-2.912], [-3.838], [0.141], [10000], [0.033],
     [AGE-Arit], [-3.128], [-3.822], [0.087], [10000], [0.012],
     [AGE-BLX], [-2.969], [-3.703], [0.111], [10000], [0.012],
+    [AM-ALL], [-3.100], [-3.863], [0.041], [10000], [0.030],
+    [AM-RAND], [-3.345], [-3.858], [0.097], [10000], [0.032],
+    [AM-BEST], [-2.921], [-3.799], [0.110], [10000], [0.027],
 
   ),
   caption: [Resultados de S&P100 (Medias)]
@@ -552,7 +558,7 @@ La ejecución se ha hecho como se indicó en el apartado anterior , cambiando en
   table(
     columns: 6,
     align: center,
-    stroke: (x, y) => if y == 0 or y == 7 { (bottom: 0.8pt) } else { none },
+    stroke: (x, y) => if y == 0 or y == 10 { (bottom: 0.8pt) } else { none },
     inset: 8pt,
     
     [*Algoritmo*], [*2015-2024*\ *Fitness*], [*2025*\ *Fitness*], [*Beneficio*], [*Evaluaciones*], [*Tiempo*\ *(segundos)*],
@@ -564,7 +570,9 @@ La ejecución se ha hecho como se indicó en el apartado anterior , cambiando en
     [AGG-BLX], [-2.867], [-4.042], [0.002], [10000], [2.281],
     [AGE-Arit], [-3.358], [-4.232], [0.002], [10000], [0.202],
     [AGE-BLX], [-3.100], [-4.208], [-0.018], [10000], [0.184],
-
+    [AM-ALL], [-3.236], [-4.135], [0.019], [10000], [0.334],
+    [AM-RAND], [-3.542], [-4.256], [0.020], [10000], [0.690],
+    [AM-BEST], [-2.857], [-4.049], [0.025], [10000], [1.035],
   ),
   caption: [Resultados de S&P500 (Medias)]
 )

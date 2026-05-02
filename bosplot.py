@@ -11,14 +11,14 @@ def main():
         df['alg'] = df['alg'].str.upper()
 
         # --- Gráfico 1: BOXPLOT (usando catplot) ---
-        p1 = sns.catplot(data=df, x="alg", y="fitness", aspect=1, kind="box")
+        p1 = sns.catplot(data=df, x="alg", y="fitness", aspect=2, kind="box")
         p1.set(xlabel="Algoritmo", ylabel="Fitness")
         p1.savefig(fname.replace(".csv", ".png"))
         plt.close() # Importante: cerrar para liberar memoria
 
         # --- Gráfico 2: LINEPLOT ---
         # Creamos la figura explícitamente para evitar errores
-        plt.figure(figsize=(8, 6))
+        plt.figure(figsize=(14, 8))
         
         df['intento'] = df.groupby('alg').cumcount() + 1
         
