@@ -247,62 +247,6 @@ El principal objetivo de los algoritmos es maximizar la función fitness , la cu
 
 #pagebreak()
 = Estructura de los algoritmos 
-== Random Search
-
-El algoritmo de Búsqueda aleatoria consiste en generar un número determinado de soluciones válidas de forma aleatoria y seleccionar la solución que maximice o minimice la función del problema, en este caso en concreto , se selecciona la solución que maximice el fitness del problema.
-
- #block(fill: luma(240), inset: 8pt, radius: 4pt, width: 100%)[
- ```py
- # Pseudocódigo del algoritmo Random Search
- función RandomSearch(max_evals):
-    mejorfitnes = -infinito
-     for 0 hasta max_evals:
-      soluciontemporal = solucion_aleatoria
-      if fitnes_soluciontemporal > mejorfitness:
-             solucion = mejorsolucion
-            mejorfitness=fitnes_soluciontemporal
-    return (solucion,mejorfitness,max_evals)
- ```]
-Como se puede observar , el algoritmo de Búsqueda aleatoria dependerá de la suerte que tengamos a la hora de generar soluciones aleatorias ya que el espacio de búsqueda de la solución son todas las soluciones posibles a generar en el intervalo dado de número de evaluaciones por tanto no podemos esperar que obtenga una solución que sea mejor que la de otros algoritmos más avanzados , en caso de que esto ocurriese sería por una cuestión de suerte.
-
-#pagebreak()
-== Greedy
-
-El algorítmo Greedy trata de construir una solución ordenando las empresas de mayor a menor según la heurística establecida en el guión . Una vez obtenidas las empresas ordenadas selecciona por orden descendente y construye una solución seleccionado en cada iteración la mejor opción disponible según la heuristica hasta completar el total de la inversión (llegar a suma 1).Como en cada iteración se ha seleccionado la mejor opción posible, el algoritmo intentará asignar el mayor porcentaje posible a esta empresa siempre que le sea posible , de lo contrario , le asignará el porcentaje restante para llegar al cien por cien .
-
-La heurística usada en el problema es la siguiente :
-$ h e u r(i) = (sum_t log(1 + mu_(i t))) - lambda dot (sum_j Sigma_(i j)) / (|N|) $
-
-
-
- #block(fill: luma(240), inset: 8pt, radius: 4pt, width: 100%)[
- ```py
- # Pseudocódigo del calculo de la heurística
-  funcion heuristic(i): 
-    datalogaritmo = (data.columna(i)+1).log.sum
-    mediacovarianza = matrizcovarianza.columna(i).sum/ncompany
-    return datalogaritmo - (lambda * mediacovarianza);
-  
-
- ```]
-#block(fill: luma(240), inset: 8pt, radius: 4pt, width: 100%)[
-```py
-# Pseudocódigo del algoritmo Greedy
-función greedy(maxevals):
-  mejorescompanias = vector{0,1,2,....,ncompany-1} 
-  ordenar por heuristica de mayor a menor -> mejorescompanias 
-  mejorsolucion = vector{0,0...0}
-  while mejorescompanias.sum<1:
-    compania = mejorescompanias.front
-    mejorescompanias = mejorescompanias.delete(compania)
-    mejorsolucion[compania] = minimo entre high y (1-mejorsolucion.sum)
-     
-  return (mejorsolucion , fitness(mejorsolucion),1)
-```]
-Podemos ver que el algoritmo Greedy va seleccionando las mejores empresas según la heurística y les asigna el mayor porcentaje de la cartera posible , sin la opción de poder comprobar si verdaderamente esta empresa es la que mejor conviene a la cartera ya que el orden de la elección se hace mediante la heurística lo que hace que el algorítmo sea muy rápido pero no sea capaz de corregir en caso de que existiese una solución mejor.
-
-Como último detalle vemos que por la naturaleza de los valores low y high propuestos en elguión la solución que genere el algoritmo Greedy siempre será valida ya que una vez que se rellenen todos los pesos posibles con el valor high , el valor restante de *1-sumatotal* será un valor mayor que low , por tanto podremos asignarlo a una empresa y los pesos de la solución generada por el algoritmo sumarán 1.
-
 
 == Local Search
 
@@ -601,53 +545,9 @@ A continuación se muestran los boxplots de los resultados obtenidos para cada c
 
 Al observar los resultados obtenidos podemos ver que cada algoritmo se comporta de manera muy diferente dependiendo del conjunto de datos usado. Para poder entender por qué unos algoritmos funcionan mejor que otros es necesario analizar cómo trabaja cada uno y qué características del problema aprovechan o ignoran.
 
-== Comportamiento del algoritmo Greedy
-
-Lo primero que llama la atención del algoritmo Greedy es que en los boxplots aparece como una línea horizontal. Esto se debe a que el algoritmo es completamente determinista , es decir , siempre genera la misma solución independientemente de la semilla usada y las veces que lo ejecutemos. Como vimos en la descripción del algoritmo , Greedy ordena las empresas según la heurística y va asignando el máximo porcentaje posible a cada empresa en ese orden, por lo que el resultado final siempre será el mismo.
-
-Si nos fijamos en los valores de fitness obtenidos en los datos de 2015-2024 vemos que el  Greedy obtiene los mejores resultados en todos los casos. En el IBEX35 consigue -0.212 mientras que Random llega a -0.621 y Búsqueda Local a -0.35. En el S&P100 la diferencia es aún más notable con Greedy alcanzando 0.866 frente a 0.467 de Random y 0.591 de Búsqueda Local. Para el S&P500 Greedy obtiene 1.042 comparado con 0.2844 y 0.326 de los otros dos algoritmos.
-
-Vemos que Greedy tiene resultados más parecidos a los de Búsqueda Local que a los de Búsqueda aleatoria , esto se debe a que el resultado del Greedy puede ser un máximo local y no uno global por tanto la solución no es la mejor posible pero si es una en la que supera a la Búsqueda local.
-
-Estos resultados tan buenos tienen sentido si pensamos en cómo funciona la heurística del algoritmo Greedy. La heurística calcula para cada empresa su beneficio logarítmico acumulado menos la covarianza media ponderada por lambda , lo que significa que selecciona aquellas empresas que históricamente han dado mejores retornos ajustados por su riesgo medio con respecto al resto. Al ordenar por esta heurística y asignar los mayores porcentajes a las mejores empresas según este criterio , el algoritmo está construyendo una solución específicamente optimizada para los datos históricos que tiene.
-
-
-En cuanto a eficiencia , Greedy es el mejor  ya que solo necesita una evaluación de fitness y termina en menos de 0.01 segundos. Esto lo hace útil cuando necesitamos una solución rápida.
-== Comportamiento de Random Search
-
-El algoritmo de Búsqueda Aleatoria funciona de manera completamente opuesta a Greedy. Mientras que Greedy usa la heurística para construir una solución determinista , Random Search genera soluciones completamente al azar y se queda con la mejor de todas las que ha probado.
-
-Los boxplots de Random Search muestran más variabilidad cuando el conjunto de datos es más pequeño ya que puede llegar a generar más parte del espacio de soluciones mientras que cuanto más grande es el espacio , más dificil será generar más porcentaje del espacio. 
-
-Podemos ver que en los resultados de los dos primeros boxplot presenta varios valores fuera del rango esperado , esto se debe a la naturaleza aleatoria  del algoritmo el cual puede generar fitness que salgan del valor previsto ya sea para mejor o peor.
-
-Cuando comparamos los valores medios de fitness en 2014-2024 vemos que Random Search siempre es el peor , lo cual tiene sentido porque no está usando ninguna información sobre qué empresas son mejores. Sin embargo cuando miramos los resultados en 2025 la situación cambia bastante. En el IBEX35 Random Search consigue un beneficio del 14.9% , superando tanto a Greedy (11.5%) como a Búsqueda Local (10.3%). En el S&P100 obtiene un 8.3% frente al 0.9% de Greedy y 4.5% de Búsqueda Local.
-
-Esto puede parecer raro pero  como Random Search no usa ninguna información de los datos históricos para construir las soluciones  no se ajusta a ningún tipo de patrón de datos historicos , por tanto las  soluciones que el Random Search encuentra son buenas dependiendo de la suerte que tenga con la generación de soluciones aleatorias  tanto en 2014-2024 como en el 2025 .Por tanto no podemos asegurar que este algoritmo vaya a ser la mejor opción a la hora de usarlo ya que la probabilidad de que obtengamos beneficios depende solamente de la suerte que tengamos generando soluciones aleatorias cuando el problema tenga muchos datos, sin tener en cuenta ningún tipo de información.
-
-El principal problema de Random Search es que necesita usar todas las 10,000 evaluaciones permitidas para tener posibilidades de encontrar buenas soluciones. Los tiempos van desde 0.005 segundos para IBEX35 hasta 0.201 segundos para S&P500. Aunque estos tiempos no son muy altos en términos absolutos , son mucho mayores que los de Greedy y muchas veces también mayores que los de Búsqueda Local.
-
-Además la variabilidad entre ejecuciones es un problema. Aunque la media de resultados es buena , los boxplots muestran que algunas ejecuciones pueden dar resultados bastante malos los cuales podemos ver representados por los circulos que salen de los bigotes del boxplot.
-
-
-== Comportamiento de Búsqueda Local
-
-El algoritmo de Búsqueda Local se sitúa en un punto intermedio entre Greedy y Random Search. Empieza con una solución aleatoria como Random Search pero luego la va mejorando explorando el vecindario.
-
-En los boxplots vemos que Búsqueda Local tiene más variabilidad que Greedy   y en los dos últimos casos más variabilidad  que Random Search ya que al comenzar con una solución aleatoria la Búsqueda Local tiene también un cierto componente de suerte ya que puede haber soluciones iniciales que estén más aleajadas del máximo local o absoluto y debido a la restricción de evaluaciones ,el algoritmo no sea capaz de llegar a una solución tan buena como la que podría obtener con más evaluaciones .
-
-Los valores de fitness en 2014-2024 muestran que Búsqueda Local siempre queda entre Greedy y Random Search. En IBEX35 consigue -0.35 , en S&P100 obtiene 0.591 y en S&P500 llega a 0.326. Esto es lógico porque el algoritmo parte de una solución aleatoria y la mejora , por lo que supera claramente a Random Search , pero como se puede quedar atrapado en óptimos locales  que no sean mejores que los que encuentre Greedy con su heurística el Greedy lo acaba superando.Si diesemos más evaluaciones a la Búsqueda Local o ajustasemos cómo genera nuevas soluciones podríamos obtener mejores soluciones que greedy.
-
-Cuando evaluamos en 2025 vemos que el comportamiento es más interesante. En IBEX35 Búsqueda Local obtiene 10.3% de beneficio , quedando entre Random (14.9%) y Greedy (11.5%). En S&P100 consigue 4.5% situándose de nuevo entre los otros dos con 0.9% y 8.3%. En S&P500 obtiene 1.5% muy cercano a Random (1.8%) y mucho mejor que Greedy (-6.2%).
-
-Podemos ver  que Búsqueda Local consigue un equilibrio entre ajustarse a los datos históricos y mantener cierta capacidad de generalización. Como parte de soluciones aleatorias hay cierta componente de aleatoriedad en la solución final que evita el sobreajuste extremo de Greedy. Al mismo tiempo la búsqueda guiada por el fitness permite mejorar sobre soluciones puramente aleatorias encontrando estructuras que realmente funcionan bien.
-
-El número de evaluaciones que usa Búsqueda Local cambia bastante según el conjunto de datos. En IBEX35 solo necesita 1,382 evaluaciones de media , lo que indica que encuentra rápido un óptimo local del que no puede salir. En S&P100 usa 9,074 evaluaciones acercándose al límite , lo que nos dice que el espacio de búsqueda es más complejo y hay más óptimos locales entre los que moverse. En S&P500 siempre llega al límite de 10,000 evaluaciones , lo que muestra la dificultad de mejorar soluciones en un espacio tan grande donde el vecindario es enorme.
-
-Se podría tratar de ampliar el número de iteraciones de la Búsqueda Local para darle más oportunidad de poder alcanzar una mejor solución pero esto podría elevar mucho los tiempos de ejecución. También hay que destacar que al estar usando una Busqueda Local con la variante el primero el mejor estamos condicionados a elegir el primer vecino que nos mejore nuestra solución actual , sin tener en cuenta que alomejor encontramos un vecino en las siguientes iteraciones el cual nos da una mejor solución , esto nos ahorra coste ya que no siempre tenemos que recorrer todo el vecindario pero nos condiciona a quedarnos con la primera mejora que encontremos.
-
-Los tiempos de ejecución de Búsqueda Local son parecidos a los de Random Search en la mayoría de casos. En IBEX35 tarda 0.01 segundos , el doble que Random porque tiene que gestionar el vecindario. En S&P100 termina en 0.011 segundos frente a 0.019 de Random , y en S&P500 tarda 0.229 segundos frente a 0.201. Esto indica que aunque hay un coste adicional por gestionar el vecindario y comprobar las soluciones , este coste se compensa al obtener una mejor solución y estár el algoritmo implementado de forma eficiente. 
-
+== Comportamiento de los Algorítmos Genéticos Generacionales
+== Comportamiento de los Algorítmos Genéticos Estacionarios 
+== Comportamiento de los Algorítmos  Meméticos 
 == Comparación Gráfica fitness 2014-2024 (50 ejecuciones)
 
 #figure(
