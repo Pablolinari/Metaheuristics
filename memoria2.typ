@@ -244,7 +244,120 @@ pesos que ya estén activos , de no ser así si la diferencia es mayor que el li
 
 El principal objetivo de los algoritmos es maximizar la función fitness , la cual trata de maximizar el beneficio y minimizar el riesgo en una sola fórmula.El parámetro lambda se usará a modo de ajuste , cuando más alto sea su valor el algoritmo valorará mejor soluciones con poco beneficio pero que sean seguras , es decir que tengan poco riesgo , mientras que cuanto más cercano a 0 sea lambda , el algoritmo valorará mejor las soluciones con máximo beneficio posible , ignorando el riesgo.
 
+== Operadores 
 
+Para agrupar los operadores usados en los diferentes algoritmos he utilizado una clase *Operator* la cual tiene como métodos públicos los operadores usados en los algorítmos genéticos y meméticos.
+
+=== Operadores de cruce
+En este problema se han utilizado dos operadores de cruce , *Aritmético* y *BLX-$alpha$*
+ #block(fill: luma(240), inset: 8pt, radius: 4pt, width: 100%)[
+ ```py
+ # Pseudocódigo del operador Aritmético
+  funcion arithmetic(padre1 , padre2): 
+    hijo1(padre1.size) ## genero los hijos con el mismo tamanio que los padres
+    hijo2(padre1.size) ## en el problema que tratamos todos los cromosomas miden lo mismo
+    
+    for i in range(0,tamaniopadres):
+
+     if(padre1[i] == padre2[i]):
+      # asigno el mismo gen a los hijos
+      # de esta forma si los padres son idénticos 
+      # sus hijos también los son
+      hijo1[i]=padre1[i]
+      hijo2[i]=padre1[i]
+     else:
+      sigma = double aleatorio entre 0 y 1
+      hijo1[i] =sigma*padre1[i]+(1-sigma)*padre2[i]
+      hijo2[i] =sigma*padre2[i]+(1-sigma)*padre1[i]
+    return pareja de hijos (hijo1, hijo2)
+ ```]
+
+
+ #block(fill: luma(240), inset: 8pt, radius: 4pt, width: 100%)[
+ ```py
+ # Pseudocódigo del operador BLX-alpha 
+  funcion arithmetic(padre1 , padre2): 
+    hijo1(padre1.size) ## genero los hijos con el mismo tamanio que los padres
+    hijo2(padre1.size) ## en el problema que tratamos todos los cromosomas miden lo mismo
+    
+    for i in range(0,tamaniopadres):
+
+     if(padre1[i] == padre2[i]):
+      # asigno el mismo gen a los hijos
+      # de esta forma si los padres son idénticos 
+      # sus hijos también los son
+      hijo1[i]=padre1[i]
+      hijo2[i]=padre1[i]
+     else:
+      cmax = double maximo entre padre1[i],padre2[i]
+      cmin = double minimo entre padre1[i],padre2[i]
+      gap = cmax-cmin
+      hijo1[i] = aleatorio entre (cmin-gap*alpha,cmax-gap*alpha)
+      hijo2[i] = aleatorio entre (cmin-gap*alpha,cmax-gap*alpha)
+    return pareja de hijos (hijo1, hijo2)
+ ```]
+
+=== Operador de mutación
+
+
+ #block(fill: luma(240), inset: 8pt, radius: 4pt, width: 100%)[
+ ```py
+ # Pseudocódigo del operador BLX-alpha 
+  funcion mutation(mutsol , problem ,mutationrate, maxattempts): 
+    idxgene=-1
+    amount =0
+    problembounds = pareja de valores de restriccion del problema #high,low 
+
+    for attempt in range(0,maxattempts):
+      primercandidato = aleatorio entre (0,problem.size -1);
+      amountcandidato = mutsol[primercandidato]*mutationrate
+      # si la cantidad es 0 , busco otro ya que esta cantidad no 
+      # me modifica nada
+      
+      if(amountcandidato<=0):
+        continue
+      firstafter =mutsol[primercandidato]-amountcandidato
+      bool firstvalido =firstafter == 0.0 || (firstafter >= problembounds.first &&
+                                            firstafter <= problembounds.second)    
+      if(firstvalido): #si puedo hacer la modificación al primero 
+       idxgene = primercandidato
+       amount = candidateAmount
+       break ## termino el bucle para buscar el primer gen
+    if(idxGene ==-1):
+     # si no he podido encontrar un primer gen en el rango de intentos que tengo 
+     # no consigo mutar la solución y termino
+     # esto no suele ocurrir , solo por seguridad
+     return false
+ 
+    idxnextgene=-1
+    for attempt in range(0,maxattempts):
+      segundocandidato = aleatorio entre (0,problem.size -1);
+      
+     ## si elijo el mismo que el primero busco otro
+      if(idxGene ==segundocandidato):
+        continue
+      secondafter =mutsol[primercandidato]-amountcandidato
+      bool secondvalido =secondafter == 0.0 || (secondafter >= problembounds.first &&
+                                            secondafter <= problembounds.second)    
+      if(secondvalido): #si puedo hacer la modificación al segundo escoido 
+       idxnextgene = segundocandidato
+       amount = candidateAmount
+       break ## termino el bucle para dejar de buscar y aplicar la modificación
+    if(idxnextgene =-1):# si no consigo buscar un segundo gen ,no hago la mutación
+      return false
+    ## Si todo ha ido bien aplico la mutación 
+    mutsol[idxgene]-=amount
+    mutsol[idxnextgene]+=amount
+    # compruebo que sea valida, debe de serlo por todas las restricciones consideradas
+   # anteriormente , pero por si hay errores de precisión uso el método 
+   # de la clase problem 
+
+    if(mutsol es valida):
+     return true
+    else:
+     return false
+    # si la solucion no es valida no la usaré.
+ ```]
 #pagebreak()
 = Estructura de los algoritmos 
 
@@ -571,17 +684,5 @@ En estas gráficas podemos ver la evolución del fitness a través de las 50 eje
 Podemos observar también que en algunas ejecuciones la Búsqueda aleatoria ha obtenido mejor fitness que la Búsqueda Local , esto ocurre mayoritariamente en los datos del S&P500 ya que al ser un espacio de soluciones tan grande a la Búsqueda Local se le acaban las evaluaciones muy rápido y en algunos casos puede sacar fitness peores que la Búsqueda Aleatoria.
 
 == Comparación global y conclusiones
-
-Después de analizar el comportamiento de los tres algoritmos podemos ver que no hay uno que sea claramente mejor en todos los casos. Cada algoritmo tiene sus ventajas y desventajas que los hacen más o menos apropiados según qué nos importe más en cada situación.
-
-Greedy es muy rápido y obtiene excelentes resultados en los datos de 2014-2024 , pero tiene el problema de que puede sobreajustar mucho y dar malos resultados cuando las condiciones cambian.
-
-Random Search por otro lado obtiene peores resultados en 2014-2024 pero sorprendentemente consigue mejor generalización en varios casos. El problema es que es muy variable entre ejecuciones y necesita usar siempre el máximo de evaluaciones sin garantía de encontrar una buena solución.
-
-Búsqueda Local es  la opción más equilibrada. Consigue mejor generalización que Greedy , es más consistente que Random Search entre ejecuciones , y tiene una eficiencia computacional razonable. Para mercados como el IBEX35 parece ser una buena opción , mientras que en mercados muy grandes como el S&P500 Random Search podría funcionar mejor ya que incluso la búsqueda local tiende a sobreajustar.
-
-
-En general si tuviésemos que escoger un algoritmo para usar en un problema real de optimización de portfolio , Búsqueda Local parece la opción más segura para la mayoría de casos. Greedy podría usarse para obtener una solución inicial rápida o para explorar el problema , pero no deberíamos confiar en él como solución final. También podríamos tratar de usar como solución inicial en la Búsqueda local una solución dada por el Greedy , por tanto si este se había quedado en un máximo local , el algoritmo de búsqueda podría llegar a buscar la manera de escapara de ese máximo
-
 
 
