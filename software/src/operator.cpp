@@ -97,9 +97,5 @@ bool Operator::mutation(tSolution<double> &mutSol, Problem<double> &problem,
 
   mutSol(idxGene) -= amount;
   mutSol(idxNextGene) += amount;
-  if (problem.isValid(mutSol)) {
-    return true;
-  } else {
-    return false;
-  }
+	return true;
 }

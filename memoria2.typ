@@ -298,6 +298,7 @@ En este problema se han utilizado dos operadores de cruce , *Aritmético* y *BLX
  ```]
 
 === Operador de mutación
+A la hora de hacer la mutación en los algoritmos usaremos el siguiente método:
 
 
  #block(fill: luma(240), inset: 8pt, radius: 4pt, width: 100%)[
@@ -317,8 +318,8 @@ En este problema se han utilizado dos operadores de cruce , *Aritmético* y *BLX
       if(amountcandidato<=0):
         continue
       firstafter =mutsol[primercandidato]-amountcandidato
-      bool firstvalido =firstafter == 0.0 || (firstafter >= problembounds.first &&
-                                            firstafter <= problembounds.second)    
+      bool firstvalido =firstafter == 0.0 || (firstafter >= problembounds.first &&firstafter <= problembounds.second)    
+
       if(firstvalido): #si puedo hacer la modificación al primero 
        idxgene = primercandidato
        amount = candidateAmount
@@ -337,8 +338,7 @@ En este problema se han utilizado dos operadores de cruce , *Aritmético* y *BLX
       if(idxGene ==segundocandidato):
         continue
       secondafter =mutsol[primercandidato]-amountcandidato
-      bool secondvalido =secondafter == 0.0 || (secondafter >= problembounds.first &&
-                                            secondafter <= problembounds.second)    
+      bool secondvalido =secondafter == 0.0 || (secondafter >= problembounds.first && secondafter <= problembounds.second)    
       if(secondvalido): #si puedo hacer la modificación al segundo escoido 
        idxnextgene = segundocandidato
        amount = candidateAmount
@@ -346,18 +346,34 @@ En este problema se han utilizado dos operadores de cruce , *Aritmético* y *BLX
     if(idxnextgene =-1):# si no consigo buscar un segundo gen ,no hago la mutación
       return false
     ## Si todo ha ido bien aplico la mutación 
+   ## La mutación ya es valida ya que los genes 
+   ## modificados cumplen los límites de 
+   ## high y low y la suma total no cambia 
     mutsol[idxgene]-=amount
     mutsol[idxnextgene]+=amount
-    # compruebo que sea valida, debe de serlo por todas las restricciones consideradas
-   # anteriormente , pero por si hay errores de precisión uso el método 
-   # de la clase problem 
+    return true
 
-    if(mutsol es valida):
-     return true
-    else:
-     return false
-    # si la solucion no es valida no la usaré.
  ```]
+
+La función de mutación recibe como parámetros la solución a mutar (por referencia), un objeto 
+problema, el ratio de mutación y el número máximo de intentos que tenemos para elegir tanto el 
+primer como el segundo gen. 
+
+Como se puede observar, el proceso de mutación se divide en dos partes:
+- En el *primer bucle*, intentamos escoger un índice aleatorio para el primer gen a seleccionar; 
+  este gen debe cumplir las restricciones necesarias del problema tras haberle aplicado la 
+  transformación indicada. De no ser así, se genera otra posición aleatoria para el primer gen; 
+  este proceso se repite tantas veces como el parámetro `maxattempts` nos permita hasta conseguir 
+  un primer gen que acepte la transformación.
+- Para el *segundo gen*, el proceso es similar: se busca un gen de forma aleatoria que pueda 
+  aceptar la suma de la cantidad que se va a restar del primer gen y que se mantenga en el rango 
+  de las restricciones del problema durante las iteraciones permitidas.
+
+Cada vez que no se encuentra un gen que cumpla las restricciones y se hayan agotado las 
+iteraciones permitidas, se devuelve `false`. De lo contrario, modifica la solución y se devuelve true. 
+pasada por referencia se modifica. Esto se hace para poder tener un control posterior de cuándo 
+se muta la solución.
+
 #pagebreak()
 = Estructura de los algoritmos 
 
@@ -684,5 +700,3 @@ En estas gráficas podemos ver la evolución del fitness a través de las 50 eje
 Podemos observar también que en algunas ejecuciones la Búsqueda aleatoria ha obtenido mejor fitness que la Búsqueda Local , esto ocurre mayoritariamente en los datos del S&P500 ya que al ser un espacio de soluciones tan grande a la Búsqueda Local se le acaban las evaluaciones muy rápido y en algunos casos puede sacar fitness peores que la Búsqueda Aleatoria.
 
 == Comparación global y conclusiones
-
-
