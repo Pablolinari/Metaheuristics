@@ -246,10 +246,17 @@ El principal objetivo de los algoritmos es maximizar la función fitness , la cu
 
 == Operadores 
 
-Para agrupar los operadores usados en los diferentes algoritmos he utilizado una clase *Operator* la cual tiene como métodos públicos los operadores usados en los algorítmos genéticos y meméticos.
+Para agrupar los operadores usados en los diferentes algoritmos he utilizado una clase *Operator* la cual tiene como métodos públicos los operadores usados en los algoritmos genéticos y meméticos.
 
 === Operadores de cruce
-En este problema se han utilizado dos operadores de cruce , *Aritmético* y *BLX-$alpha$*
+En este problema se han utilizado dos operadores de cruce, *Aritmético* y *BLX-$alpha$*
+
+En ambos operadores, si los padres seleccionados son iguales, los hijos serán iguales a los padres.
+
+El operador aritmético genera un aleatorio entre 0 y 1, para cada posición *i* de los padres, con el aleatorio escogido hace una combinación lineal distinta para cada hijo entre los genes de los padres. Si los genes de los padres son iguales en una determinada posición, no se genera la transformación, de esta manera conseguimos que si todos los genes de los padres son iguales, los hijos sean iguales.
+
+Al ser este cruce una combinación lineal, los genes de los hijos resultantes, nunca podrán tener un valor menor que el menor de los padres ni mayor que el mayor de los genes de sus padres. Esto hace que este operador tienda a converger hacia el centro de los padres, con un comportamiento explotativo.
+
  #block(fill: luma(240), inset: 8pt, radius: 4pt, width: 100%)[
  ```py
  # Pseudocódigo del operador Aritmético
@@ -272,7 +279,8 @@ En este problema se han utilizado dos operadores de cruce , *Aritmético* y *BLX
     return pareja de hijos (hijo1, hijo2)
  ```]
 
-
+El operador BLX-alpha, genera un intervalo entre el minimo y el maximo de los genes seleccionados de los padres , a este intervalo se le añade un parámetro *alpha*gap*, el cual permite que el intervalo se agrande según el *alpha* escogido   y la distancia entre el mínimo y el máximo.Esto permite que el valor aleatorio que se genere en ese intervalo para cada hijo , 
+pueda ser más grande o más pequeño que los valores que el padre tenía por defecto por lo que permite explorar más soluciones y mantiene más diversidad ya que se generan genes que están fuera de los rango de los padres.
  #block(fill: luma(240), inset: 8pt, radius: 4pt, width: 100%)[
  ```py
  # Pseudocódigo del operador BLX-alpha 
@@ -292,10 +300,12 @@ En este problema se han utilizado dos operadores de cruce , *Aritmético* y *BLX
       cmax = double maximo entre padre1[i],padre2[i]
       cmin = double minimo entre padre1[i],padre2[i]
       gap = cmax-cmin
-      hijo1[i] = aleatorio entre (cmin-gap*alpha,cmax-gap*alpha)
-      hijo2[i] = aleatorio entre (cmin-gap*alpha,cmax-gap*alpha)
+      hijo1[i] = aleatorio entre (cmin-gap*alpha,cmax+gap*alpha)
+      hijo2[i] = aleatorio entre (cmin-gap*alpha,cmax+gap*alpha)
     return pareja de hijos (hijo1, hijo2)
  ```]
+
+Ambos operadores devuelven parejas de hijos que pueden no ser válidos por lo que se tendrán que arreglar ambos cuando estos se usen en los correespondientes algritmos.
 
 === Operador de mutación
 A la hora de hacer la mutación en los algoritmos usaremos el siguiente método:
@@ -438,10 +448,61 @@ Si la solución generada no es valida o no mejora la solución actual , restaura
 Mientras que no se superen las restricciones de las evaluaciones y se sigan encontrando vecinos mejores en cada vecindario seguiremos intentando encontrar la mejor solución . En caso de recorrer todo el vecindario y no encontrar una solución mejor o que se superen las evaluciones permitidas , se detendrá la búsqueda.
 
 == Algoritmo Genético Generacional
+Para el algoritmo genético Generacional , se ha construido una clase *Agg* para implementar la estructura del algoritmo , y dos clases hijas *AggArit* y *AggBLX* las cuales heredan de *Agg* y solo modifican la función de cruce. De esta manera podemos tener una única implementación del algoritmo y cambiar el operador de cruce con facilidad.
+
+#block(fill: luma(240), inset: 8pt, radius: 4pt, width: 100%)[
+```py
+# Pseudocódigo del algoritmo de búsqueda local
+función LocalSearch(max_evals):
+    double ratio
+    solucioninicial = solucionAleatoria
+    bestfitnes = fitness(solucionAleatoria)
+  
+    vecinos = Generar vector de todas las parejas (i,j) posibles con i,j en [0,ncompany-1]
+    # excepto en el caso i=j;
+    
+    while evals < maxevals and haymejora:
+
+      mezclar vecinos
+      for v in vecinos:
+        cantidadmover = ratio*solucioninicial[v.primero]
+        
+        solucioninicial[v.primero]-=cantidadmover
+        solucioninicial[v.segundo]+=cantidadmover
+        
+        if es valida solucioninicial:
+          evals = evals+1
+          
+          if fitness(solucioninicial) > mejorfitness:
+            haymejora=true;
+            mejorfitness=fitnes de la solucion inicial modificada
+            #si hay una mejora salimos del bucle for 
+            #ya que es una busqueda del primero el mejor
+            salir del bucle for
+        # si no cambiamos de solucion inicial , hay que
+        # devolverla a su estado original
+        devolver solucioninicial a su estado original
+        if evals==maxevals:
+          salir del bucle for
+          #para no pasarnos de evaluaciones 
+    return solucioninicial ,mejorfitness,evals
+```
+]
+#block(fill: luma(240), inset: 8pt, radius: 4pt, width: 100%)[
+```py
+  #Generación del vecindario
+  for i,j in ncompany:
+    vectorparejas.insertar(pareja(i,j))
+
+```]
+
 
 == Algoritmo Genético Estacionario 
+Para el algoritmo genético Estacionari , se ha construido una clase *Age* para implementar la estructura del algoritmo , y dos clases hijas *AgeArit* y *AgeBLX* las cuales heredan de *Age* y solo modifican la función de cruce. De esta manera podemos tener una única implementación del algoritmo y cambiar el operador de cruce con facilidad.
+
 
 == Algortimo Memético
+
 = Estructura del código
 
 El código de la práctica está organizado en una estructura modular que facilita la compilación y ejecución. A continuación se describe la organización del proyecto y el manual de usuario para compilar y ejecutar el programa.
@@ -453,12 +514,24 @@ El proyecto está organizado de la siguiente manera:
 - `software/` : Directorio raíz que contiene todo el código fuente
   - `main.cpp` : Archivo principal que ejecuta los algoritmos
   - `src/` : Contiene las implementaciones (.cpp)
+    - `age.cpp` : Implementación del algoritmo AGE
+    - `agg.cpp` : Implementación del algoritmo AGG
+    - `amall.cpp` : Implementación del algoritmo AM-All
+    - `ambest.cpp` : Implementación del algoritmo AM-Best
+    - `amrand.cpp` : Implementación del algoritmo AM-Rand
     - `pportfolio.cpp` : Implementación de la clase del problema
     - `randomsearch.cpp` : Implementación del algoritmo de búsqueda aleatoria
     - `greedy.cpp` : Implementación del algoritmo Greedy
     - `localsearch.cpp` : Implementación del algoritmo de búsqueda local
+    - `operator.cpp` : Implementación de la clase Operator
   - `include/` : Contiene los archivos de cabecera (.h y .hpp)
+    - `age.h`: Clase base para los algoritmos genéticos estacionarios
+    -  `agg.h`: Clase base para los algoritmos genéticos generacionales 
+    - `agearit.h`, `ageblx.h`: Clases hijas de `age.h`con los correspondientes operadores 
+    - `aggarit.h`, `aggblx.h`: Clases hijas de `agg.h` con los correspondientes operadores 
+    - `amall.h`, `ambest.h`, `amrand.h`: Clases de los algoritmos meméticos.
     - `pportfolio.h`, `greedy.h`, `localsearch.h`, `randomsearch.h`
+    - `operator.h` : Clase de operadores genéticos
     - `problem.h` : Clase base abstracta
     - `mh.h` : Clase base para los algoritmos de metaheurísticas
     - `solution.h` : Estructura para representar soluciones
