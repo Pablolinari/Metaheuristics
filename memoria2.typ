@@ -453,38 +453,88 @@ Para el algoritmo genético Generacional , se ha construido una clase *Agg* para
 #block(fill: luma(240), inset: 8pt, radius: 4pt, width: 100%)[
 ```py
 # Pseudocódigo del algoritmo de búsqueda local
-función LocalSearch(max_evals):
-    double ratio
-    solucioninicial = solucionAleatoria
-    bestfitnes = fitness(solucionAleatoria)
-  
-    vecinos = Generar vector de todas las parejas (i,j) posibles con i,j en [0,ncompany-1]
-    # excepto en el caso i=j;
-    
-    while evals < maxevals and haymejora:
+función Agg(max_evals):
+    evals =0
+    bestFitness = -infinito
+    bestSolution
+    poblation = vector de soluciones
+    # guarda para cada solucion i , su fitnes en la posicion i 
+    fitnesspoblation = vector de doubles 
+    sons = vector de soluciones
+    # indices de los padres que selecciono en el torneo
+    idxparents = vector de enteros 
+    # inicializo la población con soluciones aleatorias 
+    for i in range(0,populationSize):
+      poblation.pushback(solución aleatoria)
 
-      mezclar vecinos
-      for v in vecinos:
-        cantidadmover = ratio*solucioninicial[v.primero]
-        
-        solucioninicial[v.primero]-=cantidadmover
-        solucioninicial[v.segundo]+=cantidadmover
-        
-        if es valida solucioninicial:
-          evals = evals+1
-          
-          if fitness(solucioninicial) > mejorfitness:
-            haymejora=true;
-            mejorfitness=fitnes de la solucion inicial modificada
-            #si hay una mejora salimos del bucle for 
-            #ya que es una busqueda del primero el mejor
-            salir del bucle for
-        # si no cambiamos de solucion inicial , hay que
-        # devolverla a su estado original
-        devolver solucioninicial a su estado original
-        if evals==maxevals:
-          salir del bucle for
-          #para no pasarnos de evaluaciones 
+    #busco el mejor cromosoma y calculo todos los fitness 
+    # de la población
+
+    for i in range(0,populationSize):
+      tempfitness = fitness(poblation[i])
+      evals+=1
+      #añado el fitness a su posición
+      fitnesspoblation.pushback(tempfitness)
+      if(tempfitness>bestFitness):
+        bestFitness = tempfitness
+        bestSolution = poblation[i]
+      
+    
+    while evals < maxevals:
+      ##torneo (k=3) para seleccionar los padres
+      # el torneo se hace las mismas veces que el tamaño
+      # de la población
+      for i in range(0,populationSize):
+
+        fitnesstournament = - infinito 
+        idxBestSolution = 0; 
+        idx=0; # indice de los padres que elijo aleatoriamente
+
+        #selecciono aleatoriamente 3 padres
+        for i in range(0,tournamentsize):
+          idx=aleatorio entre 0 y populationsize-1
+          if fitnesspoblation[idx] > fitnessournament:
+            fitnesstournament = fitnesspoblation[idx]
+            idxBestSolution = idx
+          }
+        }
+        # guardo el indice del padre que gana el torneo
+        idxparents.pushback(idxbestsolution)
+      
+      ##Cruce 
+      # aqui se usa el operador explicado en el apartado anterior, 
+      # Cada subclase de Agg implementa la función Crossover
+      
+      # la variable indica el número de padres que se deben cruzar 
+      # no el número de parejas , por eso no la divido por dos como 
+      # indica el guión
+      expectedparentscrossover = redondeo hacia arriba(crossoverprob*idxparents.size())
+      # hago que el número de padres sea par para 
+      # que cuadren bien las parejas
+      if expectedparentscrossover %2 !=0: 
+        expectedparentscrossover -=1
+
+      # recorro el idx parents de 2 en 2
+      for i in range(0,expectedparentscrossover,2):
+
+      son =crossover(poblation[idxparents[i]], poblation[idxparents[i + 1]])
+      # como los hijos no tienen por que ser válidos , compruebo si lo son 
+      # y los arreglo si hace falta
+      if (son.first no es solución válida):
+        fix(son.first)
+      if (son.second no es solución válida):
+        fix(son.second)
+      # añado los hijos al vector son para empezar a crear
+      # la siguiente población
+      sons.pushback(son.first)
+      sons.pushback(son.second);
+
+    for  i in range(expectedparentscrossover,poblationsize):
+      # aniado los padres restantes que no se han cruzado
+      sons.pushback(poblation[idxparents[i]])
+    }
+    
+    ## mutación
     return solucioninicial ,mejorfitness,evals
 ```
 ]

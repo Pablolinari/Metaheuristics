@@ -40,19 +40,17 @@ ResultMH<double> AmRand::optimize(Problem<double> &problem, int maxevals) {
   }
   while (evals < maxevals) {
 
-    std::vector<int> idx;
     // torneo para npob veces
     for (int i = 0; i < this->populationSize; i++) {
-      idx.clear();
-      for (int j = 0; j < this->tournamentSize; j++) {
-        idx.push_back(Random::get(0, this->populationSize - 1));
-      }
+
       double fitnessTournament = -std::numeric_limits<double>::infinity();
       int idxBestSolution = 0;
+      int idx;
       for (int j = 0; j < this->tournamentSize; j++) {
-        if (fitnessPoblation[idx[j]] > fitnessTournament) {
-          fitnessTournament = fitnessPoblation[idx[j]];
-          idxBestSolution = idx[j];
+        idx = Random::get(0, this->populationSize - 1);
+        if (fitnessPoblation[idx] > fitnessTournament) {
+          fitnessTournament = fitnessPoblation[idx];
+          idxBestSolution = idx;
         }
       }
       idxparents.push_back(idxBestSolution);
