@@ -199,9 +199,9 @@ ResultMH<double> Am::optimize(Problem<double> &problem, int maxevals) {
     idxparents.clear();
     nGenerations++;
     if (nGenerations % 10 == 0) {
-      int localeval = applyLocalSearch(poblation, fitnessPoblation, bestFitness, bestSolution,
-                       problem);
-			evals+=localeval;
+      int localeval = applyLocalSearch(poblation, fitnessPoblation, bestFitness,
+                                       bestSolution, problem);
+      evals += localeval;
     }
   }
   return ResultMH(bestSolution, bestFitness, evals);

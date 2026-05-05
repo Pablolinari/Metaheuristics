@@ -12,6 +12,6 @@ public:
 
   int applyLocalSearch(std::vector<tSolution<double>> &poblation,
                        std::vector<double> &fitnesspoblation,
-                       double bestFitness, tSolution<double> &bestsolution,
+                       double &bestFitness, tSolution<double> &bestsolution,
                        Problem<double> &problem) override;
 };

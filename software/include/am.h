@@ -21,10 +21,10 @@ public:
   crossover(const tSolution<double> &p1, const tSolution<double> &p2);
 
   virtual int applyLocalSearch(std::vector<tSolution<double>> &poblation,
-                                std::vector<double> &fitnesspoblation,
-                                double bestFitness,
-                                tSolution<double> &bestsolution,
-                                Problem<double> &problem)=0;
+                               std::vector<double> &fitnesspoblation,
+                               double &bestFitness,
+                               tSolution<double> &bestsolution,
+                               Problem<double> &problem) = 0;
 
 protected:
   Operator op;

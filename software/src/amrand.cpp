@@ -1,8 +1,7 @@
 
 #include "../include/amrand.h"
 #include <cassert>
-#include <limits>
-#include <utility>
+#include <cmath>
 #include <vector>
 
 AmRand::AmRand(int populationSize, double crossoverProb, double mutationProb,
@@ -11,10 +10,10 @@ AmRand::AmRand(int populationSize, double crossoverProb, double mutationProb,
 
 int AmRand::applyLocalSearch(std::vector<tSolution<double>> &poblation,
                              std::vector<double> &fitnesspoblation,
-                             double bestFitness,
+                             double &bestFitness,
                              tSolution<double> &bestsolution,
                              Problem<double> &problem) {
-  double nRand = this->populationSize * 0.10;
+  int nRand = std::ceil(poblation.size() * 0.10);
   int evals = 0;
   for (int i = 0; i < nRand; i++) {
     ResultMH<double> result = localSearch(problem, 100, poblation[i]);
