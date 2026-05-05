@@ -10,14 +10,8 @@ public:
         int tournamentSize = 3);
   virtual ~AmAll() {}
 
-  ResultMH<double> optimize(Problem<double> &problem, int maxevals) override;
-
-  std::pair<tSolution<double>, tSolution<double>>
-  crossover(const tSolution<double> &p1, const tSolution<double> &p2);
-
-  Operator op;
-  int populationSize;
-  double mutationProb;
-  double crossoverProb;
-  int tournamentSize;
+  int applyLocalSearch(std::vector<tSolution<double>> &poblation,
+                       std::vector<double> &fitnesspoblation,
+                       double bestFitness, tSolution<double> &bestsolution,
+                       Problem<double> &problem) override;
 };

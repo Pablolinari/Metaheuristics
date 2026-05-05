@@ -8,7 +8,6 @@ public:
          int tournamentSize = 3)
       : Age(populationSize, mutationProb, tournamentSize), alpha(alpha) {}
 
-protected:
   std::pair<tSolution<double>, tSolution<double>>
   crossover(const tSolution<double> &p1, const tSolution<double> &p2) override {
     return op.blxAlpha(p1, p2, this->alpha);
