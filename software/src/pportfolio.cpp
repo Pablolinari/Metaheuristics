@@ -228,7 +228,7 @@ void ProblemPort::fix(tSolution<double> &solution) {
  * */
 double ProblemPort::heuristic(int i) {
   double logmean = this->logSums(i);
-  double sigmamean = this->covarianceMat.col(i).sum() / this->ncompany;
+  double sigmamean = sqrt(this->covarianceMat.col(i).sum() / this->ncompany);
   return logmean - (this->lambda * sigmamean);
 }
 
