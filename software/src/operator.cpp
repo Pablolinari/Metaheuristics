@@ -1,6 +1,7 @@
 #include "../include/operator.h"
 #include <algorithm>
 #include <utility>
+#include <vector>
 
 std::pair<tSolution<double>, tSolution<double>>
 Operator::arithmetic(const tSolution<double> &p1, const tSolution<double> &p2) {
@@ -46,56 +47,91 @@ Operator::blxAlpha(const tSolution<double> &p1, const tSolution<double> &p2,
 
 bool Operator::mutation(tSolution<double> &mutSol, Problem<double> &problem,
                         double mutationRate, int maxAttempts) {
-  int idxGene = -1;
-  double amount = 0.0;
   std::pair<double, double> problembounds = problem.getSolutionDomainRange();
+  int solutionsize = problem.getSolutionSize();
 
-  for (int attempt = 0; attempt < maxAttempts; ++attempt) {
-    int candidateFirst = Random::get<int>(0, problem.getSolutionSize() - 1);
-    double candidateAmount = mutSol(candidateFirst) * mutationRate;
-    if (candidateAmount <= 0.0) {
+  std::vector<int> validDonors;
+  for (int i = 0; i < solutionsize; ++i) {
+    double amount = mutSol(i) * mutationRate;
+    if (amount <= 0.0) {
       continue;
     }
+    double firstAfter = mutSol(i) - amount;
+    bool firstValid = firstAfter == 0.0 ||
+                      (firstAfter >= problembounds.first &&
+                       firstAfter <= problembounds.second);
+    if (firstValid) {
+      validDonors.push_back(i);
+    }
+  }
 
-    double firstAfter = mutSol(candidateFirst) - candidateAmount;
+  if (validDonors.empty()) {
+    return false;
+  }
+
+  for (int attempt = 0; attempt < maxAttempts; ++attempt) {
+    int pickDonor = Random::get<int>(0, static_cast<int>(validDonors.size()) - 1);
+    int candidateFirst = validDonors[pickDonor];
+    double amount = mutSol(candidateFirst) * mutationRate;
+
+    double firstAfter = mutSol(candidateFirst) - amount;
     bool firstValid = firstAfter == 0.0 || (firstAfter >= problembounds.first &&
                                             firstAfter <= problembounds.second);
-
-    if (firstValid) {
-      idxGene = candidateFirst;
-      amount = candidateAmount;
-      break;
-    }
-  }
-
-  if (idxGene == -1) {
-    return false;
-  }
-
-  int idxNextGene = -1;
-  for (int attempt = 0; attempt < maxAttempts; ++attempt) {
-    int candidateSecond = Random::get<int>(0, problem.getSolutionSize() - 1);
-    if (candidateSecond == idxGene) {
+    if (!firstValid) {
       continue;
     }
 
-    double secondAfter = mutSol(candidateSecond) + amount;
-    bool secondValid =
-        secondAfter == 0.0 || (secondAfter >= problembounds.first &&
-                               secondAfter <= problembounds.second);
-
-    if (secondValid) {
-      idxNextGene = candidateSecond;
-
-      break;
+    std::vector<int> validReceivers;
+    validReceivers.reserve(solutionsize - 1);
+    for (int i = 0; i < solutionsize; ++i) {
+      if (i == candidateFirst) {
+        continue;
+      }
+      double secondAfter = mutSol(i) + amount;
+      bool secondValid = secondAfter == 0.0 ||
+                         (secondAfter >= problembounds.first &&
+                          secondAfter <= problembounds.second);
+      if (secondValid) {
+        validReceivers.push_back(i);
+      }
     }
+
+    if (validReceivers.empty()) {
+      continue;
+    }
+
+    int pick = Random::get<int>(0, static_cast<int>(validReceivers.size()) - 1);
+    int candidateSecond = validReceivers[pick];
+    double secondAfter = mutSol(candidateSecond) + amount;
+
+    mutSol(candidateFirst) -= amount;
+    mutSol(candidateSecond) += amount;
+    return true;
   }
 
-  if (idxNextGene == -1) {
-    return false;
+  return false;
+}
+
+std::vector<int>
+Operator::tournament(int tournamentsize, int populationsize,
+                     const std::vector<double> &fitnesspoblation) {
+
+  std::vector<int> idxparents;
+
+  for (int i = 0; i < populationsize; i++) {
+
+    double fitnessTournament = -std::numeric_limits<double>::infinity();
+    int idxBestSolution = 0;
+    int idx;
+    for (int j = 0; j < tournamentsize; j++) {
+      idx = Random::get(0, populationsize - 1);
+      if (fitnesspoblation[idx] > fitnessTournament) {
+        fitnessTournament = fitnesspoblation[idx];
+        idxBestSolution = idx;
+      }
+    }
+    idxparents.push_back(idxBestSolution);
   }
 
-  mutSol(idxGene) -= amount;
-  mutSol(idxNextGene) += amount;
-	return true;
+  return idxparents;
 }

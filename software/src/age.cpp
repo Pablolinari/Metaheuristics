@@ -21,7 +21,7 @@ ResultMH<double> Age::optimize(Problem<double> &problem, int maxevals) {
   tSolution<double> bestSolution(problemSize);
   std::vector<tSolution<double>> poblation;
   std::vector<double> fitnessPoblation;
-  std::pair<int, int> idxparents;
+  std::vector<int> idxparents;
 
   for (int i = 0; i < this->populationSize; i++) {
     poblation.push_back(problem.createSolution());
@@ -40,31 +40,13 @@ ResultMH<double> Age::optimize(Problem<double> &problem, int maxevals) {
     std::vector<int> idx;
 
     // torneo para npob veces
-    for (int i = 0; i < 2; i++) {
-      idx.clear();
-      for (int j = 0; j < this->tournamentSize; j++) {
-        idx.push_back(Random::get(0, this->populationSize - 1));
-      }
-      double fitnessTournament = -std::numeric_limits<double>::infinity();
-      int idxBestSolution = 0;
-      for (int j = 0; j < this->tournamentSize; j++) {
-        if (fitnessPoblation[idx[j]] > fitnessTournament) {
-          fitnessTournament = fitnessPoblation[idx[j]];
-          idxBestSolution = idx[j];
-        }
-      }
-      if (i == 0) {
-        idxparents.first = idxBestSolution;
-      } else {
-        idxparents.second = idxBestSolution;
-      }
-    }
+    idxparents = op.tournament(3, 2, fitnessPoblation);
 
     // cruce
 
     std::vector<tSolution<double>> son(2);
     std::pair<tSolution<double>, tSolution<double>> auxson =
-        crossover(poblation[idxparents.first], poblation[idxparents.second]);
+        crossover(poblation[idxparents[0]], poblation[idxparents[1]]);
 
     if (!problem.isValid(auxson.first)) {
       problem.fix(auxson.first);

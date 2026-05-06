@@ -39,20 +39,8 @@ ResultMH<double> Agg::optimize(Problem<double> &problem, int maxevals) {
   while (evals < maxevals) {
 
     // torneo para npob veces
-    for (int i = 0; i < this->populationSize; i++) {
-
-      double fitnessTournament = -std::numeric_limits<double>::infinity();
-      int idxBestSolution = 0;
-			int idx;
-      for (int j = 0; j < this->tournamentSize; j++) {
-				idx=Random::get(0,this->populationSize-1);
-        if (fitnessPoblation[idx] > fitnessTournament) {
-          fitnessTournament = fitnessPoblation[idx];
-          idxBestSolution = idx;
-        }
-      }
-      idxparents.push_back(idxBestSolution);
-    }
+    idxparents = op.tournament(this->tournamentSize, this->populationSize,
+                               fitnessPoblation);
 
     // cruce
 
@@ -83,18 +71,21 @@ ResultMH<double> Agg::optimize(Problem<double> &problem, int maxevals) {
     // mutación
     int expectedMutation =
         std::ceil(this->mutationProb * this->populationSize * problemSize);
-
+    int contador = 0;
     for (int i = 0; i < expectedMutation; i++) {
 
       int idxSolution = Random::get(0, this->populationSize - 1);
       tSolution<double> mutSol = sons[idxSolution];
 
-      bool mutated = op.mutation(mutSol, problem, 0.15, problemSize * 3);
+      bool mutated = op.mutation(mutSol, problem, 0.15, problemSize * 5);
 
       if (mutated) {
         sons[idxSolution] = mutSol;
+      } else {
+        std::cout << "liadas " << contador << std::endl;
       }
     }
+
     // reemplazo generacional
     //  busco el peor de la generación nueva y lo elimino
     //  busco el mejor de la generación nueva y compruebo si es mejor que el

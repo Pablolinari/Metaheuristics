@@ -102,20 +102,7 @@ ResultMH<double> Am::optimize(Problem<double> &problem, int maxevals) {
   while (evals < maxevals) {
 
     // torneo para npob veces
-    for (int i = 0; i < this->populationSize; i++) {
-
-      double fitnessTournament = -std::numeric_limits<double>::infinity();
-      int idxBestSolution = 0;
-      int idx;
-      for (int j = 0; j < this->tournamentSize; j++) {
-        idx = Random::get(0, this->populationSize - 1);
-        if (fitnessPoblation[idx] > fitnessTournament) {
-          fitnessTournament = fitnessPoblation[idx];
-          idxBestSolution = idx;
-        }
-      }
-      idxparents.push_back(idxBestSolution);
-    }
+    idxparents = op.tournament(3, this->populationSize, fitnessPoblation);
     // cruce
 
     // esta variable indica el numero de padres que tienen que cruzarse , no el
