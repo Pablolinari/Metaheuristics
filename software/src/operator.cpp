@@ -1,5 +1,8 @@
 #include "../include/operator.h"
 #include <algorithm>
+#include <iostream>
+#include <istream>
+#include <ostream>
 #include <utility>
 #include <vector>
 
@@ -57,20 +60,20 @@ bool Operator::mutation(tSolution<double> &mutSol, Problem<double> &problem,
       continue;
     }
     double firstAfter = mutSol(i) - amount;
-    bool firstValid = firstAfter == 0.0 ||
-                      (firstAfter >= problembounds.first &&
-                       firstAfter <= problembounds.second);
+    bool firstValid = firstAfter == 0.0 || (firstAfter >= problembounds.first &&
+                                            firstAfter <= problembounds.second);
     if (firstValid) {
       validDonors.push_back(i);
     }
   }
 
   if (validDonors.empty()) {
+    std::cout << "no hay donantes" << std::endl;
     return false;
   }
 
   for (int attempt = 0; attempt < maxAttempts; ++attempt) {
-    int pickDonor = Random::get<int>(0, static_cast<int>(validDonors.size()) - 1);
+    int pickDonor = Random::get<int>(0, (validDonors.size()) - 1);
     int candidateFirst = validDonors[pickDonor];
     double amount = mutSol(candidateFirst) * mutationRate;
 
@@ -88,15 +91,16 @@ bool Operator::mutation(tSolution<double> &mutSol, Problem<double> &problem,
         continue;
       }
       double secondAfter = mutSol(i) + amount;
-      bool secondValid = secondAfter == 0.0 ||
-                         (secondAfter >= problembounds.first &&
-                          secondAfter <= problembounds.second);
+      bool secondValid =
+          secondAfter == 0.0 || (secondAfter >= problembounds.first &&
+                                 secondAfter <= problembounds.second);
       if (secondValid) {
         validReceivers.push_back(i);
       }
     }
 
     if (validReceivers.empty()) {
+			std::cout<<"no receptores"<<std::endl;
       continue;
     }
 
@@ -113,12 +117,12 @@ bool Operator::mutation(tSolution<double> &mutSol, Problem<double> &problem,
 }
 
 std::vector<int>
-Operator::tournament(int tournamentsize, int populationsize,
+Operator::tournament(int tournamentsize, int populationsize,int selectionsize,
                      const std::vector<double> &fitnesspoblation) {
 
   std::vector<int> idxparents;
 
-  for (int i = 0; i < populationsize; i++) {
+  for (int i = 0; i < selectionsize; i++) {
 
     double fitnessTournament = -std::numeric_limits<double>::infinity();
     int idxBestSolution = 0;

@@ -7,7 +7,6 @@
 Age::Age(int populationSize, double mutationProb, int tournamentSize)
     : populationSize(populationSize), mutationProb(mutationProb),
       tournamentSize(tournamentSize) {}
-
 ResultMH<double> Age::optimize(Problem<double> &problem, int maxevals) {
   assert(maxevals > 0);
   int evals = 0;
@@ -37,10 +36,9 @@ ResultMH<double> Age::optimize(Problem<double> &problem, int maxevals) {
   }
   while (evals < maxevals) {
 
-    std::vector<int> idx;
-
+    idxparents.clear();
     // torneo para npob veces
-    idxparents = op.tournament(3, 2, fitnessPoblation);
+    idxparents = op.tournament(this->tournamentSize, this->populationSize,2, fitnessPoblation);
 
     // cruce
 
@@ -62,7 +60,7 @@ ResultMH<double> Age::optimize(Problem<double> &problem, int maxevals) {
     for (int i = 0; i < 2; i++) {
       if (Random::get<bool>(this->mutationProb)) {
         tSolution<double> mutSol = son[i];
-        bool mutated = op.mutation(mutSol, problem, 0.15, problemSize * 3);
+        bool mutated = op.mutation(mutSol, problem, 0.15, problemSize * 5);
         if (mutated) {
           son[i] = mutSol;
         }

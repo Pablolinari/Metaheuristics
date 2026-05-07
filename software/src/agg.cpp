@@ -40,7 +40,7 @@ ResultMH<double> Agg::optimize(Problem<double> &problem, int maxevals) {
 
     // torneo para npob veces
     idxparents = op.tournament(this->tournamentSize, this->populationSize,
-                               fitnessPoblation);
+                               this->populationSize, fitnessPoblation);
 
     // cruce
 
@@ -69,8 +69,7 @@ ResultMH<double> Agg::optimize(Problem<double> &problem, int maxevals) {
     }
 
     // mutación
-    int expectedMutation =
-        std::ceil(this->mutationProb * this->populationSize * problemSize);
+    int expectedMutation = std::ceil(this->mutationProb * this->populationSize);
     int contador = 0;
     for (int i = 0; i < expectedMutation; i++) {
 
@@ -82,10 +81,13 @@ ResultMH<double> Agg::optimize(Problem<double> &problem, int maxevals) {
       if (mutated) {
         sons[idxSolution] = mutSol;
       } else {
-        std::cout << "liadas " << contador << std::endl;
+        contador++;
       }
     }
 
+    if (contador > 0) {
+      std::cout << "liadas " << contador << std::endl;
+    }
     // reemplazo generacional
     //  busco el peor de la generación nueva y lo elimino
     //  busco el mejor de la generación nueva y compruebo si es mejor que el

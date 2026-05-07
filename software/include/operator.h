@@ -26,5 +26,5 @@ public:
 
   bool mutation(tSolution<double> &mutSol, Problem<double> &problem,
                 double mutationRate, int maxAttempts);
-	std::vector<int>tournament(int tournamentsize,int populationsize,const std::vector<double>&fitnesspoblation); 
+	std::vector<int>tournament(int tournamentsize,int populationsize,int selectionsize,const std::vector<double>&fitnesspoblation); 
 };

@@ -102,7 +102,7 @@ ResultMH<double> Am::optimize(Problem<double> &problem, int maxevals) {
   while (evals < maxevals) {
 
     // torneo para npob veces
-    idxparents = op.tournament(3, this->populationSize, fitnessPoblation);
+    idxparents = op.tournament(3, this->populationSize,this->populationSize, fitnessPoblation);
     // cruce
 
     // esta variable indica el numero de padres que tienen que cruzarse , no el
@@ -130,8 +130,7 @@ ResultMH<double> Am::optimize(Problem<double> &problem, int maxevals) {
     }
 
     // mutación
-    int expectedMutation =
-        std::ceil(this->mutationProb * this->populationSize * problemSize);
+    int expectedMutation = std::ceil(this->mutationProb * this->populationSize);
 
     for (int i = 0; i < expectedMutation; i++) {
 
