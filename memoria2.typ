@@ -508,7 +508,6 @@ Para el algoritmo genético Generacional , se ha construido una clase *Agg* para
         ##Cruce
         # aqui se usa el operador explicado en el apartado anterior,
         # Cada subclase de Agg implementa la función Crossover
-        crossover
         # la variable indica el número de padres que se deben cruzar
         # no el número de parejas , por eso no la divido por dos como
         # indica el guión
@@ -539,6 +538,7 @@ Para el algoritmo genético Generacional , se ha construido una clase *Agg* para
       }
 
       ## mutación
+
       return solucioninicial ,mejorfitness,evals
   ```
 ]
