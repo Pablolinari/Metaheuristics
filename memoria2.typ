@@ -385,19 +385,10 @@ problema, el ratio de mutación y el número máximo de intentos que tenemos par
 primer como el segundo gen.
 
 Como se puede observar, el proceso de mutación se divide en dos partes:
-- En el *primer bucle*, intentamos escoger un índice aleatorio para el primer gen a seleccionar;
-  este gen debe cumplir las restricciones necesarias del problema tras haberle aplicado la
-  transformación indicada. De no ser así, se genera otra posición aleatoria para el primer gen;
-  este proceso se repite tantas veces como el parámetro `maxattempts` nos permita hasta conseguir
-  un primer gen que acepte la transformación.
-- Para el *segundo gen*, el proceso es similar: se busca un gen de forma aleatoria que pueda
-  aceptar la suma de la cantidad que se va a restar del primer gen y que se mantenga en el rango
-  de las restricciones del problema durante las iteraciones permitidas.
 
-Cada vez que no se encuentra un gen que cumpla las restricciones y se hayan agotado las
-iteraciones permitidas, se devuelve `false`. De lo contrario, modifica la solución y se devuelve `true`.
-La solución pasada por referencia se modifica. Esto se hace para poder tener un control posterior de cuándo
-se muta la solución.
+- En el primer bucle se buscan todos los genes a los cuales se les puede restar el porcentaje indicado en la variable *mutationrate* y que siguen cumpliendo las restricciones del problema.Si no se encuentran posibles donantes se acaba la ejecución.
+
+- En el segundo bucle, se selecciona un gen donante del vector calculado previamente y se buscan todos los posibles genes que puedan recibir la cantidad que se le va a restar a este gen.Si no se encuentra ningún gen que pueda recibir dicha cantidad , se vuelve a escoger un donante aleatorio y se repite el proceso. Este proceso se repite todas las veces que permita el limite de intentos marcado por *maxattempts* . En la práctica , tras varias pruebas el límite se ha puesto lo suficientemente alto para que se pueda encontrar el gen receptor.
 
 #pagebreak()
 = Estructura de los algoritmos
@@ -513,7 +504,7 @@ Para el algoritmo genético generacional se ha construido una clase *Agg* para i
           worstFitnessSons = tempfitness
           idxworst = i
         if evals == maxevals:
-          terminar          
+          terminar
       if bestfitness > worstfitnesssons:
         sons[idxworst] = bestsolution
         fitnesspoblation[idxworst] = bestfitness
@@ -847,7 +838,7 @@ Al observar los resultados obtenidos podemos ver que cada algoritmo se comporta 
 == Comportamiento de los Algoritmos Genéticos Generacionales
 Los AGG reemplazan en todas las iteraciones la población al completo, conservando el mejor de la población anterior e intercambiándolo por el peor de la generación que entra. Este tipo de reemplazo hace que haya más diversidad de soluciones y por tanto el algoritmo tenga menos riesgo de quedarse "atascado" en una zona del espacio de soluciones. Esto hace que el algoritmo explore más parte del espacio de soluciones, en consecuencia se pierden soluciones que, aunque no fuesen la mejor, eran buenas y podrían haber convergido a mejores soluciones mediante cruces y mutaciones.
 
-Podemos ver en el 
+Podemos ver en el
 
 == Comportamiento de los Algoritmos Genéticos Estacionarios
 == Comportamiento de los Algoritmos Meméticos
