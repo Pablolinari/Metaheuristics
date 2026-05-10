@@ -9,12 +9,18 @@
 AmAll::AmAll(int populationSize, double crossoverProb, double mutationProb,
              int tournamentSize)
     : Am(populationSize, crossoverProb, mutationProb) {}
-int AmAll::applyLocalSearch(std::vector<tSolution<double>> &poblation,
-                            std::vector<double> &fitnesspoblation,
-                            double &bestFitness, tSolution<double> &bestsolution,
-                            Problem<double> &problem) {
-	int evals =0;
+void AmAll::applyLocalSearch(std::vector<tSolution<double>> &poblation,
+                             std::vector<double> &fitnesspoblation,
+                             double &bestFitness,
+                             tSolution<double> &bestsolution,
+                             Problem<double> &problem, int maxevals) {
   for (int i = 0; i < populationSize; i++) {
+    if (evals + 100 > maxevals) {
+      break;
+    } else {
+      evals += 100;
+    }
+
     ResultMH<double> result = localSearch(problem, 100, poblation[i]);
     if (result.fitness > fitnesspoblation[i]) {
       fitnesspoblation[i] = result.fitness;
@@ -24,7 +30,6 @@ int AmAll::applyLocalSearch(std::vector<tSolution<double>> &poblation,
       bestFitness = result.fitness;
       bestsolution = result.solution;
     }
-		evals+=100;
+    evals += 100;
   }
-	return evals;
 }

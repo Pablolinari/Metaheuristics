@@ -10,8 +10,8 @@ public:
         int tournamentSize = 3);
   virtual ~AmAll() {}
 
-  int applyLocalSearch(std::vector<tSolution<double>> &poblation,
+  void applyLocalSearch(std::vector<tSolution<double>> &poblation,
                        std::vector<double> &fitnesspoblation,
                        double &bestFitness, tSolution<double> &bestsolution,
-                       Problem<double> &problem) override;
+                       Problem<double> &problem,int maxevals) override;
 };

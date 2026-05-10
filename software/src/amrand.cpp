@@ -8,16 +8,19 @@ AmRand::AmRand(int populationSize, double crossoverProb, double mutationProb,
                int tournamentSize)
     : Am(populationSize, crossoverProb, mutationProb) {}
 
-int AmRand::applyLocalSearch(std::vector<tSolution<double>> &poblation,
+ void AmRand::applyLocalSearch(std::vector<tSolution<double>> &poblation,
                              std::vector<double> &fitnesspoblation,
                              double &bestFitness,
                              tSolution<double> &bestsolution,
-                             Problem<double> &problem) {
+                             Problem<double> &problem,int maxevals) {
   int nRand = std::ceil(poblation.size() * 0.10);
-  int evals = 0;
   for (int i = 0; i < nRand; i++) {
+    if (evals + 100 > maxevals) {
+      break;
+    } else {
+      evals += 100;
+    }
     ResultMH<double> result = localSearch(problem, 100, poblation[i]);
-    evals += 100;
     if (result.fitness > fitnesspoblation[i]) {
       fitnesspoblation[i] = result.fitness;
       poblation[i] = result.solution;
@@ -27,5 +30,4 @@ int AmRand::applyLocalSearch(std::vector<tSolution<double>> &poblation,
       bestsolution = result.solution;
     }
   }
-  return evals;
 }

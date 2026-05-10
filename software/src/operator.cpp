@@ -68,7 +68,6 @@ bool Operator::mutation(tSolution<double> &mutSol, Problem<double> &problem,
   }
 
   if (validDonors.empty()) {
-    std::cout << "no hay donantes" << std::endl;
     return false;
   }
 
@@ -77,12 +76,7 @@ bool Operator::mutation(tSolution<double> &mutSol, Problem<double> &problem,
     int candidateFirst = validDonors[pickDonor];
     double amount = mutSol(candidateFirst) * mutationRate;
 
-    double firstAfter = mutSol(candidateFirst) - amount;
-    bool firstValid = firstAfter == 0.0 || (firstAfter >= problembounds.first &&
-                                            firstAfter <= problembounds.second);
-    if (!firstValid) {
-      continue;
-    }
+		// no hace falta comprobar ya que es de la lista de validos 
 
     std::vector<int> validReceivers;
     validReceivers.reserve(solutionsize - 1);
@@ -98,16 +92,16 @@ bool Operator::mutation(tSolution<double> &mutSol, Problem<double> &problem,
         validReceivers.push_back(i);
       }
     }
-
+		// si no encuentro ningún un receptor valido busco otro donante
     if (validReceivers.empty()) {
-			std::cout<<"no receptores"<<std::endl;
       continue;
     }
-
-    int pick = Random::get<int>(0, static_cast<int>(validReceivers.size()) - 1);
-    int candidateSecond = validReceivers[pick];
+		// selecciono un receptor aleatorio de los posibles
+    int idx = Random::get<int>(0,validReceivers.size() - 1);
+    int candidateSecond = validReceivers[idx];
     double secondAfter = mutSol(candidateSecond) + amount;
 
+		//modifico la solución
     mutSol(candidateFirst) -= amount;
     mutSol(candidateSecond) += amount;
     return true;

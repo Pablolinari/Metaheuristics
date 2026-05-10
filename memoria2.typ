@@ -313,7 +313,7 @@ Para la selección de los padres se usa un torneo entre tres cromosomas elegidos
   # Pseudocódigo del operador tournament
    funcion tournament(tournamentsize , populationsize,selectionsize,fitnesspoblation):
     vector idxparents # vector con los indices de los padres
-    # repito el torneo tantas veces como necesite 
+    # repito el torneo tantas veces como necesite
       for i in range(0,selectionsize):
         idxbest = 0
 
@@ -474,89 +474,123 @@ Para el algoritmo genético Generacional , se ha construido una clase *Agg* para
   ```py
   # Pseudocódigo del algoritmo de búsqueda local
   función Agg(max_evals):
-      evals =0
+      evals = 0
       bestFitness = -infinito
       bestSolution
-      poblation = vector de soluciones
-      # guarda para cada solucion i , su fitnes en la posicion i
-      fitnesspoblation = vector de doubles
-      sons = vector de soluciones
-      # indices de los padres que selecciono en el torneo
-      idxparents = vector de enteros
-      # inicializo la población con soluciones aleatorias
-      for i in range(0,populationSize):
-        poblation.pushback(solución aleatoria)
-
-      #busco el mejor cromosoma y calculo todos los fitness
-      # de la población
-
-      for i in range(0,populationSize):
+      poblation = soluciones aleatorias
+      for i in range(0, populationSize):
         tempfitness = fitness(poblation[i])
-        evals+=1
-        #añado el fitness a su posición
+        evals += 1
         fitnesspoblation.pushback(tempfitness)
-        if(tempfitness>bestFitness):
+        if tempfitness > bestFitness:
           bestFitness = tempfitness
           bestSolution = poblation[i]
 
-
       while evals < maxevals:
-        ##torneo (k=3) para seleccionar los padres
-        # el torneo se hace las mismas veces que el tamaño
-        # de la población
-        tournament(tournamentsize,populationsize,populationsize,fitnesspoblation)
-        ##Cruce
-        # aqui se usa el operador explicado en el apartado anterior,
-        # Cada subclase de Agg implementa la función Crossover
-        # la variable indica el número de padres que se deben cruzar
-        # no el número de parejas , por eso no la divido por dos como
-        # indica el guión
-        expectedparentscrossover = redondeo hacia arriba(crossoverprob*idxparents.size())
-        # hago que el número de padres sea par para
-        # que cuadren bien las parejas
-        if expectedparentscrossover %2 !=0:
-          expectedparentscrossover -=1
+        tournament(tournamentsize, populationsize, populationsize, fitnesspoblation)
+        expectedparentscrossover = redondeo hacia arriba(crossoverprob * idxparents.size())
+        for i in range(0, expectedparentscrossover, 2):
+          son = crossover(poblation[idxparents[i]], poblation[idxparents[i + 1]])
+          reparar hijos inválidos
+          sons.pushback(son.first)
+          sons.pushback(son.second)
 
-        # recorro el idx parents de 2 en 2
-        for i in range(0,expectedparentscrossover,2):
-
-        son =crossover(poblation[idxparents[i]], poblation[idxparents[i + 1]])
-        # como los hijos no tienen por que ser válidos , compruebo si lo son
-        # y los arreglo si hace falta
-        if (son.first no es solución válida):
-          fix(son.first)
-        if (son.second no es solución válida):
-          fix(son.second)
-        # añado los hijos al vector son para empezar a crear
-        # la siguiente población
-        sons.pushback(son.first)
-        sons.pushback(son.second);
-
-      for  i in range(expectedparentscrossover,poblationsize):
-        # aniado los padres restantes que no se han cruzado
+      for i in range(expectedparentscrossover, poblationsize):
         sons.pushback(poblation[idxparents[i]])
-      }
 
       ## mutación
+      expectedmutation = mutationprob * populationsize
+      for i in range(0, expectedmutation):
+        idxsolution = random entre 0 y populationsize - 1
+        mutsol = sons[idxsolution]
+        mutation(mutSol, problem, 0.15, problemSize * 5)
+        sons[idxSolution] = mutSol
 
-      return solucioninicial ,mejorfitness,evals
+      # Sustitución de la población
+      for i in range(0, populationsize - 1):
+        tempfitness = fitness(sons[i])
+        evals += 1
+        fitnesspoblation.pushback(tempfitness)
+        if tempfitness > bestfitnessSons:
+          bestfitnessSons = tempfitness
+          idxbest = i
+        if tempfitness < worstfitnessSons:
+          worstFitnessSons = tempfitness
+          idxworst = i
+        if evals == maxevals:
+          terminar          
+      if bestfitness > worstfitnesssons:
+        sons[idxworst] = bestsolution
+        fitnesspoblation[idxworst] = bestfitness
+      if bestfitnessSons > bestfitness:
+        bestsolution = sons[idxbest]
+        bestfitness = bestfitnessSons
+      poblation = sons
+  return bestsolution, bestfitness, evals
   ```
 ]
-#block(fill: luma(240), inset: 8pt, radius: 4pt, width: 100%)[
-  ```py
-    #Generación del vecindario
-    for i,j in ncompany:
-      vectorparejas.insertar(pareja(i,j))
-
-  ```]
-
 
 == Algoritmo Genético Estacionario
 Para el algoritmo genético Estacionari , se ha construido una clase *Age* para implementar la estructura del algoritmo , y dos clases hijas *AgeArit* y *AgeBLX* las cuales heredan de *Age* y solo modifican la función de cruce. De esta manera podemos tener una única implementación del algoritmo y cambiar el operador de cruce con facilidad.
 
 
 == Algortimo Memético
-
+Para la implementación de los algoritmos meméticos he usado una clase llamada *Am* en la cual implemento el método optimize general , la busqueda local y el operador de cruce. Dentro de esta clase hay un método virtual *applyLocalSearch* que es el que marca la diferencia entre los tres tipos de algoritmo genético. Este método lo implementa cada subclase del algoritmo memético.A continuación describo el método applyLocalSearch que usa cada uno.
+=== AM-Random
+#block(fill: luma(240), inset: 8pt, radius: 4pt, width: 100%)[
+  ```py
+  # Pseudocódigo de AM-Random (applyLocalSearch)
+  función applyLocalSearch(poblation, fitnesspoblation, bestFitness, bestsolution, problem):
+      nRand = redondeo hacia arriba(poblation.size() * 0.10)
+      evals = 0
+      for i in range(0, nRand):
+        result = localSearch(problem, 100, poblation[i])
+        evals += 100
+        if result.fitness > fitnesspoblation[i]:
+          fitnesspoblation[i] = result.fitness
+          poblation[i] = result.solution
+        if result.fitness > bestFitness:
+          bestFitness = result.fitness
+          bestsolution = result.solution
+      return evals
+  ```
+]
+=== AM-All
+#block(fill: luma(240), inset: 8pt, radius: 4pt, width: 100%)[
+  ```py
+  # Pseudocódigo de AM-All (applyLocalSearch)
+  función applyLocalSearch(poblation, fitnesspoblation, bestFitness, bestsolution, problem):
+      evals = 0
+      for i in range(0, populationSize):
+        result = localSearch(problem, 100, poblation[i])
+        if result.fitness > fitnesspoblation[i]:
+          fitnesspoblation[i] = result.fitness
+          poblation[i] = result.solution
+        if result.fitness > bestFitness:
+          bestFitness = result.fitness
+          bestsolution = result.solution
+        evals += 100
+      return evals
+  ```
+]
+=== AM-Best
+#block(fill: luma(240), inset: 8pt, radius: 4pt, width: 100%)[
+  ```py
+  # Pseudocódigo de AM-Best (applyLocalSearch)
+  función applyLocalSearch(poblation, fitnesspoblation, bestFitness, bestsolution, problem):
+      evals = 0
+      nBest = redondeo hacia arriba(populationSize * 0.10)
+      indices = indices de las nBest mejores soluciones según fitnesspoblation
+      for i in indices:
+        result = localSearch(problem, 100, poblation[i])
+        evals += 100
+        if result.fitness > bestFitness:
+          bestFitness = result.fitness
+          bestsolution = result.solution
+          poblation[i] = result.solution
+      return evals
+  ```
+]
 = Estructura del código
 
 El código de la práctica está organizado en una estructura modular que facilita la compilación y ejecución. A continuación se describe la organización del proyecto y el manual de usuario para compilar y ejecutar el programa.
@@ -816,8 +850,25 @@ A continuación se muestran los boxplots de los resultados obtenidos para cada c
 Al observar los resultados obtenidos podemos ver que cada algoritmo se comporta de manera muy diferente dependiendo del conjunto de datos usado. Para poder entender por qué unos algoritmos funcionan mejor que otros es necesario analizar cómo trabaja cada uno y qué características del problema aprovechan o ignoran.
 
 == Comportamiento de los Algorítmos Genéticos Generacionales
+Los AGG reemplazan en todas las iteraciones la población al completo, conservando el mejor de la población anterior e intercambiandolo por el peor de la generación que entra. Este tipo de reemplazo hace que haya más diversidad de soluciones y por tanto el algoritmo tenga menos riesgo de quedarse "atascado" en una zona del espacio de soluciones. Esto hace que el algoritmo explore más parte del espacio de soluciones, en consecuencia  se pierden soluciones que aunque no fuesen la mejor , eran buenas y podrían haber convergido a mejores soluciones mediante cruces y mutaciones. 
+
+Podemos ver en el 
+
 == Comportamiento de los Algorítmos Genéticos Estacionarios
 == Comportamiento de los Algorítmos  Meméticos
+== Mejor operador para los genéticos
+Como se puede observar en los resultados , en ambos algoritmos genéticos el mejor resultado lo obtiene el operador *BLX-$alpha$*.La principal diferencia entre este y el aritmético es que el *BLX-$alpha$* permite que el gen resultante de los hijos al cruzar los genes de los padres, pueda estar fuera del intervalo que genera el minimo y el máximo de los padres, por tanto los hijos resultantes de los cruces se pueden alejar más de sus padres y permiten explorar más  el espacio de soluciones.
+Por otra parte , el cromosoma resultante del cruce aritmético contiene genes que no pueden tener un valor mayor o menor que el mayor o menor de los padres (al ser una combinación lineal )  por lo que al aplicar este tipo  de cruce , los hijos convergen a la media de los padres obteniendo mejor resultado en entornos explotativos.
+
+== Búsqueda Local vs Algorítmos Genéticos
+Los algoritmos genéticos en el problema del portfolio , obtienen mejores resultados en el problema del portfolio ya que exploran más el espacio de soluciones que la búsqueda local. La búsqueda local es más explotativa por lo que le es fácil entrar en máximos locales en datasets pequeños como el ibex35 mientras que los algoritmos genéticos exploran un mayor rango de soluciones por lo que tienen más facilidad de evitar máximos locales. También cabe destacar  que la búsqueda local se ve muy afectada por la solución inicial que se toma , al ser esta aleatoria , dependemos más de la "suerte" a la hora de encontrar una mejor solución antes de las evaluaciones permitidas. En los algorítmos genéticos también influye la población inicial , pero sobre todo en los AGG , al reemplazar toda la población en cada iteración y conservar la mejor solución , se consigue una mayor diversidad y mayor probabilidad de no quedarse atascado en un máximo local. 
+
+== AGE-BL$alpha$ vs AGG-BL$alpha$
+
+== Comparación entre meméticos
+
+== Meméticos vs mejor AG
+
 == Comparación Gráfica fitness 2014-2024 (50 ejecuciones)
 
 #figure(

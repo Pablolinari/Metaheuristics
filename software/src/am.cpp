@@ -22,7 +22,7 @@ ResultMH<double> Am::localSearch(Problem<double> &problem, int maxevals,
       }
     }
   }
-  int evals = 0;
+  this->evals = 0;
   // mientras no gaste las evaluaciones o no haya recorrido
   // el vecindario entero sigo probando
   while (evals < maxevals && improved) {
@@ -185,9 +185,8 @@ ResultMH<double> Am::optimize(Problem<double> &problem, int maxevals) {
     idxparents.clear();
     nGenerations++;
     if (nGenerations % 10 == 0) {
-      int localeval = applyLocalSearch(poblation, fitnessPoblation, bestFitness,
-                                       bestSolution, problem);
-      evals += localeval;
+      applyLocalSearch(poblation, fitnessPoblation, bestFitness,
+                                       bestSolution, problem,maxevals);
     }
   }
   return ResultMH(bestSolution, bestFitness, evals);
