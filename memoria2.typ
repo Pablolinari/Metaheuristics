@@ -834,21 +834,23 @@ A continuación se muestran los boxplots de los resultados obtenidos para cada c
 = Análisis de los resultados
 
 Al observar los resultados obtenidos podemos ver que cada algoritmo se comporta de manera muy diferente dependiendo del conjunto de datos usado. Para poder entender por qué unos algoritmos funcionan mejor que otros es necesario analizar cómo trabaja cada uno y qué características del problema aprovechan o ignoran.
+//hecho
+== Búsqueda Local vs Algoritmos Genéticos
+Los algoritmos genéticos en el problema del portfolio obtienen mejores resultados ya que exploran más el espacio de soluciones que la búsqueda local. La búsqueda local es más explotativa por lo que le es fácil entrar en máximos locales en datasets pequeños como el Ibex 35 ,(podemos ver que acaba antes que el máximo de evaluaciones),mientras que los algoritmos genéticos exploran un mayor rango de soluciones por lo que tienen más facilidad de evitar máximos locales. También cabe destacar que la búsqueda local se ve muy afectada por la solución inicial que se toma, al ser esta aleatoria, dependemos más de la "suerte" a la hora de encontrar una mejor solución antes de las evaluaciones permitidas.Esto lo podemos ver claramente en los boxplots donde la caja de la búsqueda local tiene el cuerpo mucho más grande que la de los otros algoritmos , debido a la variabilidad de la solucion inicial escogida. En los algoritmos genéticos también influye la población inicial, pero sobre todo en los AGG, al reemplazar toda la población en cada iteración y conservar la mejor solución, se consigue una mayor diversidad y mayor probabilidad de no quedarse atascado en un máximo local.
 
-== Comportamiento de los Algoritmos Genéticos Generacionales
-Los AGG reemplazan en todas las iteraciones la población al completo, conservando el mejor de la población anterior e intercambiándolo por el peor de la generación que entra. Este tipo de reemplazo hace que haya más diversidad de soluciones y por tanto el algoritmo tenga menos riesgo de quedarse "atascado" en una zona del espacio de soluciones. Esto hace que el algoritmo explore más parte del espacio de soluciones, en consecuencia se pierden soluciones que, aunque no fuesen la mejor, eran buenas y podrían haber convergido a mejores soluciones mediante cruces y mutaciones.
+Comparando los resultados de los fitness promedio y las gráficas de lineas  podemos ver que la búsqueda local en dataset más pequeños alcanza a los algoritmos genéticos que usan el operador aritmético ya que este operador no dá tanta diversidad en el cruce. Por a medida que el tamaño del dataset aumenta , la búsqueda local se va quedando atrás y es fácilmente superada por los algoritmos genéticos .Donde más se nota la diferencia es en los que usan el operador BLX-$alpha$ que como veremos a continuación es el que mejor resultados obtiene.
 
-Podemos ver en el
-
-== Comportamiento de los Algoritmos Genéticos Estacionarios
-== Comportamiento de los Algoritmos Meméticos
 == Mejor operador para los genéticos
 Como se puede observar en los resultados, en ambos algoritmos genéticos el mejor resultado lo obtiene el operador *BLX-$alpha$*. La principal diferencia entre este y el aritmético es que el *BLX-$alpha$* permite que el gen resultante de los hijos al cruzar los genes de los padres pueda estar fuera del intervalo que genera el mínimo y el máximo de los padres, por tanto los hijos resultantes de los cruces se pueden alejar más de sus padres y permiten explorar más el espacio de soluciones.
 Por otra parte, el cromosoma resultante del cruce aritmético contiene genes que no pueden tener un valor mayor o menor que el mayor o menor de los padres (al ser una combinación lineal) por lo que al aplicar este tipo de cruce, los hijos convergen a la media de los padres obteniendo mejor resultado en entornos explotativos.
 
-//hecho
-== Búsqueda Local vs Algoritmos Genéticos
-Los algoritmos genéticos en el problema del portfolio obtienen mejores resultados en el problema del portfolio ya que exploran más el espacio de soluciones que la búsqueda local. La búsqueda local es más explotativa por lo que le es fácil entrar en máximos locales en datasets pequeños como el Ibex 35 mientras que los algoritmos genéticos exploran un mayor rango de soluciones por lo que tienen más facilidad de evitar máximos locales. También cabe destacar que la búsqueda local se ve muy afectada por la solución inicial que se toma, al ser esta aleatoria, dependemos más de la "suerte" a la hora de encontrar una mejor solución antes de las evaluaciones permitidas. En los algoritmos genéticos también influye la población inicial, pero sobre todo en los AGG, al reemplazar toda la población en cada iteración y conservar la mejor solución, se consigue una mayor diversidad y mayor probabilidad de no quedarse atascado en un máximo local.
+Como consecuencia de estas propiedades vemos que en la tabla del ibex35 la diferencia entre la media de los fitness no es tan alta pero en cuanto pasamos a los dataset del sp100 y el sp500 al aumentar el espacio de búsqueda , se ven claramente má recompensados los algoritmos que usan el operador BLX-$alpha$.
+== Comportamiento de los Algoritmos Genéticos Generacionales
+Los AGG reemplazan en todas las iteraciones la población al completo, conservando el mejor de la población anterior e intercambiándolo por el peor de la generación que entra. Este tipo de reemplazo hace que haya más diversidad de soluciones y por tanto el algoritmo tenga menos riesgo de quedarse "atascado" en una zona del espacio de soluciones y explore más soluciones del espacio. Esto  lo podemos comprobar 
+en las tablas podemos analizando que este tipo de algoritmos se ve beneficiado cuando el espacio de búsqueda es más grande ,permitiendole asi obtener el mejor fitness promedio en las ejecuciones donde el dataset es más grande. La única ejecución donde no destaca tanto es en la del ibex35 ya que al ser un dataset pequeño los AGE adquieren un poco de ventaja.
+
+== Comportamiento de los Algoritmos Genéticos Estacionarios
+Los AGE al hacer reemplazos en proporciones pequeñas de la población conservan mejor las soluciones que son buenas pero los hace depender mucho de la población inicial.Podemos comprobar esto fijandonos en los boxplots ya que el AGE con el operador BLX es uno de los algoritmos que más outliers presenta. Fijandonos en las tablas vemos que en los dataset grande claramente gana el AGG pero en  el ibex35 consigue superarlo debido a que en dataset pequeños la capacidad explotativa funciona mejor.
 
 == AGE-BL$alpha$ vs AGG-BL$alpha$
 En cuanto a comparación entre algoritmos genéticos nos fijaremos en los que usan el operador *BLX-$alpha$* para compararlos en igualdad de condiciones cuando usan el mejor operador.
@@ -857,9 +859,20 @@ Se puede observar facilmente en los gráficos de lineas que ambos algoritmos tie
 se intenta conservar de manera prematura a los mejores indivíduos (AGE).
 
 == Comparación entre meméticos
-Los algoritmos meméticos usados son una hibridación entre el AGG-BLX$alpha$ y la búsqueda local. En los resultados vemos que tienen un comportamiento similar todas las implementaciones de los meméticos ,   
+Los algoritmos meméticos usados son una hibridación entre el AGG-BLX$alpha$ y la búsqueda local. Esto nos permite que cada vez que ejecutamos la búsqueda local sobre la cantidad de cromosomas  selecionados en cada caso ,  podamos explotar las soluciones que se encuentran en un entorno del cromosoma seleccionado.Como los resultados obtenidos en todas las variantes de los algoritmos son muy parecidas entre sí  podemos concluir dos cosas: 
+- O bien nuestro espacio de búsqueda no presenta "picos" sobre los que la búsqueda local pueda escalar para mejorar la solución inicial que se le da con el AGG.
+- O bien debemos añadir más iteraciones a la búsqueda local para darle más posibilidades de poder encontrar mejores soluciones en el entorno dado.
+
+Para comprobarlo , he probado a hacer ejecuciones usando 500 evaluaciones en la búsqueda local , como resultado he vist que la solución varía en cuestión de centésimas por lo que considerar el aumento de evaluaciones en la búsqueda local no mejora los resultados.
+
 
 == Meméticos vs mejor AG
+
+Como hemos observado en el apartado anterior , los meméticos tienen resultados muy parecidos , si los comparamos con el AGG-BLX-$alpha$ , que es el algoritmo que se a usado de base para los meméticos , observamos que los fitness medios obtenidos son mejores por parte del algorítmo genético , esto se debe a que el operador BLX-$alpha$ junto al algoritmo generacional funcionan muy bien para el conjunto de datos que se tiene por tanto al aplicar la búsqueda local no se obtienen mejores soluciones.
+
+También hay que tener en cuenta que si el espacio de soluciones no presenta picos pronunciados, la búsqueda local no va a hacer gran efecto sobre los resultados que ya se obtienen con el AGG.
+
+== Análisis resultados 2025
 
 == Comparación gráfica fitness 2014-2024 (50 ejecuciones)
 
@@ -882,4 +895,4 @@ En estas gráficas podemos ver la evolución del fitness a través de las 50 eje
 
 Podemos observar también que en algunas ejecuciones la Búsqueda aleatoria ha obtenido mejor fitness que la Búsqueda Local, esto ocurre mayoritariamente en los datos del S&P500 ya que al ser un espacio de soluciones tan grande a la Búsqueda Local se le acaban las evaluaciones muy rápido y en algunos casos puede sacar fitness peores que la Búsqueda Aleatoria.
 
-== Comparación global y conclusiones
+== Conclusiones

@@ -30,7 +30,7 @@ void AmBest::applyLocalSearch(std::vector<tSolution<double>> &poblation,
     } else {
       evals += 100;
     }
-    ResultMH<double> result = localSearch(problem, 100, poblation[i]);
+    ResultMH<double> result = localSearch(problem, 500, poblation[i]);
 
     if (result.fitness > bestFitness) {
       bestFitness = result.fitness;

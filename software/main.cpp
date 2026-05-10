@@ -92,11 +92,13 @@ int main(int argc, char *argv[]) {
   RandomSearch ralg = RandomSearch();
   Greedy greedyalg = Greedy();
   LocalSearch localalg = LocalSearch();
+
   AggArit aggarit(100, 0.8, 0.1, 3);
   AggBLX aggblx(100, 0.8, 0.1, 0.3, 3);
 
   AgeArit agearit(100, 0.1, 3);
   AgeBLX ageblx(100, 0.1, 0.3, 3);
+
   AmAll amall(100, 0.8, 0.1, 3);
   AmRand amrand(100, 0.8, 0.1, 3);
   AmBest ambest(100, 0.8, 0.1, 3);
