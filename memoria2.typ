@@ -71,49 +71,49 @@
 
 El problema que se ha escogido es el problema del portfolio, en el cual se nos da una lista de empresas de las cuales sabemos su retorno obtenido diario desde principios de 2015 hasta finales de 2025. Con estos datos necesitamos elaborar una solución indicando qué porcentaje de nuestra cartera deberíamos haber invertido en cada empresa para maximizar el beneficio de las inversiones.
 
-En este contexto, el problema no solo busca el máximo retorno, sino que también suele considera la correlaicion
-entre activos teniendo esto en cuenta en las ecuaciones que se usan para maximizar el beneficio.
+En este contexto, el problema no solo busca el máximo retorno, sino que también suele considerar la correlación
+entre activos, teniendo esto en cuenta en las ecuaciones que se usan para maximizar el beneficio.
 
-De esta manera podemos ajustar el programa ajustando el parametro $lambda$ de la ecuacion a maximizar para asi tener mayor o menor aversión al riesgo.
+De esta manera podemos ajustar el programa ajustando el parámetro $lambda$ de la ecuación a maximizar para así tener mayor o menor aversión al riesgo.
 
 #pagebreak()
 = Algoritmos empleados y estructura del problema
 
 == Estructura del problema
-Para modelar el problema del portfolio se ha usado la clase Pportfolio la cual es hija de la clase Problem que viene ya predefinnida con varios métodos virtuales , los cuales se implementan en la clase hija. Para representar el problema usando estas clases se tienen en cuenta los siguientes atributos:
+Para modelar el problema del portfolio se ha usado la clase Pportfolio la cual es hija de la clase Problem que viene ya predefinida con varios métodos virtuales, los cuales se implementan en la clase hija. Para representar el problema usando estas clases se tienen en cuenta los siguientes atributos:
 
 - *days* : número entero de días de los que se tienen datos.
-- *ncompany* : número entero  de empresas de las que se tienen datos.
+- *ncompany* : número entero de empresas de las que se tienen datos.
 - *low* : mínimo porcentaje de inversión en una empresa (double).
 - *high* : máximo porcentaje de inversión en una empresa (double).
-- *lambda* : parámetro entero  usado en el fitness.
-- *data* : matriz de la libreria Eigen con valores double que contienen los beneficios diarios de cada empresa, en las columnas se representan las empresas y en las filas los dias.
-- *covarianceMat* : matriz de la libreria Eigen con valores double que contiene la  covarianza de las empresas.
-- *logSums* : vector de la libreria Eigen con valores double que contiene la  suma por columnas  después de aplicar  *log(valor+1)* a cada posición de la matriz.
+- *lambda* : parámetro entero usado en el fitness.
+- *data* : matriz de la librería Eigen con valores double que contienen los beneficios diarios de cada empresa, en las columnas se representan las empresas y en las filas los días.
+- *covarianceMat* : matriz de la librería Eigen con valores double que contiene la covarianza de las empresas.
+- *logSums* : vector de la librería Eigen con valores double que contiene la suma por columnas después de aplicar *log(valor+1)* a cada posición de la matriz.
 - *ERROR* : Error permitido en la suma total del vector solución (double).
 
 
 
-Podemos observar que se ha optado por usar la libreria Eigen de C++ para poder manejar las operaciones de matrices y vectores como la suma total , la media total , la media por columnas o por filas , multiplicación escalar a escalar, etc... . Esto hace que el código sea más compacto y fácil de seguir a la vez que más preciso y cómodo de utilizar.
+Podemos observar que se ha optado por usar la librería Eigen de C++ para poder manejar las operaciones de matrices y vectores como la suma total, la media total, la media por columnas o por filas, multiplicación escalar a escalar, etc. Esto hace que el código sea más compacto y fácil de seguir a la vez que más preciso y cómodo de utilizar.
 
 También se han guardado los datos como *covarianceMat* y *logSums* que son constantes durante la ejecución del programa y solo cambian cuando cambia el archivo de entrada. Al ser
 valores calculados con operaciones matriciales son costosos de calcular y eso hace que el programa sea más rápido.
 
 == Representación de las soluciones
 
-Para este problema las soluciones se representan por vectores de la biblioteca Eigen con tipo de dato double donde cada posición del vector representa la i-ésima empresa del fichero de datos de entrada , todos estos vectores deben cumplir las siguientes restricciones:
+Para este problema las soluciones se representan por vectores de la biblioteca Eigen con tipo de dato double donde cada posición del vector representa la i-ésima empresa del fichero de datos de entrada, todos estos vectores deben cumplir las siguientes restricciones:
 
 - El tamaño de la solución debe ser el mismo que el número de empresas en los datos de entrada.
 - La suma de todos sus valores debe ser igual a 1.
 - Cada posición del vector tiene que tener un valor entre *low* y *high*
-- Puede haber posiciones del vector con valor 0(representando que en esa empresa no se invierte).
+- Puede haber posiciones del vector con valor 0 (representando que en esa empresa no se invierte).
 
 La mejor solución será aquella que consiga maximizar la función objetivo.
 
 == Funciones comunes usadas por los algoritmos
 
-En primer lugar la función que permite cargar los datos en nuestra clase Pportfolio es una función implementada en un archivo auxiliar ya que no tiene por qué pertenecer  necesariamente al problema que se plantea.Esta función lee datos de un fichero en formato CSV. Tras abrir el archivo la función descarta la primera linea con los nombre de las empresas y comienza a leer las siguientes lineas, una vez escogida una linea , se salta el string que contiene la fecha y comienza a insertar datos al vector usando como separador la coma.
-El código comprueba los valores de la fecha leida , si el parametro only2025 es True , solo se leen datos de 2025 , de lo contrario se leen todos los datos hasta el último día del 2024. Una vez leidos todos los datos, la matriz obtenida se convierte a una matriz Eigen para poder manejarla con más facilidad.
+En primer lugar la función que permite cargar los datos en nuestra clase Pportfolio es una función implementada en un archivo auxiliar ya que no tiene por qué pertenecer necesariamente al problema que se plantea. Esta función lee datos de un fichero en formato CSV. Tras abrir el archivo la función descarta la primera línea con los nombres de las empresas y comienza a leer las siguientes líneas, una vez escogida una línea, se salta el string que contiene la fecha y comienza a insertar datos al vector usando como separador la coma.
+El código comprueba los valores de la fecha leída, si el parámetro only2025 es True, solo se leen datos de 2025, de lo contrario se leen todos los datos hasta el último día del 2024. Una vez leídos todos los datos, la matriz obtenida se convierte a una matriz Eigen para poder manejarla con más facilidad.
 
 #block(fill: luma(240), inset: 8pt, radius: 4pt, width: 100%)[
   ```py
@@ -130,119 +130,119 @@ El código comprueba los valores de la fecha leida , si el parametro only2025 es
          solo leer valores de 2025
        vector valores
 
-       while(leer(dato)):
-         if(dato no vacio):
-           valores.pushback(dato)
-         else:
-           valores.pushback(0.0)
+        while(leer(dato)):
+          if(dato no vacío):
+            valores.pushback(dato)
+          else:
+            valores.pushback(0.0)
 
        data.pushback(valores)
 
      cerrar archivo
 
-     if(data no vacio):
-       matriz_eigen = data
+      if(data no vacío):
+        matriz_eigen = data
      return matriz_eigen
   ```]
 
-Las principales funciones que se usan de la clase *Pportfolio* para implementar los algoritmos  son las siguientes :
+Las principales funciones que se usan de la clase *Pportfolio* para implementar los algoritmos son las siguientes:
 
-La función *createSolution* Se usa en dos algoritmos , en la Búsqueda Aleatoria para generar soluciones aleatorias y escoger finalmente la que mejor fitness tenga y en la Búsqueda Local para generar la solución desde la cual se comienza a buscar la mejor solución posible.
+La función *createSolution* se usa en dos algoritmos, en la Búsqueda Aleatoria para generar soluciones aleatorias y escoger finalmente la que mejor fitness tenga y en la Búsqueda Local para generar la solución desde la cual se comienza a buscar la mejor solución posible.
 
 
 #block(fill: luma(240), inset: 8pt, radius: 4pt, width: 100%)[
   ```py
    funcion createSolution():
-     vector solucion;
+      vector solución;
 
-     for i<solucion.size :
-       solucion(i) = Aleatorio entre high y low
+      for i<solución.size :
+        solución(i) = Aleatorio entre high y low
 
 
-     numeroceros = Aleatorio entre 1 y solucion.size-1
-     vectorindices = {0,1,2, ......,solucion.size-1}
+      numeroceros = Aleatorio entre 1 y solución.size-1
+      vectorindices = {0,1,2, ......,solución.size-1}
      desordenar(vectorindices)
       ## Seleccionamos valores aleatorios que ponemos a 0
-     for i<numeroceros:
-       solucion(vectorindices[i])=0
+      for i<numeroceros:
+        solución(vectorindices[i])=0
 
-     solucion = solucion/solucion.sum
-     if la solucion no es valida
-       fix(solucion)
+      solución = solución/solución.sum
+      if la solución no es válida
+        fix(solución)
 
-     return solution;
+      return solución;
   ```]
 
 #block(fill: luma(240), inset: 8pt, radius: 4pt, width: 100%)[
   ```py
-  # Pseudocódigo del arreglo de solucion
-   funcion fix(solucion):
-      solution = solution/solution.sum
+   # Pseudocódigo del arreglo de solución
+    funcion fix(solución):
+       solución = solución/solución.sum
 
-   for i in ncompany:
-     if solution(i) < low:
-       solution(i) = 0
-     else if solution(i) >high:
-       solution(i) = this->high
+    for i in ncompany:
+      if solución(i) < low:
+        solución(i) = 0
+      else if solución(i) > high:
+        solución(i) = this->high
 
 
-   double diff = 1.0 - solution.sum
-   while diff >ERROR and  no supera máximo iteraciones:
+    double diff = 1.0 - solución.sum
+    while diff >ERROR and no supera máximo de iteraciones:
      ajustado = false
 
-     while i < ncompany and not  ajustado:
-       if solution(i) en rango [low,high):
-         espacio =high - solution(i)
+      while i < ncompany and not ajustado:
+        if solución(i) en rango [low, high):
+          espacio = high - solución(i)
          if hay espacio :
            sumar diferencia y ajustado=true
           else :
-           solution(i) =high
+            solución(i) = high
            diff =diff- espacio
 
-     if no se ha ajustado y diferencia menor mayor que low:
-       for i in ncompany and not ajustado:
-         if solution(i) == 0:
-           solution(i) = minimo entre diff y high
+      if no se ha ajustado y diferencia menor que low:
+        for i in ncompany and not ajustado:
+          if solución(i) == 0:
+            solución(i) = mínimo entre diff y high
            ajustado = true
 
-     if no se ha ajustado y la diferencia es menor que low :
-       while i< ncompany and not ajustado:
-         if (solution(j) > low and solution(j) + diff < high:
-           solution(j) += diff
+      if no se ha ajustado y la diferencia es menor que low:
+        while i < ncompany and not ajustado:
+          if (solución(j) > low and solución(j) + diff < high:
+            solución(j) += diff
            ajustado = true
 
-     diff = 1.0 - solution.sum
+      diff = 1.0 - solución.sum
   ```]
 
-La solución fix se aplica cada vez que se genera una solución aleatoria para arreglarla , lo que se hace es tras normalizar la solución modificar los valores fuera de rango para
-que cumplan las condiciones de ser solución. Una vez hecho esto , si hace falta añadir más valor en alguna posición se añade , primero se comprueba si se puede repartir dentro de
-pesos que ya estén activos , de no ser así si la diferencia es mayor que el limite inferior se activa un cero de la solución. En caso de que la diferencia sea menor que el mínimo permitido se intenta distribuir la diferencia entre valores que ya estén activos y tengan un margen para ser de nuevo ajustados. Este proceso se repite hasta que la diferencia es menor que el error permitido o se sobrepasen las evaluaciones. En el código las evaluaciones permitidas son altas para que no haya problema por la precisión de las operaciones.
+La solución fix se aplica cada vez que se genera una solución aleatoria para arreglarla, lo que se hace es tras normalizar la solución modificar los valores fuera de rango para
+que cumplan las condiciones de ser solución. Una vez hecho esto, si hace falta añadir más valor en alguna posición se añade, primero se comprueba si se puede repartir dentro de
+pesos que ya estén activos, de no ser así si la diferencia es mayor que el límite inferior se activa un cero de la solución. En caso de que la diferencia sea menor que el mínimo permitido se intenta distribuir la diferencia entre valores que ya estén activos y tengan un margen para ser de nuevo ajustados. Este proceso se repite hasta que la diferencia es menor que el error permitido o se sobrepasen las evaluaciones. En el código las evaluaciones permitidas son altas para que no haya problema por la precisión de las operaciones.
 
 #block(fill: luma(240), inset: 8pt, radius: 4pt, width: 100%)[
   ```py
-  # Pseudocódigo del calculo del beneficio
+  # Pseudocódigo del cálculo del beneficio
    funcion profit(solution):
-     return (solution * logdSums).sum #multiplicación componente a componente
+     return (solution * logSums).sum #multiplicación componente a componente
 
   ```]
 #block(fill: luma(240), inset: 8pt, radius: 4pt, width: 100%)[
   ```py
-  # Pseudocódigo del calculo driesgo
+  # Pseudocódigo del cálculo del riesgo
    funcion risk(solution):
      return (solution.transpose * covarianceMat * solution);
-  #devuelve un número resultado de las dimensiones  1xn * nxn *nx1
+  #devuelve un número resultado de las dimensiones 1xn * nxn * nx1
   ```]
 
 #block(fill: luma(240), inset: 8pt, radius: 4pt, width: 100%)[
   ```py
-  # Pseudocódigo del calculo del fitness
+  # Pseudocódigo del cálculo del fitness
    funcion fitness(solution):
      return (profit - lambda*risk);
-  #devuelve un número resultado de las dimensiones  1xn * nxn *nx1
+  #devuelve un número resultado de las dimensiones 1xn * nxn * nx1
   ```]
 
 
-El principal objetivo de los algoritmos es maximizar la función fitness , la cual trata de maximizar el beneficio y minimizar el riesgo en una sola fórmula.El parámetro lambda se usará a modo de ajuste , cuando más alto sea su valor el algoritmo valorará mejor soluciones con poco beneficio pero que sean seguras , es decir que tengan poco riesgo , mientras que cuanto más cercano a 0 sea lambda , el algoritmo valorará mejor las soluciones con máximo beneficio posible , ignorando el riesgo.
+El principal objetivo de los algoritmos es maximizar la función fitness, la cual trata de maximizar el beneficio y minimizar el riesgo en una sola fórmula. El parámetro lambda se usará a modo de ajuste, cuando más alto sea su valor el algoritmo valorará mejor soluciones con poco beneficio pero que sean seguras, es decir, que tengan poco riesgo, mientras que cuanto más cercano a 0 sea lambda, el algoritmo valorará mejor las soluciones con máximo beneficio posible, ignorando el riesgo.
 
 == Operadores
 
@@ -259,36 +259,36 @@ Al ser este cruce una combinación lineal, los genes de los hijos resultantes, n
 
 #block(fill: luma(240), inset: 8pt, radius: 4pt, width: 100%)[
   ```py
-  # Pseudocódigo del operador Aritmético
+  # Pseudocódigo del operador aritmético
    funcion arithmetic(padre1 , padre2):
-     hijo1(padre1.size) ## genero los hijos con el mismo tamanio que los padres
+     hijo1(padre1.size) ## genero los hijos con el mismo tamaño que los padres
      hijo2(padre1.size) ## en el problema que tratamos todos los cromosomas miden lo mismo
 
-     for i in range(0,tamaniopadres):
+       for i in range(0,tamaniopadres):
 
-      if(padre1[i] == padre2[i]):
+       if (padre1[i] == padre2[i]):
        # asigno el mismo gen a los hijos
        # de esta forma si los padres son idénticos
        # sus hijos también los son
        hijo1[i]=padre1[i]
        hijo2[i]=padre1[i]
-      else:
+       else:
        sigma = double aleatorio entre 0 y 1
        hijo1[i] =sigma*padre1[i]+(1-sigma)*padre2[i]
        hijo2[i] =sigma*padre2[i]+(1-sigma)*padre1[i]
-     return pareja de hijos (hijo1, hijo2)
+      return pareja de hijos (hijo1, hijo2)
   ```]
 
-El operador BLX-alpha, genera un intervalo entre el minimo y el maximo de los genes seleccionados de los padres , a este intervalo se le añade un parámetro *alpha*gap*, el cual permite que el intervalo se agrande según el *alpha* escogido   y la distancia entre el mínimo y el máximo.Esto permite que el valor aleatorio que se genere en ese intervalo para cada hijo ,
-pueda ser más grande o más pequeño que los valores que el padre tenía por defecto por lo que permite explorar más soluciones y mantiene más diversidad ya que se generan genes que están fuera de los rango de los padres.
+El operador BLX-alpha genera un intervalo entre el mínimo y el máximo de los genes seleccionados de los padres, a este intervalo se le añade un parámetro *alpha*gap*, el cual permite que el intervalo se agrande según el *alpha* escogido y la distancia entre el mínimo y el máximo. Esto permite que el valor aleatorio que se genere en ese intervalo para cada hijo,
+pueda ser más grande o más pequeño que los valores que el padre tenía por defecto, por lo que permite explorar más soluciones y mantiene más diversidad ya que se generan genes que están fuera de los rangos de los padres.
 #block(fill: luma(240), inset: 8pt, radius: 4pt, width: 100%)[
   ```py
   # Pseudocódigo del operador BLX-alpha
    funcion arithmetic(padre1 , padre2):
-     hijo1(padre1.size) ## genero los hijos con el mismo tamanio que los padres
+     hijo1(padre1.size) ## genero los hijos con el mismo tamaño que los padres
      hijo2(padre1.size) ## en el problema que tratamos todos los cromosomas miden lo mismo
 
-     for i in range(0,tamaniopadres):
+      for i in range(0,tamaniopadres):
 
       if(padre1[i] == padre2[i]):
        # asigno el mismo gen a los hijos
@@ -297,94 +297,89 @@ pueda ser más grande o más pequeño que los valores que el padre tenía por de
        hijo1[i]=padre1[i]
        hijo2[i]=padre1[i]
       else:
-       cmax = double maximo entre padre1[i],padre2[i]
-       cmin = double minimo entre padre1[i],padre2[i]
+        cmax = double máximo entre padre1[i],padre2[i]
+        cmin = double mínimo entre padre1[i],padre2[i]
        gap = cmax-cmin
        hijo1[i] = aleatorio entre (cmin-gap*alpha,cmax+gap*alpha)
        hijo2[i] = aleatorio entre (cmin-gap*alpha,cmax+gap*alpha)
      return pareja de hijos (hijo1, hijo2)
   ```]
 
-Ambos operadores devuelven parejas de hijos que pueden no ser válidos por lo que se tendrán que arreglar ambos cuando estos se usen en los correespondientes algritmos.
+Ambos operadores devuelven parejas de hijos que pueden no ser válidos, por lo que se tendrán que arreglar ambos cuando estos se usen en los correspondientes algoritmos.
 === Operador de selección
-Para la selección de los padres se usa un torneo entre tres cromosomas elegidos al azar de la población actual.Estos tres cromosomas compiten por ver quien tiene mejor fitness y el que gane se convierte en padre.La función recibe como parametros el numero de seleccionados por torneo (k) ,el tamaño de la población,el número de  padres que se deben de seleccionar , y el vector de fitness de la población , para economizar las evaluaciones.Como resultado la función devuelve un vector de indices de los cromosomas escogidos para ser padres.
+Para la selección de los padres se usa un torneo entre tres cromosomas elegidos al azar de la población actual. Estos tres cromosomas compiten por ver quién tiene mejor fitness y el que gane se convierte en padre. La función recibe como parámetros el número de seleccionados por torneo (k), el tamaño de la población, el número de padres que se deben de seleccionar y el vector de fitness de la población, para economizar las evaluaciones. Como resultado la función devuelve un vector de índices de los cromosomas escogidos para ser padres.
 #block(fill: luma(240), inset: 8pt, radius: 4pt, width: 100%)[
   ```py
   # Pseudocódigo del operador tournament
-   funcion tournament(tournamentsize , populationsize,selectionsize,fitnesspoblation):
-    vector idxparents # vector con los indices de los padres
+    funcion tournament(tournamentsize, populationsize, selectionsize, fitnesspoblation):
+    vector idxparents # vector con los índices de los padres
     # repito el torneo tantas veces como necesite
-      for i in range(0,selectionsize):
+        for i in range(0, selectionsize):
         idxbest = 0
 
-        for j in range(0,tournamentsize):
+        for j in range(0, tournamentsize):
           idx = aleatorio entre 0 y populationsize-1
         #selecciono el mejor de entre los participantes del torneo
-          if fitnesspoblation[idx] > fitnesstournament:
-            fitnesstournament =fitnesspoblation
-            dxbest = idx
+          if fitnesspoblation[idx] > fitnessTournament:
+            fitnessTournament = fitnesspoblation[idx]
+            idxBest = idx
         #añado el mejor del torneo a la lista de padres
-        idxparents.puxhback(bestidx)
+        idxparents.pushback(idxBest)
     return idxparents
   ```]
 === Operador de mutación
 A la hora de hacer la mutación en los algoritmos usaremos el siguiente método:
 
-
 #block(fill: luma(240), inset: 8pt, radius: 4pt, width: 100%)[
   ```py
-  # Pseudocódigo del operador BLX-alpha
-   funcion mutation(mutsol , problem ,mutationrate, maxattempts):
-     idxgene=-1
-     amount =0
-     problembounds = pareja de valores de restriccion del problema #high,low
+  # Pseudocódigo del operador de mutación
+  funcion mutation(mutSol, problem, mutationRate, maxAttempts):
+    problembounds = problem.getSolutionDomainRange()
+    solutionsize = problem.getSolutionSize()
 
-     for attempt in range(0,maxattempts):
-       primercandidato = aleatorio entre (0,problem.size -1);
-       amountcandidato = mutsol[primercandidato]*mutationrate
-       # si la cantidad es 0 , busco otro ya que esta cantidad no
-       # me modifica nada
+    validDonors = []
+    for i in range(0, solutionsize):
+      amount = mutSol(i) * mutationRate
+      if amount <= 0.0:
+        continuar
+      firstAfter = mutSol(i) - amount
+      firstValid = firstAfter == 0.0 o
+                   (firstAfter >= problembounds.first y
+                    firstAfter <= problembounds.second)
+      if firstValid:
+        validDonors.pushback(i)
 
-       if(amountcandidato<=0):
-         continue
-       firstafter =mutsol[primercandidato]-amountcandidato
-       bool firstvalido =firstafter == 0.0 || (firstafter >= problembounds.first &&firstafter <= problembounds.second)
-
-       if(firstvalido): #si puedo hacer la modificación al primero
-        idxgene = primercandidato
-        amount = candidateAmount
-        break ## termino el bucle para buscar el primer gen
-     if(idxGene ==-1):
-      # si no he podido encontrar un primer gen en el rango de intentos que tengo
-      # no consigo mutar la solución y termino
-      # esto no suele ocurrir , solo por seguridad
+    if validDonors está vacío:
       return false
 
-     idxnextgene=-1
-     for attempt in range(0,maxattempts):
-       segundocandidato = aleatorio entre (0,problem.size -1);
+    for attempt in range(0, maxAttempts):
+      pickDonor = aleatorio entre 0 y validDonors.size - 1
+      candidateFirst = validDonors[pickDonor]
+      amount = mutSol(candidateFirst) * mutationRate
 
-      ## si elijo el mismo que el primero busco otro
-       if(idxGene ==segundocandidato):
-         continue
-       secondafter =mutsol[primercandidato]-amountcandidato
-       bool secondvalido =secondafter == 0.0 || (secondafter >= problembounds.first && secondafter <= problembounds.second)
-       if(secondvalido): #si puedo hacer la modificación al segundo escoido
-        idxnextgene = segundocandidato
-        amount = candidateAmount
-        break ## termino el bucle para dejar de buscar y aplicar la modificación
-     if(idxnextgene =-1):# si no consigo buscar un segundo gen ,no hago la mutación
-       return false
-     ## Si todo ha ido bien aplico la mutación
-    ## La mutación ya es valida ya que los genes
-    ## modificados cumplen los límites de
-    ## high y low y la suma total no cambia
-     mutsol[idxgene]-=amount
-     mutsol[idxnextgene]+=amount
-     return true
+      validReceivers = []
+      for i in range(0, solutionsize):
+        if i == candidateFirst:
+          continuar
+        secondAfter = mutSol(i) + amount
+        secondValid = secondAfter == 0.0 o
+                      (secondAfter >= problembounds.first y
+                       secondAfter <= problembounds.second)
+        if secondValid:
+          validReceivers.pushback(i)
 
+      if validReceivers está vacío:
+        continuar
+
+      idx = aleatorio entre 0 y validReceivers.size - 1
+      candidateSecond = validReceivers[idx]
+
+      mutSol(candidateFirst) -= amount
+      mutSol(candidateSecond) += amount
+      return true
+
+    return false
   ```]
-
 La función de mutación recibe como parámetros la solución a mutar (por referencia), un objeto
 problema, el ratio de mutación y el número máximo de intentos que tenemos para elegir tanto el
 primer como el segundo gen.
@@ -400,8 +395,8 @@ Como se puede observar, el proceso de mutación se divide en dos partes:
   de las restricciones del problema durante las iteraciones permitidas.
 
 Cada vez que no se encuentra un gen que cumpla las restricciones y se hayan agotado las
-iteraciones permitidas, se devuelve `false`. De lo contrario, modifica la solución y se devuelve true.
-pasada por referencia se modifica. Esto se hace para poder tener un control posterior de cuándo
+iteraciones permitidas, se devuelve `false`. De lo contrario, modifica la solución y se devuelve `true`.
+La solución pasada por referencia se modifica. Esto se hace para poder tener un control posterior de cuándo
 se muta la solución.
 
 #pagebreak()
@@ -409,7 +404,7 @@ se muta la solución.
 
 == Local Search
 
-El algortimo de búsqueda local (el primero el mejor) parte de una solución generada aleatoriamente y genera un vecindario alrededor de esta solución , una vez generado el vecindario , se comienza a recorrer cada vecino  y se evalúa su fitness. Si se encuentra un fitness mejor que el de la solución actual ,se escoge ese vecino como mejor solución y se genera un nuevo vecindario alrededor de el.El proceso termina cuando se llega al máximo de evaluaciones permitidas o cuando no se ha encontrado ningún vecino del vecindario actual generado que mejore la solución.
+El algoritmo de búsqueda local (el primero el mejor) parte de una solución generada aleatoriamente y genera un vecindario alrededor de esta solución, una vez generado el vecindario, se comienza a recorrer cada vecino y se evalúa su fitness. Si se encuentra un fitness mejor que el de la solución actual, se escoge ese vecino como mejor solución y se genera un nuevo vecindario alrededor de él. El proceso termina cuando se llega al máximo de evaluaciones permitidas o cuando no se ha encontrado ningún vecino del vecindario actual generado que mejore la solución.
 
 
 #block(fill: luma(240), inset: 8pt, radius: 4pt, width: 100%)[
@@ -417,8 +412,8 @@ El algortimo de búsqueda local (el primero el mejor) parte de una solución gen
   # Pseudocódigo del algoritmo de búsqueda local
   función LocalSearch(max_evals):
       double ratio
-      solucioninicial = solucionAleatoria
-      bestfitnes = fitness(solucionAleatoria)
+       solucioninicial = solucionAleatoria
+       bestFitness = fitness(solucionAleatoria)
 
       vecinos = Generar vector de todas las parejas (i,j) posibles con i,j en [0,ncompany-1]
       # excepto en el caso i=j;
@@ -432,43 +427,43 @@ El algortimo de búsqueda local (el primero el mejor) parte de una solución gen
           solucioninicial[v.primero]-=cantidadmover
           solucioninicial[v.segundo]+=cantidadmover
 
-          if es valida solucioninicial:
+           if es válida solucioninicial:
             evals = evals+1
 
-            if fitness(solucioninicial) > mejorfitness:
-              haymejora=true;
-              mejorfitness=fitnes de la solucion inicial modificada
-              #si hay una mejora salimos del bucle for
-              #ya que es una busqueda del primero el mejor
+             if fitness(solucioninicial) > mejorfitness:
+               haymejora = true
+               mejorfitness = fitness de la solución inicial modificada
+               #si hay una mejora salimos del bucle for
+               #ya que es una búsqueda del primero el mejor
               salir del bucle for
-          # si no cambiamos de solucion inicial , hay que
-          # devolverla a su estado original
-          devolver solucioninicial a su estado original
-          if evals==maxevals:
+           # si no cambiamos de solución inicial, hay que
+           # devolverla a su estado original
+           devolver solucioninicial a su estado original
+           if evals==maxevals:
             salir del bucle for
             #para no pasarnos de evaluaciones
-      return solucioninicial ,mejorfitness,evals
+       return solucioninicial, mejorfitness, evals
   ```
 ]
 #block(fill: luma(240), inset: 8pt, radius: 4pt, width: 100%)[
   ```py
-    #Generación del vecindario
+     # Generación del vecindario
     for i,j in ncompany:
       vectorparejas.insertar(pareja(i,j))
 
   ```]
 
-La implementación del algoritmo de Búsqueda local se divide en dos partes , primero se crea el vector vecinos , en este caso se usa un vector de parejas , donde cada vecino es la pareja (i,j) la cual nos indicará los índices que debemos modificar en el vector solución.
-Una vez creado el vector , lo mezclamos aleatoriamente , y este será el que nos indique qué vecinos debemos de probar. Si no fuese una busqueda de el primero el mejor y se escogiese el mejor vecino no haría falta mezclar las parejas ya que el orden no importaría por que siempre tendríamos que recorrer todo el vecindario.
+La implementación del algoritmo de Búsqueda local se divide en dos partes, primero se crea el vector vecinos, en este caso se usa un vector de parejas, donde cada vecino es la pareja (i,j) la cual nos indicará los índices que debemos modificar en el vector solución.
+Una vez creado el vector, lo mezclamos aleatoriamente, y este será el que nos indique qué vecinos debemos de probar. Si no fuese una búsqueda del primero el mejor y se escogiese el mejor vecino no haría falta mezclar las parejas, ya que el orden no importaría porque siempre tendríamos que recorrer todo el vecindario.
 
-Una vez disponemos del vecindario , debemos generar las nuevas soluciones a partir de las parejas que vamos escogiendo del vector , si tenemos la pareja (i,j) quitaremos un porcentaje del peso a la posición i y se la sumaremos a la posición j (el ratio usado en la práctica es 0.4). Esto nos genera una nueva solución la cual comprobaremos si es valida y en caso de ser valida si supera el fitness de nuestra mejor solución hasta el momento , este nuevo vector solución con las nuevas modificaciones en los indices (i,j) se convertirá en nuestra nueva solución. Dejaremos de recorrer el vector de vecinos y volveremos a generar un vecindario mezclado aleatoriamente para de nuevo  recorrerlo desde el principio para ver si a partir de esta nueva solución generada , conseguimos una mejor.
+Una vez disponemos del vecindario, debemos generar las nuevas soluciones a partir de las parejas que vamos escogiendo del vector. Si tenemos la pareja (i,j) quitaremos un porcentaje del peso a la posición i y se la sumaremos a la posición j (el ratio usado en la práctica es 0.4). Esto nos genera una nueva solución la cual comprobaremos si es válida y, en caso de ser válida, si supera el fitness de nuestra mejor solución hasta el momento. Este nuevo vector solución con las nuevas modificaciones en los índices (i,j) se convertirá en nuestra nueva solución. Dejaremos de recorrer el vector de vecinos y volveremos a generar un vecindario mezclado aleatoriamente para recorrerlo de nuevo desde el principio para ver si a partir de esta nueva solución generada conseguimos una mejor.
 
-Si la solución generada no es valida o no mejora la solución actual , restauraremos las modificaciones hechas al vector solución , de esta manera podemos usar un solo vector y modificar dos posiciones en vez de hacer copias de vectores completos.
+Si la solución generada no es válida o no mejora la solución actual, restauraremos las modificaciones hechas al vector solución. De esta manera podemos usar un solo vector y modificar dos posiciones en vez de hacer copias de vectores completos.
 
-Mientras que no se superen las restricciones de las evaluaciones y se sigan encontrando vecinos mejores en cada vecindario seguiremos intentando encontrar la mejor solución . En caso de recorrer todo el vecindario y no encontrar una solución mejor o que se superen las evaluciones permitidas , se detendrá la búsqueda.
+Mientras que no se superen las restricciones de las evaluaciones y se sigan encontrando vecinos mejores en cada vecindario seguiremos intentando encontrar la mejor solución. En caso de recorrer todo el vecindario y no encontrar una solución mejor o que se superen las evaluaciones permitidas, se detendrá la búsqueda.
 
 == Algoritmo Genético Generacional
-Para el algoritmo genético Generacional , se ha construido una clase *Agg* para implementar la estructura del algoritmo , y dos clases hijas *AggArit* y *AggBLX* las cuales heredan de *Agg* y solo modifican la función de cruce. De esta manera podemos tener una única implementación del algoritmo y cambiar el operador de cruce con facilidad.
+Para el algoritmo genético generacional se ha construido una clase *Agg* para implementar la estructura del algoritmo y dos clases hijas *AggArit* y *AggBLX* las cuales heredan de *Agg* y solo modifican la función de cruce. De esta manera podemos tener una única implementación del algoritmo y cambiar el operador de cruce con facilidad.
 
 #block(fill: luma(240), inset: 8pt, radius: 4pt, width: 100%)[
   ```py
@@ -531,11 +526,11 @@ Para el algoritmo genético Generacional , se ha construido una clase *Agg* para
 ]
 
 == Algoritmo Genético Estacionario
-Para el algoritmo genético Estacionari , se ha construido una clase *Age* para implementar la estructura del algoritmo , y dos clases hijas *AgeArit* y *AgeBLX* las cuales heredan de *Age* y solo modifican la función de cruce. De esta manera podemos tener una única implementación del algoritmo y cambiar el operador de cruce con facilidad.
+Para el algoritmo genético estacionario se ha construido una clase *Age* para implementar la estructura del algoritmo y dos clases hijas *AgeArit* y *AgeBLX* las cuales heredan de *Age* y solo modifican la función de cruce. De esta manera podemos tener una única implementación del algoritmo y cambiar el operador de cruce con facilidad.
 
 
-== Algortimo Memético
-Para la implementación de los algoritmos meméticos he usado una clase llamada *Am* en la cual implemento el método optimize general , la busqueda local y el operador de cruce. Dentro de esta clase hay un método virtual *applyLocalSearch* que es el que marca la diferencia entre los tres tipos de algoritmo genético. Este método lo implementa cada subclase del algoritmo memético.A continuación describo el método applyLocalSearch que usa cada uno.
+== Algoritmo Memético
+Para la implementación de los algoritmos meméticos he usado una clase llamada *Am* en la cual implemento el método optimize general, la búsqueda local y el operador de cruce. Dentro de esta clase hay un método virtual *applyLocalSearch* que es el que marca la diferencia entre los tres tipos de algoritmo genético. Este método lo implementa cada subclase del algoritmo memético. A continuación describo el método applyLocalSearch que usa cada uno.
 === AM-Random
 #block(fill: luma(240), inset: 8pt, radius: 4pt, width: 100%)[
   ```py
@@ -580,7 +575,7 @@ Para la implementación de los algoritmos meméticos he usado una clase llamada 
   función applyLocalSearch(poblation, fitnesspoblation, bestFitness, bestsolution, problem):
       evals = 0
       nBest = redondeo hacia arriba(populationSize * 0.10)
-      indices = indices de las nBest mejores soluciones según fitnesspoblation
+       indices = índices de las nBest mejores soluciones según fitnesspoblation
       for i in indices:
         result = localSearch(problem, 100, poblation[i])
         evals += 100
@@ -615,7 +610,7 @@ El proyecto está organizado de la siguiente manera:
   - `include/` : Contiene los archivos de cabecera (.h y .hpp)
     - `age.h`: Clase base para los algoritmos genéticos estacionarios
     - `agg.h`: Clase base para los algoritmos genéticos generacionales
-    - `agearit.h`, `ageblx.h`: Clases hijas de `age.h`con los correspondientes operadores
+    - `agearit.h`, `ageblx.h`: Clases hijas de `age.h` con los correspondientes operadores
     - `aggarit.h`, `aggblx.h`: Clases hijas de `agg.h` con los correspondientes operadores
     - `amall.h`, `ambest.h`, `amrand.h`: Clases de los algoritmos meméticos.
     - `pportfolio.h`, `greedy.h`, `localsearch.h`, `randomsearch.h`
@@ -648,8 +643,8 @@ El script *script.sh* automatiza el proceso de compilación:
   ```
 ]
 
-- *Modo debug*: Compila con la flag -O0 (sin optimización) y -g (símbolos de depuración), para detectar errores y depurar .
-- *Modo release*: Compila con -O3 (máxima optimización) y -DNDEBUG (desactiva comprobaciones de Eigen),con esta compilación se han hecho las pruebas.
+- *Modo debug*: Compila con la flag -O0 (sin optimización) y -g (símbolos de depuración), para detectar errores y depurar.
+- *Modo release*: Compila con -O3 (máxima optimización) y -DNDEBUG (desactiva comprobaciones de Eigen), con esta compilación se han hecho las pruebas.
 
 *Opción 2: Usando CMake directamente*
 
@@ -683,8 +678,8 @@ Una vez compilado el programa, se puede ejecutar de las siguientes formas:
 - *high*: Porcentaje máximo de inversión permitido por empresa (ejemplo: 0.08)
 - *evaluaciones*: Número de ejecuciones de cada algoritmo con diferentes seeds
 - *seed*: Semilla inicial para el generador de números aleatorios (se incrementa en 10 por cada evaluación)
-- *output_csv* : Archivo csv donde se guardan los fitness de todas las ejecuciones
-El parámetro output_csv es opcional , si no se pone entonces no se guardan los datos en un fichero solo aparecen las medias.
+- *output_csv* : Archivo CSV donde se guardan los fitness de todas las ejecuciones
+El parámetro output_csv es opcional, si no se pone entonces no se guardan los datos en un fichero y solo aparecen las medias.
 
 *Ejemplo de ejecución:*
 
@@ -728,7 +723,7 @@ Muestra el mensaje de ayuda con las instrucciones de uso.
 = Experimentos y análisis de los resultados
 == Casos empleados y valores de los parámetros.
 
-Para comparar los resultados de los algoritmos se han usado los beneficios diarios de las empresas del S&P500 , S&P100 e IBEX35 con los siguientes parámetros.
+Para comparar los resultados de los algoritmos se han usado los beneficios diarios de las empresas del S&P500, S&P100 e IBEX35 con los siguientes parámetros.
 
 - *$lambda$*= 500 (usado en la función fitness)
 - *seed* = 42 (por cada ejecución del algoritmo se incrementa 10 unidades)
@@ -738,7 +733,7 @@ Para comparar los resultados de los algoritmos se han usado los beneficios diari
 - *high*(para S&P500) = 0.02
 - *totalevaluations* = 50
 
-La ejecución se ha hecho como se indicó en el apartado anterior , cambiando en los argumentos del programa el archivo de entrada de datos y ajustando su respectivo valor *high* correspondiente a cada archivo.
+La ejecución se ha hecho como se indicó en el apartado anterior, cambiando en los argumentos del programa el archivo de entrada de datos y ajustando su respectivo valor *high* correspondiente a cada archivo.
 
 == Resultados obtenidos
 
@@ -849,19 +844,19 @@ A continuación se muestran los boxplots de los resultados obtenidos para cada c
 
 Al observar los resultados obtenidos podemos ver que cada algoritmo se comporta de manera muy diferente dependiendo del conjunto de datos usado. Para poder entender por qué unos algoritmos funcionan mejor que otros es necesario analizar cómo trabaja cada uno y qué características del problema aprovechan o ignoran.
 
-== Comportamiento de los Algorítmos Genéticos Generacionales
-Los AGG reemplazan en todas las iteraciones la población al completo, conservando el mejor de la población anterior e intercambiandolo por el peor de la generación que entra. Este tipo de reemplazo hace que haya más diversidad de soluciones y por tanto el algoritmo tenga menos riesgo de quedarse "atascado" en una zona del espacio de soluciones. Esto hace que el algoritmo explore más parte del espacio de soluciones, en consecuencia  se pierden soluciones que aunque no fuesen la mejor , eran buenas y podrían haber convergido a mejores soluciones mediante cruces y mutaciones. 
+== Comportamiento de los Algoritmos Genéticos Generacionales
+Los AGG reemplazan en todas las iteraciones la población al completo, conservando el mejor de la población anterior e intercambiándolo por el peor de la generación que entra. Este tipo de reemplazo hace que haya más diversidad de soluciones y por tanto el algoritmo tenga menos riesgo de quedarse "atascado" en una zona del espacio de soluciones. Esto hace que el algoritmo explore más parte del espacio de soluciones, en consecuencia se pierden soluciones que, aunque no fuesen la mejor, eran buenas y podrían haber convergido a mejores soluciones mediante cruces y mutaciones.
 
 Podemos ver en el 
 
-== Comportamiento de los Algorítmos Genéticos Estacionarios
-== Comportamiento de los Algorítmos  Meméticos
+== Comportamiento de los Algoritmos Genéticos Estacionarios
+== Comportamiento de los Algoritmos Meméticos
 == Mejor operador para los genéticos
-Como se puede observar en los resultados , en ambos algoritmos genéticos el mejor resultado lo obtiene el operador *BLX-$alpha$*.La principal diferencia entre este y el aritmético es que el *BLX-$alpha$* permite que el gen resultante de los hijos al cruzar los genes de los padres, pueda estar fuera del intervalo que genera el minimo y el máximo de los padres, por tanto los hijos resultantes de los cruces se pueden alejar más de sus padres y permiten explorar más  el espacio de soluciones.
-Por otra parte , el cromosoma resultante del cruce aritmético contiene genes que no pueden tener un valor mayor o menor que el mayor o menor de los padres (al ser una combinación lineal )  por lo que al aplicar este tipo  de cruce , los hijos convergen a la media de los padres obteniendo mejor resultado en entornos explotativos.
+Como se puede observar en los resultados, en ambos algoritmos genéticos el mejor resultado lo obtiene el operador *BLX-$alpha$*. La principal diferencia entre este y el aritmético es que el *BLX-$alpha$* permite que el gen resultante de los hijos al cruzar los genes de los padres pueda estar fuera del intervalo que genera el mínimo y el máximo de los padres, por tanto los hijos resultantes de los cruces se pueden alejar más de sus padres y permiten explorar más el espacio de soluciones.
+Por otra parte, el cromosoma resultante del cruce aritmético contiene genes que no pueden tener un valor mayor o menor que el mayor o menor de los padres (al ser una combinación lineal) por lo que al aplicar este tipo de cruce, los hijos convergen a la media de los padres obteniendo mejor resultado en entornos explotativos.
 
-== Búsqueda Local vs Algorítmos Genéticos
-Los algoritmos genéticos en el problema del portfolio , obtienen mejores resultados en el problema del portfolio ya que exploran más el espacio de soluciones que la búsqueda local. La búsqueda local es más explotativa por lo que le es fácil entrar en máximos locales en datasets pequeños como el ibex35 mientras que los algoritmos genéticos exploran un mayor rango de soluciones por lo que tienen más facilidad de evitar máximos locales. También cabe destacar  que la búsqueda local se ve muy afectada por la solución inicial que se toma , al ser esta aleatoria , dependemos más de la "suerte" a la hora de encontrar una mejor solución antes de las evaluaciones permitidas. En los algorítmos genéticos también influye la población inicial , pero sobre todo en los AGG , al reemplazar toda la población en cada iteración y conservar la mejor solución , se consigue una mayor diversidad y mayor probabilidad de no quedarse atascado en un máximo local. 
+== Búsqueda Local vs Algoritmos Genéticos
+Los algoritmos genéticos en el problema del portfolio obtienen mejores resultados en el problema del portfolio ya que exploran más el espacio de soluciones que la búsqueda local. La búsqueda local es más explotativa por lo que le es fácil entrar en máximos locales en datasets pequeños como el Ibex 35 mientras que los algoritmos genéticos exploran un mayor rango de soluciones por lo que tienen más facilidad de evitar máximos locales. También cabe destacar que la búsqueda local se ve muy afectada por la solución inicial que se toma, al ser esta aleatoria, dependemos más de la "suerte" a la hora de encontrar una mejor solución antes de las evaluaciones permitidas. En los algoritmos genéticos también influye la población inicial, pero sobre todo en los AGG, al reemplazar toda la población en cada iteración y conservar la mejor solución, se consigue una mayor diversidad y mayor probabilidad de no quedarse atascado en un máximo local.
 
 == AGE-BL$alpha$ vs AGG-BL$alpha$
 
@@ -869,7 +864,7 @@ Los algoritmos genéticos en el problema del portfolio , obtienen mejores result
 
 == Meméticos vs mejor AG
 
-== Comparación Gráfica fitness 2014-2024 (50 ejecuciones)
+== Comparación gráfica fitness 2014-2024 (50 ejecuciones)
 
 #figure(
   image("img/ib35_linea.png", width: 80%),
@@ -883,11 +878,11 @@ Los algoritmos genéticos en el problema del portfolio , obtienen mejores result
 
 #figure(
   image("img/syp500_linea.png", width: 80%),
-  caption: [Boxplot de resultados  para S&P500],
+  caption: [Boxplot de resultados para S&P500],
 )
 
-En estas gráficas podemos ver la evolución del fitness a través de las 50 ejecuciones hechas , vemos que como es lógico en el Algoritmo Greedy se mantiene constante y podemos ver como la variabilidad del fitness va disminuyendo en el algoritmo de Búsqueda Aleatoria conforme el conjunto de datos aumenta , sin embargo la variabilidad del fitness de la búsqueda local sigue una distribución parecida en todos los casos.
+En estas gráficas podemos ver la evolución del fitness a través de las 50 ejecuciones hechas, vemos que como es lógico en el Algoritmo Greedy se mantiene constante y podemos ver cómo la variabilidad del fitness va disminuyendo en el algoritmo de Búsqueda Aleatoria conforme el conjunto de datos aumenta, sin embargo la variabilidad del fitness de la búsqueda local sigue una distribución parecida en todos los casos.
 
-Podemos observar también que en algunas ejecuciones la Búsqueda aleatoria ha obtenido mejor fitness que la Búsqueda Local , esto ocurre mayoritariamente en los datos del S&P500 ya que al ser un espacio de soluciones tan grande a la Búsqueda Local se le acaban las evaluaciones muy rápido y en algunos casos puede sacar fitness peores que la Búsqueda Aleatoria.
+Podemos observar también que en algunas ejecuciones la Búsqueda aleatoria ha obtenido mejor fitness que la Búsqueda Local, esto ocurre mayoritariamente en los datos del S&P500 ya que al ser un espacio de soluciones tan grande a la Búsqueda Local se le acaban las evaluaciones muy rápido y en algunos casos puede sacar fitness peores que la Búsqueda Aleatoria.
 
 == Comparación global y conclusiones
