@@ -137,7 +137,7 @@ ResultMH<double> Am::optimize(Problem<double> &problem, int maxevals) {
       int idxSolution = Random::get(0, this->populationSize - 1);
       tSolution<double> mutSol = sons[idxSolution];
 
-      bool mutated = op.mutation(mutSol, problem, 0.15, problemSize * 3);
+      bool mutated = op.mutation(mutSol, problem, 0.15, problemSize * 5);
 
       if (mutated) {
         sons[idxSolution] = mutSol;

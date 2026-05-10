@@ -846,12 +846,18 @@ Podemos ver en el
 Como se puede observar en los resultados, en ambos algoritmos genéticos el mejor resultado lo obtiene el operador *BLX-$alpha$*. La principal diferencia entre este y el aritmético es que el *BLX-$alpha$* permite que el gen resultante de los hijos al cruzar los genes de los padres pueda estar fuera del intervalo que genera el mínimo y el máximo de los padres, por tanto los hijos resultantes de los cruces se pueden alejar más de sus padres y permiten explorar más el espacio de soluciones.
 Por otra parte, el cromosoma resultante del cruce aritmético contiene genes que no pueden tener un valor mayor o menor que el mayor o menor de los padres (al ser una combinación lineal) por lo que al aplicar este tipo de cruce, los hijos convergen a la media de los padres obteniendo mejor resultado en entornos explotativos.
 
+//hecho
 == Búsqueda Local vs Algoritmos Genéticos
 Los algoritmos genéticos en el problema del portfolio obtienen mejores resultados en el problema del portfolio ya que exploran más el espacio de soluciones que la búsqueda local. La búsqueda local es más explotativa por lo que le es fácil entrar en máximos locales en datasets pequeños como el Ibex 35 mientras que los algoritmos genéticos exploran un mayor rango de soluciones por lo que tienen más facilidad de evitar máximos locales. También cabe destacar que la búsqueda local se ve muy afectada por la solución inicial que se toma, al ser esta aleatoria, dependemos más de la "suerte" a la hora de encontrar una mejor solución antes de las evaluaciones permitidas. En los algoritmos genéticos también influye la población inicial, pero sobre todo en los AGG, al reemplazar toda la población en cada iteración y conservar la mejor solución, se consigue una mayor diversidad y mayor probabilidad de no quedarse atascado en un máximo local.
 
 == AGE-BL$alpha$ vs AGG-BL$alpha$
+En cuanto a comparación entre algoritmos genéticos nos fijaremos en los que usan el operador *BLX-$alpha$* para compararlos en igualdad de condiciones cuando usan el mejor operador.
+
+Se puede observar facilmente en los gráficos de lineas que ambos algoritmos tienen resultados muy parecidos y de los mejores en comparación a los otros algoritmos, en datasets pequeños como podría ser el del ibex35 vemos que no se aprecia apenas diferencia ya que la ventaja explorativa del AGG no tiene apenas efecto. La diferencia se puede observar en el dataset de mayor tamaño donde vemos que el AGG (linea morada) consigue mantener su fitness por encima del AGE en la mayoría de las ejecuciones. Por tanto podemos ver que en el SP500 se obtienen mejores soluciones cuando se tiene mayor diversidad en la población del algoritmo que cuando 
+se intenta conservar de manera prematura a los mejores indivíduos (AGE).
 
 == Comparación entre meméticos
+Los algoritmos meméticos usados son una hibridación entre el AGG-BLX$alpha$ y la búsqueda local. En los resultados vemos que tienen un comportamiento similar todas las implementaciones de los meméticos ,   
 
 == Meméticos vs mejor AG
 
