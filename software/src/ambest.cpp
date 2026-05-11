@@ -17,8 +17,8 @@ void AmBest::applyLocalSearch(std::vector<tSolution<double>> &poblation,
   int nBest = std::ceil(this->populationSize * 0.1);
   std::vector<int> indices(this->populationSize);
   std::iota(indices.begin(), indices.end(), 0);
-  /// implementar best
-  /// busco los indices de las diez mejores soluciones
+
+  /// busco los indices del 10%  mejores soluciones
   std::nth_element(indices.begin(), indices.begin() + nBest, indices.end(),
                    [&fitnessPoblation](int i, int j) {
                      return fitnessPoblation[i] > fitnessPoblation[j];
@@ -31,11 +31,14 @@ void AmBest::applyLocalSearch(std::vector<tSolution<double>> &poblation,
       evals += 100;
     }
     ResultMH<double> result = localSearch(problem, 500, poblation[i]);
-
+		
+    if (result.fitness > fitnessPoblation[i]) {
+      fitnessPoblation[i] = result.fitness;
+      poblation[i] = result.solution;
+    }
     if (result.fitness > bestFitness) {
       bestFitness = result.fitness;
       bestSolution = result.solution;
-      poblation[i] = result.solution;
     }
   }
 }

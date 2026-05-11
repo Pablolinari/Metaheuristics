@@ -255,7 +255,7 @@ En ambos operadores, si los padres seleccionados son iguales, los hijos serán i
 
 El operador aritmético genera un aleatorio entre 0 y 1, para cada posición *i* de los padres, con el aleatorio escogido hace una combinación lineal distinta para cada hijo entre los genes de los padres. Si los genes de los padres son iguales en una determinada posición, no se genera la transformación, de esta manera conseguimos que si todos los genes de los padres son iguales, los hijos sean iguales.
 
-Al ser este cruce una combinación lineal, los genes de los hijos resultantes, nunca podrán tener un valor menor que el menor de los padres ni mayor que el mayor de los genes de sus padres. Esto hace que este operador tienda a converger hacia el centro de los padres, con un comportamiento explotativo.
+Al ser este cruce una combinación lineal, los genes de los hijos resultantes, nunca podrán tener un valor menor que el menor gen de los padres ni mayor que el mayor de los genes de sus padres. Esto hace que este operador tienda a converger hacia el centro de los padres, con un comportamiento explotativo.
 
 #block(fill: luma(240), inset: 8pt, radius: 4pt, width: 100%)[
   ```py
@@ -280,7 +280,7 @@ Al ser este cruce una combinación lineal, los genes de los hijos resultantes, n
   ```]
 
 El operador BLX-alpha genera un intervalo entre el mínimo y el máximo de los genes seleccionados de los padres, a este intervalo se le añade un parámetro *alpha*gap*, el cual permite que el intervalo se agrande según el *alpha* escogido y la distancia entre el mínimo y el máximo. Esto permite que el valor aleatorio que se genere en ese intervalo para cada hijo,
-pueda ser más grande o más pequeño que los valores que el padre tenía por defecto, por lo que permite explorar más soluciones y mantiene más diversidad ya que se generan genes que están fuera de los rangos de los padres.
+pueda ser más grande o más pequeño que los valores que los padres tenían, por lo que permite explorar más soluciones y mantiene más diversidad ya que se generan genes que están fuera de los rangos de los padres.
 #block(fill: luma(240), inset: 8pt, radius: 4pt, width: 100%)[
   ```py
   # Pseudocódigo del operador BLX-alpha
@@ -307,7 +307,7 @@ pueda ser más grande o más pequeño que los valores que el padre tenía por de
 
 Ambos operadores devuelven parejas de hijos que pueden no ser válidos, por lo que se tendrán que arreglar ambos cuando estos se usen en los correspondientes algoritmos.
 === Operador de selección
-Para la selección de los padres se usa un torneo entre tres cromosomas elegidos al azar de la población actual. Estos tres cromosomas compiten por ver quién tiene mejor fitness y el que gane se convierte en padre. La función recibe como parámetros el número de seleccionados por torneo (k), el tamaño de la población, el número de padres que se deben de seleccionar y el vector de fitness de la población, para economizar las evaluaciones. Como resultado la función devuelve un vector de índices de los cromosomas escogidos para ser padres.
+Para la selección de los padres se usa un torneo entre k cromosomas elegidos al azar de la población actual. Estos k cromosomas compiten por ver quién tiene mejor fitness y el que gane se convierte en padre. La función recibe como parámetros el número de seleccionados por torneo (k), el tamaño de la población, el número de padres que se deben de seleccionar y el vector de fitness de la población, para economizar las evaluaciones. Como resultado la función devuelve un vector de índices de los cromosomas escogidos para ser padres.
 #block(fill: luma(240), inset: 8pt, radius: 4pt, width: 100%)[
   ```py
   # Pseudocódigo del operador tournament
@@ -381,8 +381,7 @@ A la hora de hacer la mutación en los algoritmos usaremos el siguiente método:
     return false
   ```]
 La función de mutación recibe como parámetros la solución a mutar (por referencia), un objeto
-problema, el ratio de mutación y el número máximo de intentos que tenemos para elegir tanto el
-primer como el segundo gen.
+problema, el ratio de mutación y el número máximo de intentos que tenemos para elegir el segundo gen.
 
 Como se puede observar, el proceso de mutación se divide en dos partes:
 
@@ -521,33 +520,97 @@ Para el algoritmo genético estacionario se ha construido una clase *Age* para i
 
 
 == Algoritmo Memético
-Para la implementación de los algoritmos meméticos he usado una clase llamada *Am* en la cual implemento el método optimize general, la búsqueda local y el operador de cruce. Dentro de esta clase hay un método virtual *applyLocalSearch* que es el que marca la diferencia entre los tres tipos de algoritmo genético. Este método lo implementa cada subclase del algoritmo memético. A continuación describo el método applyLocalSearch que usa cada uno.
+
+Los algoritmos meméticos se han implementado hibridando el *AGG-BLX$alpha$* con la ejecución de la búsqueda local cada 10 generaciones de poblaciones.La estructura del código es idéntica a la expuesta en el AGG pero con una condición adicional al final del bucle principal.
+
+Una pequeña diferencia que se puede encontrar respecto a la implementación es que la variable evals pertenece a la clase *Am* para poder seguir la cuenta del número de iteraciones al aplicar la búsqueda local.
+
+#block(fill: luma(240), inset: 8pt, radius: 4pt, width: 100%)[
+  ```py
+  # Pseudocódigo del algoritmo de búsqueda local
+  función Agg(max_evals):
+      bestFitness = -infinito
+      bestSolution
+      poblation = soluciones aleatorias
+      for i in range(0, populationSize):
+        tempfitness = fitness(poblation[i])
+        evals += 1
+        fitnesspoblation.pushback(tempfitness)
+        if tempfitness > bestFitness:
+          bestFitness = tempfitness
+          bestSolution = poblation[i]
+
+      while evals < maxevals:
+        tournament(tournamentsize, populationsize, populationsize, fitnesspoblation)
+        expectedparentscrossover = redondeo hacia arriba(crossoverprob * idxparents.size())
+        for i in range(0, expectedparentscrossover, 2):
+          son = crossover(poblation[idxparents[i]], poblation[idxparents[i + 1]])
+          reparar hijos inválidos
+          sons.pushback(son.first)
+          sons.pushback(son.second)
+
+      for i in range(expectedparentscrossover, poblationsize):
+        sons.pushback(poblation[idxparents[i]])
+
+      ## mutación
+      expectedmutation = mutationprob * populationsize
+      for i in range(0, expectedmutation):
+        idxsolution = random entre 0 y populationsize - 1
+        mutsol = sons[idxsolution]
+        mutation(mutSol, problem, 0.15, problemSize * 5)
+        sons[idxSolution] = mutSol
+
+      # Sustitución de la población
+        mismo fragmento de código que la 
+        sustitución en el AGG
+
+      # aplicación de la búsqueda local
+      nGenerations+=1;
+      if nGenerations % 10 == 0:
+        applyLocalSearch
+    }
+  return bestsolution, bestfitness, evals
+  ```
+]
+
+Para la implementación de los algoritmos meméticos especificados he usado el método virtual applyLocalSerch de la clase *Am* para poder cambiar el modo de aplicar la búsqueda local sin tener que modificar el código general.
+
+
+A continuación describo el método applyLocalSearch que usa cada uno.
 === AM-Random
+
 #block(fill: luma(240), inset: 8pt, radius: 4pt, width: 100%)[
   ```py
   # Pseudocódigo de AM-Random (applyLocalSearch)
-  función applyLocalSearch(poblation, fitnesspoblation, bestFitness, bestsolution, problem):
+  función applyLocalSearch(poblation, fitnesspoblation, bestFitness, bestsolution, problem,maxevals):
       nRand = redondeo hacia arriba(poblation.size() * 0.10)
-      evals = 0
       for i in range(0, nRand):
+        if evals+100>maxevals:
+          termina el bucle
+        else : evals+=100
         result = localSearch(problem, 100, poblation[i])
-        evals += 100
         if result.fitness > fitnesspoblation[i]:
           fitnesspoblation[i] = result.fitness
           poblation[i] = result.solution
         if result.fitness > bestFitness:
           bestFitness = result.fitness
           bestsolution = result.solution
-      return evals
   ```
 ]
+En este algoritmo se aplica la BL a un 10% de la población escogida aleatoriamente , si los resultados de la búsqueda local superan a los cromosomas escogidos , se insertan en su respectiva posición. Si se consigue una nueva mejor solución, también se actualiza.
+
+No necesitamos generar números aleatorios ya que el proceso de generación de la población ya aleatoriza las posiciones en las que se encuentran los cromosomas.
+
 === AM-All
 #block(fill: luma(240), inset: 8pt, radius: 4pt, width: 100%)[
   ```py
   # Pseudocódigo de AM-All (applyLocalSearch)
   función applyLocalSearch(poblation, fitnesspoblation, bestFitness, bestsolution, problem):
-      evals = 0
       for i in range(0, populationSize):
+
+        if evals+100>maxevals:
+          termina el bucle
+        else : evals+=100
         result = localSearch(problem, 100, poblation[i])
         if result.fitness > fitnesspoblation[i]:
           fitnesspoblation[i] = result.fitness
@@ -555,10 +618,12 @@ Para la implementación de los algoritmos meméticos he usado una clase llamada 
         if result.fitness > bestFitness:
           bestFitness = result.fitness
           bestsolution = result.solution
-        evals += 100
-      return evals
   ```
 ]
+
+En este algoritmo se aplica la BL a toda la población, si los resultados de la búsqueda local superan a los cromosomas escogidos , se insertan en su respectiva posición. Si se consigue una nueva mejor solución, también se actualiza.
+
+
 === AM-Best
 #block(fill: luma(240), inset: 8pt, radius: 4pt, width: 100%)[
   ```py
@@ -567,16 +632,20 @@ Para la implementación de los algoritmos meméticos he usado una clase llamada 
       evals = 0
       nBest = redondeo hacia arriba(populationSize * 0.10)
        indices = índices de las nBest mejores soluciones según fitnesspoblation
+        reduzco indices a un tamaño nBest para quedarme con los nBest mejores
       for i in indices:
+        if evals+100>maxevals:
+          termina el bucle
+        else : evals+=100
         result = localSearch(problem, 100, poblation[i])
-        evals += 100
         if result.fitness > bestFitness:
           bestFitness = result.fitness
           bestsolution = result.solution
           poblation[i] = result.solution
-      return evals
   ```
 ]
+
+En este algoritmo se aplica la BL al 10% de las mejores soluciones que están en la población. Para ello primero genero un vector con  los índices que índican donde se encuentra el fitness de cada individuo , y los ordeno de mayor a menor dependiendo de su fitness.Selecciono el 10% inicial y  aplico la búsqueda local sobre ellos , si la BL mejora los resultados desde los que empezó se sustituyen y si mejora la mejor solución 
 = Estructura del código
 
 El código de la práctica está organizado en una estructura modular que facilita la compilación y ejecución. A continuación se describe la organización del proyecto y el manual de usuario para compilar y ejecutar el programa.
