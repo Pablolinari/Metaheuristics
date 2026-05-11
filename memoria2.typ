@@ -916,7 +916,7 @@ La ejecución se ha hecho como se indicó en el apartado anterior, cambiando en 
     [AGE-BLX], [-4.495], [-3.096], [0.040], [10000], [0.003],
     [AM-ALL], [-4.496], [-3.089], [0.030], [10000], [0.026],
     [AM-RAND], [-4.498], [-3.090], [0.030], [10000], [0.006],
-    [AM-BEST], [-4.497], [-3.084], [0.032], [10000], [0.005],
+    [AM-BEST], [-4.494], [-3.090], [0.029], [10000], [0.005],
   ),
   caption: [Resultados de Ibex 35 (Medias)],
 )
@@ -937,13 +937,13 @@ La ejecución se ha hecho como se indicó en el apartado anterior, cambiando en 
     [Greedy], [-3.663], [-5.020], [0.009], [1], [0.001],
     [Random], [-3.408], [-3.968], [0.069], [10000], [0.02],
     [BL], [-3.118], [-3.918], [0.094], [8984.76], [0.01],
-    [AGG-Arit], [-3.184], [-3.918], [0.094], [10000], [0.012],
+    [AGG-Arit], [-3.184], [-3.918], [0.086], [10000], [0.012],
     [AGG-BLX], [-2.866], [-3.709], [0.094], [10000], [0.014],
     [AGE-Arit], [-3.127], [-3.869], [0.108], [10000], [0.014],
     [AGE-BLX], [-2.870], [-3.770], [0.108], [10000], [0.012],
     [AM-ALL], [-2.8744], [-3.722], [0.103], [10000], [0.289],
     [AM-RAND], [-2.945], [-3.786], [0.084], [10000], [0.042],
-    [AM-BEST], [-2.945], [-3.697], [0.113], [10000], [0.044],
+    [AM-BEST], [-2.814], [-3.739], [0.108], [10000], [0.044],
   ),
   caption: [Resultados de S&P100 (Medias)],
 )
@@ -968,9 +968,9 @@ La ejecución se ha hecho como se indicó en el apartado anterior, cambiando en 
     [AGG-BLX], [-3.003], [-4.097], [-0.009], [10000], [0.191],
     [AGE-Arit], [-3.338], [-4.431], [0.005], [10000], [0.202],
     [AGE-BLX], [-3.095], [-4.148], [-0.028], [10000], [0.184],
-    [AM-ALL], [-3.230], [-4.186], [-0.011], [10000], [2.687],
-    [AM-RAND], [-3.2199], [-4.159], [-0.017], [10000], [0.446],
-    [AM-BEST], [-3.227], [-4.123], [-0.017], [10000], [0.456],
+    [AM-ALL], [-3.219], [-4.114], [-0.014], [10000], [2.687],
+    [AM-RAND], [-3.225], [-4.159], [-0.017], [10000], [0.446],
+    [AM-BEST], [-3.220], [-4.028], [-0.018], [10000], [0.456],
   ),
   caption: [Resultados de S&P500 (Medias)],
 )
@@ -1037,7 +1037,7 @@ Como hemos observado en el apartado anterior , los meméticos tienen resultados 
 También hay que tener en cuenta que si el espacio de soluciones no presenta picos pronunciados, la búsqueda local no va a hacer gran efecto sobre los resultados que ya se obtienen con el AGG.
 
 == Análisis resultados 2025
-
+A la hora de analizar los resultados obtenidos en el año 2025 vemos que  no hay un claro ganador ya que varía dependiendo del dataset escogido.En el ibex 
 == Comparación gráfica fitness 2014-2024 (50 ejecuciones)
 
 #figure(

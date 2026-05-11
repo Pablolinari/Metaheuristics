@@ -112,6 +112,8 @@ int main(int argc, char *argv[]) {
       make_pair("AGG-BLX", &aggblx),        make_pair("AGE-Arit", &agearit),
       make_pair("AGE-BLX", &ageblx),        make_pair("AM-ALL", &amall),make_pair("AM-RAND", &amrand),make_pair("AM-BEST", &ambest)};
   Eigen::MatrixX<double> fitness(totalevaluations, algorithms.size());
+  Eigen::MatrixX<double> profit2025(totalevaluations, algorithms.size());
+  Eigen::MatrixX<double> fitness2025(totalevaluations, algorithms.size());
   Eigen::MatrixX<double> evals(totalevaluations, algorithms.size());
   Eigen::MatrixX<double> times(totalevaluations, algorithms.size());
   vector<tSolution<double>> solutions;
@@ -129,6 +131,8 @@ int main(int argc, char *argv[]) {
       times(i, j) =
           duration_cast<std::chrono::milliseconds>(end - start).count();
       fitness(i, j) = result.fitness;
+      fitness2025(i, j) = problem25.fitness(result.solution);
+      profit2025(i, j) = problem25.profit(result.solution);
       evals(i, j) = result.evaluations;
 
       seed += 10;
@@ -143,8 +147,8 @@ int main(int argc, char *argv[]) {
     cout << algorithms[i].first << endl;
     cout << "Mean fitness of " << totalevaluations
          << " evaluations : " << fitness.col(i).mean() << endl;
-    cout << "Fitness 2025 :" << problem25.fitness(solutions[i]);
-    cout << " | Profit 2025 :" << problem25.profit(solutions[i]) << endl;
+    cout << "Fitness 2025 :" <<fitness2025.col(i).mean();
+    cout << " | Profit 2025 :" << profit2025.col(i).mean() << endl;
     cout << "Mean evaluations " << evals.col(i).mean();
     cout << " | Mean time (miliseconds): " << times.col(i).mean() << endl;
   }
