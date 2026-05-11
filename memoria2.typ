@@ -638,14 +638,17 @@ En este algoritmo se aplica la BL a toda la población, si los resultados de la 
           termina el bucle
         else : evals+=100
         result = localSearch(problem, 100, poblation[i])
+        if result.fitness > fitnesspoblation[i]:
+          fitnesspoblation[i] = result.fitness
+          poblation[i] = result.solution
         if result.fitness > bestFitness:
           bestFitness = result.fitness
           bestsolution = result.solution
-          poblation[i] = result.solution
   ```
 ]
 
-En este algoritmo se aplica la BL al 10% de las mejores soluciones que están en la población. Para ello primero genero un vector con  los índices que índican donde se encuentra el fitness de cada individuo , y los ordeno de mayor a menor dependiendo de su fitness.Selecciono el 10% inicial y  aplico la búsqueda local sobre ellos , si la BL mejora los resultados desde los que empezó se sustituyen y si mejora la mejor solución 
+En este algoritmo se aplica la BL al 10% de las mejores soluciones que están en la población. Para ello primero genero un vector con  los índices que índican donde se encuentra el fitness de cada individuo , y los ordeno de mayor a menor dependiendo de su fitness.Selecciono el 10% inicial y  aplico la búsqueda local sobre ellos , si la BL mejora los resultados desde los que empezó se sustituyen y si mejora la mejor solución la actualizo.
+
 = Estructura del código
 
 El código de la práctica está organizado en una estructura modular que facilita la compilación y ejecución. A continuación se describe la organización del proyecto y el manual de usuario para compilar y ejecutar el programa.
@@ -659,9 +662,10 @@ El proyecto está organizado de la siguiente manera:
   - `src/` : Contiene las implementaciones (.cpp)
     - `age.cpp` : Implementación del algoritmo AGE
     - `agg.cpp` : Implementación del algoritmo AGG
-    - `amall.cpp` : Implementación del algoritmo AM-All
-    - `ambest.cpp` : Implementación del algoritmo AM-Best
-    - `amrand.cpp` : Implementación del algoritmo AM-Rand
+    - `am.cpp` : Implementación del algoritmo AM
+    - `amall.cpp` : Implementación de applyLocalSearch para amAll
+    - `ambest.cpp` : Implementación de applyLocalSearch para amBest  
+    - `amrand.cpp` : Implementación de applyLocalSearch para amRand     
     - `pportfolio.cpp` : Implementación de la clase del problema
     - `randomsearch.cpp` : Implementación del algoritmo de búsqueda aleatoria
     - `greedy.cpp` : Implementación del algoritmo Greedy
@@ -670,6 +674,7 @@ El proyecto está organizado de la siguiente manera:
   - `include/` : Contiene los archivos de cabecera (.h y .hpp)
     - `age.h`: Clase base para los algoritmos genéticos estacionarios
     - `agg.h`: Clase base para los algoritmos genéticos generacionales
+    - `am.h`: Clase base para los algoritmos meméticos 
     - `agearit.h`, `ageblx.h`: Clases hijas de `age.h` con los correspondientes operadores
     - `aggarit.h`, `aggblx.h`: Clases hijas de `agg.h` con los correspondientes operadores
     - `amall.h`, `ambest.h`, `amrand.h`: Clases de los algoritmos meméticos.
