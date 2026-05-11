@@ -457,67 +457,137 @@ Para el algoritmo genético generacional se ha construido una clase *Agg* para i
 
 #block(fill: luma(240), inset: 8pt, radius: 4pt, width: 100%)[
   ```py
-  # Pseudocódigo del algoritmo de búsqueda local
+  # Pseudocódigo del algoritmo genético generacional (AGG)
   función Agg(max_evals):
       evals = 0
       bestFitness = -infinito
       bestSolution
       poblation = soluciones aleatorias
       for i in range(0, populationSize):
-        tempfitness = fitness(poblation[i])
+        tempfitness = evaluar fitness de poblation[i]
         evals += 1
-        fitnesspoblation.pushback(tempfitness)
+        añadir tempfitness a fitness de la población
         if tempfitness > bestFitness:
           bestFitness = tempfitness
           bestSolution = poblation[i]
 
       while evals < maxevals:
-        tournament(tournamentsize, populationsize, populationsize, fitnesspoblation)
+        idxparents = torneo(tournamentsize, populationsize, populationsize, fitness de la población)
         expectedparentscrossover = redondeo hacia arriba(crossoverprob * idxparents.size())
+        sons = []
         for i in range(0, expectedparentscrossover, 2):
-          son = crossover(poblation[idxparents[i]], poblation[idxparents[i + 1]])
+          son = cruce(poblation[idxparents[i]], poblation[idxparents[i + 1]])
           reparar hijos inválidos
-          sons.pushback(son.first)
-          sons.pushback(son.second)
+          añadir son.first a sons
+          añadir son.second a sons
 
-      for i in range(expectedparentscrossover, poblationsize):
-        sons.pushback(poblation[idxparents[i]])
+        for i in range(expectedparentscrossover, populationsize):
+          añadir poblation[idxparents[i]] a sons
 
-      ## mutación
-      expectedmutation = mutationprob * populationsize
-      for i in range(0, expectedmutation):
-        idxsolution = random entre 0 y populationsize - 1
-        mutsol = sons[idxsolution]
-        mutation(mutSol, problem, 0.15, problemSize * 5)
-        sons[idxSolution] = mutSol
+        ## mutación
+        expectedmutation = mutationprob * populationsize
+        for i in range(0, expectedmutation):
+          idxsolution = random entre 0 y populationsize - 1
+          mutsol = sons[idxsolution]
+          mutar mutsol con parámetros del algoritmo
+          sons[idxsolution] = mutsol
 
-      # Sustitución de la población
-      for i in range(0, populationsize - 1):
-        tempfitness = fitness(sons[i])
-        evals += 1
-        fitnesspoblation.pushback(tempfitness)
-        if tempfitness > bestfitnessSons:
-          bestfitnessSons = tempfitness
-          idxbest = i
-        if tempfitness < worstfitnessSons:
-          worstFitnessSons = tempfitness
-          idxworst = i
-        if evals == maxevals:
-          terminar
-      if bestfitness > worstfitnesssons:
-        sons[idxworst] = bestsolution
-        fitnesspoblation[idxworst] = bestfitness
-      if bestfitnessSons > bestfitness:
-        bestsolution = sons[idxbest]
-        bestfitness = bestfitnessSons
-      poblation = sons
-  return bestsolution, bestfitness, evals
+        # Sustitución de la población
+        bestfitnessSons = -infinito
+        worstfitnessSons = infinito
+        for i in range(0, populationsize - 1):
+          tempfitness = evaluar fitness de sons[i]
+          evals += 1
+          añadir tempfitness a fitness de la población
+          if tempfitness > bestfitnessSons:
+            bestfitnessSons = tempfitness
+            idxbest = i
+          if tempfitness < worstfitnessSons:
+            worstfitnessSons = tempfitness
+            idxworst = i
+          if evals == maxevals:
+            terminar
+        if bestFitness > worstfitnessSons:
+          sons[idxworst] = bestSolution
+        if bestfitnessSons > bestFitness:
+          bestSolution = sons[idxbest]
+          bestFitness = bestfitnessSons
+        poblation = sons
+    return bestsolution, bestfitness, evals
   ```
 ]
 
 == Algoritmo Genético Estacionario
-Para el algoritmo genético estacionario se ha construido una clase *Age* para implementar la estructura del algoritmo y dos clases hijas *AgeArit* y *AgeBLX* las cuales heredan de *Age* y solo modifican la función de cruce. De esta manera podemos tener una única implementación del algoritmo y cambiar el operador de cruce con facilidad.
+Para el algoritmo genético estacionario se ha construido una clase *Age* de la cual heredan las clases *AgeArti* y *AgeBLX-$alpha$*, al igual que en los AGG , estas clases solo modifican el método crossover. 
+  
+#block(fill: luma(240), inset: 8pt, radius: 4pt, width: 100%)[
+  ```py
+  # Pseudocódigo del algoritmo genético estacionario (AGE)
+  función Age(maxevals):
+      evals = 0
+      bestFitness = -infinito
+      bestSolution
+      poblation = soluciones aleatorias
+      for i in range(0, populationSize):
+        tempfitness = evaluar fitness de poblation[i]
+        evals += 1
+        añadir tempfitness a fitness de la población
+        if tempfitness > bestFitness:
+          bestFitness = tempfitness
+          bestSolution = poblation[i]
 
+      while evals < maxevals:
+        idxparents = torneo(tournamentsize, populationsize, 2, fitness de la población)
+
+        ## cruce
+        son = cruce(poblation[idxparents[0]], poblation[idxparents[1]])
+        reparar hijos inválidos
+
+        ## mutación
+        for i in range(0, 2):
+          if random < mutationprob:
+            mutar hijo con parámetros del algoritmo
+
+        # evaluación de los hijos
+        fitnessFirst = evaluar fitness de son[0]
+        evals += 1
+        if evals == maxevals:
+          terminar
+        fitnessSecond = evaluar fitness de son[1]
+        evals += 1
+        if evals == maxevals:
+          terminar
+
+        # ordenar hijos por fitness
+        if fitnessSecond > fitnessFirst:
+          intercambiar(fitnessFirst, fitnessSecond)
+          intercambiar(son[0], son[1])
+
+        # localizar peor y segundo peor
+        localizar índices del peor y segundo peor en fitness de la población
+
+        # actualizar mejor solución global
+        if fitnessSecond > bestFitness:
+          bestFitness = fitnessSecond
+          bestSolution = son[1]
+        if fitnessFirst > bestFitness:
+          bestFitness = fitnessFirst
+          bestSolution = son[0]
+
+        # reemplazo estacionario
+        usado = false
+        if fitnessFirst > worstFitness:
+          reemplazar peor por son[0]
+        else if fitnessSecond > worstFitness:
+          reemplazar peor por son[1]
+          usado = true
+
+        if not usado and fitnessSecond > secondWorstFitness:
+          reemplazar segundo peor por son[1]
+
+    return bestsolution, bestfitness, evals
+  ```
+]
 
 == Algoritmo Memético
 
@@ -527,49 +597,69 @@ Una pequeña diferencia que se puede encontrar respecto a la implementación es 
 
 #block(fill: luma(240), inset: 8pt, radius: 4pt, width: 100%)[
   ```py
-  # Pseudocódigo del algoritmo de búsqueda local
-  función Agg(max_evals):
+  # Pseudocódigo del algoritmo memético (AM)
+  función Am(max_evals):
+      evals = 0
       bestFitness = -infinito
       bestSolution
       poblation = soluciones aleatorias
       for i in range(0, populationSize):
-        tempfitness = fitness(poblation[i])
+        tempfitness = evaluar fitness de poblation[i]
         evals += 1
-        fitnesspoblation.pushback(tempfitness)
+        añadir tempfitness a fitness de la población
         if tempfitness > bestFitness:
           bestFitness = tempfitness
           bestSolution = poblation[i]
 
       while evals < maxevals:
-        tournament(tournamentsize, populationsize, populationsize, fitnesspoblation)
+        idxparents = torneo(tournamentsize, populationsize, populationsize, fitness de la población)
         expectedparentscrossover = redondeo hacia arriba(crossoverprob * idxparents.size())
+        sons = []
         for i in range(0, expectedparentscrossover, 2):
-          son = crossover(poblation[idxparents[i]], poblation[idxparents[i + 1]])
+          son = cruce(poblation[idxparents[i]], poblation[idxparents[i + 1]])
           reparar hijos inválidos
-          sons.pushback(son.first)
-          sons.pushback(son.second)
+          añadir son.first a sons
+          añadir son.second a sons
 
-      for i in range(expectedparentscrossover, poblationsize):
-        sons.pushback(poblation[idxparents[i]])
+        for i in range(expectedparentscrossover, populationsize):
+          añadir poblation[idxparents[i]] a sons
 
-      ## mutación
-      expectedmutation = mutationprob * populationsize
-      for i in range(0, expectedmutation):
-        idxsolution = random entre 0 y populationsize - 1
-        mutsol = sons[idxsolution]
-        mutation(mutSol, problem, 0.15, problemSize * 5)
-        sons[idxSolution] = mutSol
+        ## mutación
+        expectedmutation = mutationprob * populationsize
+        for i in range(0, expectedmutation):
+          idxsolution = random entre 0 y populationsize - 1
+          mutsol = sons[idxsolution]
+          mutar mutsol con parámetros del algoritmo
+          sons[idxsolution] = mutsol
 
-      # Sustitución de la población
-        mismo fragmento de código que la 
-        sustitución en el AGG
+        # Sustitución de la población
+        bestfitnessSons = -infinito
+        worstfitnessSons = infinito
+        for i in range(0, populationsize - 1):
+          tempfitness = evaluar fitness de sons[i]
+          evals += 1
+          añadir tempfitness a fitness de la población
+          if tempfitness > bestfitnessSons:
+            bestfitnessSons = tempfitness
+            idxbest = i
+          if tempfitness < worstfitnessSons:
+            worstfitnessSons = tempfitness
+            idxworst = i
+          if evals == maxevals:
+            terminar
+        if bestFitness > worstfitnessSons:
+          sons[idxworst] = bestSolution
+        if bestfitnessSons > bestFitness:
+          bestSolution = sons[idxbest]
+          bestFitness = bestfitnessSons
+        poblation = sons
 
-      # aplicación de la búsqueda local
-      nGenerations+=1;
-      if nGenerations % 10 == 0:
-        applyLocalSearch
-    }
-  return bestsolution, bestfitness, evals
+        # aplicación de la búsqueda local
+        nGenerations += 1
+        if nGenerations % 10 == 0:
+          applyLocalSearch
+
+    return bestsolution, bestfitness, evals
   ```
 ]
 
