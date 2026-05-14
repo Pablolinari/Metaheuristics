@@ -67,7 +67,6 @@ ResultMH<double> Agg::optimize(Problem<double> &problem, int maxevals) {
     for (int i = expectednParentsCrossover; i < this->populationSize; i++) {
       sons.push_back(poblation[idxparents[i]]);
     }
-
     // mutación
     int expectedMutation = std::ceil(this->mutationProb * this->populationSize);
     for (int i = 0; i < expectedMutation; i++) {

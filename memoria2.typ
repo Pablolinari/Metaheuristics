@@ -242,7 +242,7 @@ pesos que ya estén activos, de no ser así si la diferencia es mayor que el lí
   ```]
 
 
-El principal objetivo de los algoritmos es maximizar la función fitness, la cual trata de maximizar el beneficio y minimizar el riesgo en una sola fórmula. El parámetro lambda se usará a modo de ajuste, cuando más alto sea su valor el algoritmo valorará mejor soluciones con poco beneficio pero que sean seguras, es decir, que tengan poco riesgo, mientras que cuanto más cercano a 0 sea lambda, el algoritmo valorará mejor las soluciones con máximo beneficio posible, ignorando el riesgo.
+El principal objetivo de los algoritmos es maximizar la función fitness, la cual trata de maximizar el beneficio y minimizar el riesgo en una sola fórmula. El parámetro lambda se usará a modo de ajuste, cuando más alto sea su valor el algoritmo valorará mejor soluciones con poco beneficio pero que sean seguras, es decir, que tengan poco riesgo, mientras que cuanto más cercano a 0 sea lambda, el algoritmo valorará mejor las soluciones con máximo beneficio posible, ignorando el riesgo.El valor que se usa durante la práctica es $lambda=500$ que es el indicado en el guión. 
 
 == Operadores
 
@@ -255,7 +255,7 @@ En ambos operadores, si los padres seleccionados son iguales, los hijos serán i
 
 El operador aritmético genera un aleatorio entre 0 y 1, para cada posición *i* de los padres, con el aleatorio escogido hace una combinación lineal distinta para cada hijo entre los genes de los padres. Si los genes de los padres son iguales en una determinada posición, no se genera la transformación, de esta manera conseguimos que si todos los genes de los padres son iguales, los hijos sean iguales.
 
-Al ser este cruce una combinación lineal, los genes de los hijos resultantes, nunca podrán tener un valor menor que el menor gen de los padres ni mayor que el mayor de los genes de sus padres. Esto hace que este operador tienda a converger hacia el centro de los padres, con un comportamiento explotativo.
+Al ser este cruce una combinación lineal, los genes de los hijos resultantes, nunca podrán tener un valor menor que el menor gen de los padres ni mayor que el mayor de los genes de sus padres. Esto hace que cuando se aplica este operador tienda a converger hacia el centro de los padres, con un comportamiento explotativo.
 
 #block(fill: luma(240), inset: 8pt, radius: 4pt, width: 100%)[
   ```py
@@ -338,6 +338,7 @@ A la hora de hacer la mutación en los algoritmos usaremos el siguiente método:
     solutionsize = problem.getSolutionSize()
 
     validDonors = []
+    #busco un donante valido
     for i in range(0, solutionsize):
       amount = mutSol(i) * mutationRate
       if amount <= 0.0:
@@ -351,7 +352,7 @@ A la hora de hacer la mutación en los algoritmos usaremos el siguiente método:
 
     if validDonors está vacío:
       return false
-
+    # busco un receptor valido 
     for attempt in range(0, maxAttempts):
       pickDonor = aleatorio entre 0 y validDonors.size - 1
       candidateFirst = validDonors[pickDonor]
@@ -393,6 +394,7 @@ Como se puede observar, el proceso de mutación se divide en dos partes:
 = Estructura de los algoritmos
 
 == Local Search
+Es el mismo que la práctica anterior , pero al aplicarlo modificaremos el ratio y la solución inicial que toma.
 
 El algoritmo de búsqueda local (el primero el mejor) parte de una solución generada aleatoriamente y genera un vecindario alrededor de esta solución, una vez generado el vecindario, se comienza a recorrer cada vecino y se evalúa su fitness. Si se encuentra un fitness mejor que el de la solución actual, se escoge ese vecino como mejor solución y se genera un nuevo vecindario alrededor de él. El proceso termina cuando se llega al máximo de evaluaciones permitidas o cuando no se ha encontrado ningún vecino del vecindario actual generado que mejore la solución.
 
@@ -453,7 +455,7 @@ Si la solución generada no es válida o no mejora la solución actual, restaura
 Mientras que no se superen las restricciones de las evaluaciones y se sigan encontrando vecinos mejores en cada vecindario seguiremos intentando encontrar la mejor solución. En caso de recorrer todo el vecindario y no encontrar una solución mejor o que se superen las evaluaciones permitidas, se detendrá la búsqueda.
 
 == Algoritmo Genético Generacional
-Para el algoritmo genético generacional se ha construido una clase *Agg* para implementar la estructura del algoritmo y dos clases hijas *AggArit* y *AggBLX* las cuales heredan de *Agg* y solo modifican la función de cruce. De esta manera podemos tener una única implementación del algoritmo y cambiar el operador de cruce con facilidad.
+Para el algoritmo genético generacional se ha construido una clase *Agg* para implementar la estructura del algoritmo y dos clases hijas *AggArit* y *AggBLX*, las cuales heredan de *Agg* y solo modifican la función de cruce. De esta manera podemos tener una única implementación del algoritmo y cambiar el operador de cruce con facilidad.
 
 #block(fill: luma(240), inset: 8pt, radius: 4pt, width: 100%)[
   ```py
@@ -461,8 +463,8 @@ Para el algoritmo genético generacional se ha construido una clase *Agg* para i
   función Agg(max_evals):
       evals = 0
       bestFitness = -infinito
-      bestSolution
-      poblation = soluciones aleatorias
+      bestSolution = vacio
+      poblation = vector de soluciones aleatorias #tamaño populationSize 
       for i in range(0, populationSize):
         tempfitness = evaluar fitness de poblation[i]
         evals += 1
@@ -474,25 +476,26 @@ Para el algoritmo genético generacional se ha construido una clase *Agg* para i
       while evals < maxevals:
         idxparents = torneo(tournamentsize, populationsize, populationsize, fitness de la población)
         expectedparentscrossover = redondeo hacia arriba(crossoverprob * idxparents.size())
-        sons = []
+        sons = [] # poblacion nueva de hijos 
         for i in range(0, expectedparentscrossover, 2):
           son = cruce(poblation[idxparents[i]], poblation[idxparents[i + 1]])
           reparar hijos inválidos
-          añadir son.first a sons
-          añadir son.second a sons
+          añadir hijos a la población nueva
 
         for i in range(expectedparentscrossover, populationsize):
+          #añado los padres que no se han cruzado a la población actual
           añadir poblation[idxparents[i]] a sons
-
         ## mutación
         expectedmutation = mutationprob * populationsize
         for i in range(0, expectedmutation):
           idxsolution = random entre 0 y populationsize - 1
           mutsol = sons[idxsolution]
           mutar mutsol con parámetros del algoritmo
+
           sons[idxsolution] = mutsol
 
         # Sustitución de la población
+
         bestfitnessSons = -infinito
         worstfitnessSons = infinito
         for i in range(0, populationsize - 1):
@@ -500,25 +503,23 @@ Para el algoritmo genético generacional se ha construido una clase *Agg* para i
           evals += 1
           añadir tempfitness a fitness de la población
           if tempfitness > bestfitnessSons:
-            bestfitnessSons = tempfitness
-            idxbest = i
+            selecciono mejor hijo
           if tempfitness < worstfitnessSons:
-            worstfitnessSons = tempfitness
-            idxworst = i
+            selecciono peor hijo
           if evals == maxevals:
             terminar
         if bestFitness > worstfitnessSons:
-          sons[idxworst] = bestSolution
+          introduzco el mejor de la población anterior 
+          a la nueva
         if bestfitnessSons > bestFitness:
-          bestSolution = sons[idxbest]
-          bestFitness = bestfitnessSons
+          actualizo mejor fitness y mejor solucion
         poblation = sons
     return bestsolution, bestfitness, evals
   ```
 ]
-
+El algoritmo comienza seleccionando individuos de la población mediante un torneo en el que participan k individuos. El torneo se aplica tantas veces como individuos de la población haya. Una vez se obtienen los ganadores de cada torneo, se seleccionan la cantidad indicada por la probabilidad de cruce para que se crucen entre ellos. De cada cruce surgen dos hijos que serán insertados en la nueva generación (vector sons). Una vez se terminan de cruzar los individuos seleccionados, se terminan de añadir a la nueva generación los que no han participado en el cruce. Una vez ya se tiene la nueva generación, se aplica la mutación escogiendo soluciones aleatorias de la población y mutándolas en función de la probabilidad indicada. Tras la mutación se realiza el cambio generacional donde conservamos únicamente la solución de la población anterior. Esta se cambia por la peor solución de la nueva población en caso de que supere a la peor solución. Si en la nueva población se encuentra una solución mejor que la actual, se actualiza.
 == Algoritmo Genético Estacionario
-Para el algoritmo genético estacionario se ha construido una clase *Age* de la cual heredan las clases *AgeArti* y *AgeBLX-$alpha$*, al igual que en los AGG , estas clases solo modifican el método crossover. 
+Para el algoritmo genético estacionario se ha construido una clase *Age* de la cual heredan las clases *AgeArti* y *AgeBLX-$alpha$*, al igual que en los AGG, estas clases solo modifican el método crossover. 
   
 #block(fill: luma(240), inset: 8pt, radius: 4pt, width: 100%)[
   ```py
@@ -545,7 +546,7 @@ Para el algoritmo genético estacionario se ha construido una clase *Age* de la 
 
         ## mutación
         for i in range(0, 2):
-          if random < mutationprob:
+          if probabilidad de mutar:
             mutar hijo con parámetros del algoritmo
 
         # evaluación de los hijos
@@ -568,11 +569,10 @@ Para el algoritmo genético estacionario se ha construido una clase *Age* de la 
 
         # actualizar mejor solución global
         if fitnessSecond > bestFitness:
-          bestFitness = fitnessSecond
-          bestSolution = son[1]
+          actualizo mejor solucion con los valores de son[1]
+    
         if fitnessFirst > bestFitness:
-          bestFitness = fitnessFirst
-          bestSolution = son[0]
+          actualizo mejor solucion con los valores de son[0]
 
         # reemplazo estacionario
         usado = false
@@ -588,7 +588,7 @@ Para el algoritmo genético estacionario se ha construido una clase *Age* de la 
     return bestsolution, bestfitness, evals
   ```
 ]
-
+Este algoritmo selecciona dos padres de la población mediante el torneo. Estos padres se cruzan y se obtienen dos hijos a los que se les aplica la mutación en función de la probabilidad indicada por el parámetro *MutationProb*. Tras la mutación, calculo el fitness de ambos hijos y compruebo si alguno mejora la mejor solución actual; si es así, actualizo los valores. A la hora de insertarlos en la población, se buscan el primer y el segundo peores de la población actual; si los hijos son mejores, se introducen. También puede darse la situación de que un hijo entre y el otro no.
 == Algoritmo Memético
 
 Los algoritmos meméticos se han implementado hibridando el *AGG-BLX$alpha$* con la ejecución de la búsqueda local cada 10 generaciones de poblaciones.La estructura del código es idéntica a la expuesta en el AGG pero con una condición adicional al final del bucle principal.
@@ -601,8 +601,8 @@ Una pequeña diferencia que se puede encontrar respecto a la implementación es 
   función Am(max_evals):
       evals = 0
       bestFitness = -infinito
-      bestSolution
-      poblation = soluciones aleatorias
+      bestSolution = vacio
+      poblation = vector de soluciones aleatorias #tamaño populationSize 
       for i in range(0, populationSize):
         tempfitness = evaluar fitness de poblation[i]
         evals += 1
@@ -614,25 +614,26 @@ Una pequeña diferencia que se puede encontrar respecto a la implementación es 
       while evals < maxevals:
         idxparents = torneo(tournamentsize, populationsize, populationsize, fitness de la población)
         expectedparentscrossover = redondeo hacia arriba(crossoverprob * idxparents.size())
-        sons = []
+        sons = [] # poblacion nueva de hijos 
         for i in range(0, expectedparentscrossover, 2):
           son = cruce(poblation[idxparents[i]], poblation[idxparents[i + 1]])
           reparar hijos inválidos
-          añadir son.first a sons
-          añadir son.second a sons
+          añadir hijos a la población nueva
 
         for i in range(expectedparentscrossover, populationsize):
+          #añado los padres que no se han cruzado a la población actual
           añadir poblation[idxparents[i]] a sons
-
         ## mutación
         expectedmutation = mutationprob * populationsize
         for i in range(0, expectedmutation):
           idxsolution = random entre 0 y populationsize - 1
           mutsol = sons[idxsolution]
           mutar mutsol con parámetros del algoritmo
+
           sons[idxsolution] = mutsol
 
         # Sustitución de la población
+
         bestfitnessSons = -infinito
         worstfitnessSons = infinito
         for i in range(0, populationsize - 1):
@@ -640,19 +641,18 @@ Una pequeña diferencia que se puede encontrar respecto a la implementación es 
           evals += 1
           añadir tempfitness a fitness de la población
           if tempfitness > bestfitnessSons:
-            bestfitnessSons = tempfitness
-            idxbest = i
+            selecciono mejor hijo
           if tempfitness < worstfitnessSons:
-            worstfitnessSons = tempfitness
-            idxworst = i
+            selecciono peor hijo
           if evals == maxevals:
             terminar
         if bestFitness > worstfitnessSons:
-          sons[idxworst] = bestSolution
+          introduzco el mejor de la población anterior 
+          a la nueva
         if bestfitnessSons > bestFitness:
-          bestSolution = sons[idxbest]
-          bestFitness = bestfitnessSons
+          actualizo mejor fitness y mejor solucion
         poblation = sons
+
 
         # aplicación de la búsqueda local
         nGenerations += 1
@@ -665,8 +665,9 @@ Una pequeña diferencia que se puede encontrar respecto a la implementación es 
 
 Para la implementación de los algoritmos meméticos especificados he usado el método virtual applyLocalSerch de la clase *Am* para poder cambiar el modo de aplicar la búsqueda local sin tener que modificar el código general.
 
+En los siguientes apartados se encuentra la descripción de la función *applyLocalSearch* de cada algoritmo.
 
-A continuación describo el método applyLocalSearch que usa cada uno.
+La función *localSearch* contiene el mismo código que la búsqueda local descrita anteriormente , la única modificiación que se le hace es que se le pasa como parámetro la solución inicial que debe usar.
 === AM-Random
 
 #block(fill: luma(240), inset: 8pt, radius: 4pt, width: 100%)[
@@ -680,11 +681,9 @@ A continuación describo el método applyLocalSearch que usa cada uno.
         else : evals+=100
         result = localSearch(problem, 100, poblation[i])
         if result.fitness > fitnesspoblation[i]:
-          fitnesspoblation[i] = result.fitness
-          poblation[i] = result.solution
+          actualizo fitness y solución en la posición i
         if result.fitness > bestFitness:
-          bestFitness = result.fitness
-          bestsolution = result.solution
+          actualizo mejor fitness y mejor solución 
   ```
 ]
 En este algoritmo se aplica la BL a un 10% de la población escogida aleatoriamente , si los resultados de la búsqueda local superan a los cromosomas escogidos , se insertan en su respectiva posición. Si se consigue una nueva mejor solución, también se actualiza.
@@ -703,11 +702,9 @@ No necesitamos generar números aleatorios ya que el proceso de generación de l
         else : evals+=100
         result = localSearch(problem, 100, poblation[i])
         if result.fitness > fitnesspoblation[i]:
-          fitnesspoblation[i] = result.fitness
-          poblation[i] = result.solution
+          actualizo fitness y solución en la posición i
         if result.fitness > bestFitness:
-          bestFitness = result.fitness
-          bestsolution = result.solution
+          actualizo mejor fitness y mejor solución
   ```
 ]
 
@@ -729,11 +726,9 @@ En este algoritmo se aplica la BL a toda la población, si los resultados de la 
         else : evals+=100
         result = localSearch(problem, 100, poblation[i])
         if result.fitness > fitnesspoblation[i]:
-          fitnesspoblation[i] = result.fitness
-          poblation[i] = result.solution
+          actualizo fitness y solución en la posición i
         if result.fitness > bestFitness:
-          bestFitness = result.fitness
-          bestsolution = result.solution
+          actualizo mejor fitness y mejor solución
   ```
 ]
 
@@ -778,6 +773,7 @@ El proyecto está organizado de la siguiente manera:
   - `data/` : Contiene los archivos CSV con los datos de entrada
   - `CMakeLists.txt` : Archivo de configuración de CMake
   - `script.sh` : Script de compilación automatizada
+  - `execute_all.sh` : Script para ejecutar el programa en los 3 dataset a la vez.
   - `Makefile` : Archivo generado automáticamente por CMake
 
 == Compilación
@@ -907,16 +903,16 @@ La ejecución se ha hecho como se indicó en el apartado anterior, cambiando en 
     [*Evaluaciones*],
     [*Tiempo*\ *(segundos)*],
 
-    [Greedy], [-4.649], [-3.386], [0.115], [1], [0.001],
-    [Random], [-4.980], [-3.289], [0.096], [10000], [0.005],
-    [BL], [-4.608], [-3.109], [0.019], [1517.36], [0.001],
-    [AGG-Arit], [-4.657], [-3.186], [0.045], [10000], [0.002],
-    [AGG-BLX], [-4.500], [-3.123], [0.046], [10000], [0.003],
-    [AGE-Arit], [-4.576], [-3.158], [0.041], [10000], [0.003],
-    [AGE-BLX], [-4.495], [-3.096], [0.040], [10000], [0.003],
-    [AM-ALL], [-4.496], [-3.089], [0.030], [10000], [0.026],
-    [AM-RAND], [-4.498], [-3.090], [0.030], [10000], [0.006],
-    [AM-BEST], [-4.494], [-3.090], [0.029], [10000], [0.005],
+    [Greedy], [-4.558], [-3.254], [0.040], [1], [0.001],
+    [Random], [-4.980], [-3.378], [0.052], [10000], [0.005],
+    [BL], [-4.608], [-3.115], [0.020], [1517.36], [0.001],
+    [AGG-Arit], [-4.657], [-3.189], [0.055], [10000], [0.002],
+    [AGG-BLX], [-4.500], [-3.119], [0.044], [10000], [0.003],
+    [AGE-Arit], [-4.576], [-3.153], [0.051], [10000], [0.003],
+    [AGE-BLX], [-4.495], [-3.101], [0.039], [10000], [0.003],
+    [AM-ALL], [-4.496], [-3.085], [0.031], [10000], [0.026],
+    [AM-RAND], [-4.498], [-3.086], [0.031], [10000], [0.006],
+    [AM-BEST], [-4.494], [-3.084], [0.032], [10000], [0.005],
   ),
   caption: [Resultados de Ibex 35 (Medias)],
 )
@@ -934,16 +930,16 @@ La ejecución se ha hecho como se indicó en el apartado anterior, cambiando en 
     [*Evaluaciones*],
     [*Tiempo*\ *(segundos)*],
 
-    [Greedy], [-3.663], [-5.020], [0.009], [1], [0.001],
-    [Random], [-3.408], [-3.968], [0.069], [10000], [0.02],
-    [BL], [-3.118], [-3.918], [0.094], [8984.76], [0.01],
-    [AGG-Arit], [-3.184], [-3.918], [0.086], [10000], [0.012],
-    [AGG-BLX], [-2.866], [-3.709], [0.094], [10000], [0.014],
-    [AGE-Arit], [-3.127], [-3.869], [0.108], [10000], [0.014],
-    [AGE-BLX], [-2.870], [-3.770], [0.108], [10000], [0.012],
-    [AM-ALL], [-2.8744], [-3.722], [0.103], [10000], [0.289],
-    [AM-RAND], [-2.945], [-3.786], [0.084], [10000], [0.042],
-    [AM-BEST], [-2.814], [-3.739], [0.108], [10000], [0.044],
+    [Greedy], [-2.835], [-3.691], [0.092], [1], [0.001],
+    [Random], [-3.408], [-4.174], [0.088], [10000], [0.02],
+    [BL], [-3.118], [-3.888], [0.096], [8984.76], [0.01],
+    [AGG-Arit], [-3.184], [-3.947], [0.097], [10000], [0.012],
+    [AGG-BLX], [-2.866], [-3.757], [0.100], [10000], [0.014],
+    [AGE-Arit], [-3.127], [-3.901], [0.096], [10000], [0.014],
+    [AGE-BLX], [-2.870], [-3.757], [0.102], [10000], [0.012],
+    [AM-ALL], [-2.8744], [-3.761], [0.096], [10000], [0.289],
+    [AM-RAND], [-2.945], [-3.782], [0.098], [10000], [0.042],
+    [AM-BEST], [-2.814], [-3.755], [0.101], [10000], [0.044],
   ),
   caption: [Resultados de S&P100 (Medias)],
 )
@@ -961,16 +957,16 @@ La ejecución se ha hecho como se indicó en el apartado anterior, cambiando en 
     [*Evaluaciones*],
     [*Tiempo*\ *(segundos)*],
 
-    [Greedy], [-3.438], [-5.204], [-0.062], [1], [0.001],
-    [Random], [-3.638], [-4.606], [-0.0583], [10000], [0.253],
-    [BL], [-3.517], [-4.313], [0.018], [10000], [0.220],
-    [AGG-Arit], [-3.321], [-4.170], [0.003], [10000], [0.189],
-    [AGG-BLX], [-3.003], [-4.097], [-0.009], [10000], [0.191],
-    [AGE-Arit], [-3.338], [-4.431], [0.005], [10000], [0.202],
-    [AGE-BLX], [-3.095], [-4.148], [-0.028], [10000], [0.184],
-    [AM-ALL], [-3.219], [-4.114], [-0.014], [10000], [2.687],
-    [AM-RAND], [-3.225], [-4.159], [-0.017], [10000], [0.446],
-    [AM-BEST], [-3.220], [-4.028], [-0.018], [10000], [0.456],
+    [Greedy], [-2.749], [-3.776], [0.013], [1], [0.001],
+    [Random], [-3.638], [-4.389], [0.026], [10000], [0.253],
+    [BL], [-3.517], [-4.324], [0.010], [10000], [0.220],
+    [AGG-Arit], [-3.321], [-4.203], [-0.002], [10000], [0.189],
+    [AGG-BLX], [-3.003], [-4.030], [0.012], [10000], [0.191],
+    [AGE-Arit], [-3.338], [-4.241], [-0.001], [10000], [0.202],
+    [AGE-BLX], [-3.095], [-4.090], [0.009], [10000], [0.184],
+    [AM-ALL], [-3.219], [-4.113], [0.004], [10000], [2.687],
+    [AM-RAND], [-3.225], [-4.131], [0.000], [10000], [0.446],
+    [AM-BEST], [-3.220], [-4.156], [0.001], [10000], [0.456],
   ),
   caption: [Resultados de S&P500 (Medias)],
 )
@@ -994,52 +990,7 @@ A continuación se muestran los boxplots de los resultados obtenidos para cada c
   image("img/syp500.png", width: 80%),
   caption: [Boxplot de resultados para S&P500],
 )
-
-= Análisis de los resultados
-
-Al observar los resultados obtenidos podemos ver que cada algoritmo se comporta de manera muy diferente dependiendo del conjunto de datos usado. Para poder entender por qué unos algoritmos funcionan mejor que otros es necesario analizar cómo trabaja cada uno y qué características del problema aprovechan o ignoran.
-//hecho
-== Búsqueda Local vs Algoritmos Genéticos
-Los algoritmos genéticos en el problema del portfolio obtienen mejores resultados ya que exploran más el espacio de soluciones que la búsqueda local. La búsqueda local es más explotativa por lo que le es fácil entrar en máximos locales en datasets pequeños como el Ibex 35 ,(podemos ver que acaba antes que el máximo de evaluaciones),mientras que los algoritmos genéticos exploran un mayor rango de soluciones por lo que tienen más facilidad de evitar máximos locales. También cabe destacar que la búsqueda local se ve muy afectada por la solución inicial que se toma, al ser esta aleatoria, dependemos más de la "suerte" a la hora de encontrar una mejor solución antes de las evaluaciones permitidas.Esto lo podemos ver claramente en los boxplots donde la caja de la búsqueda local tiene el cuerpo mucho más grande que la de los otros algoritmos , debido a la variabilidad de la solucion inicial escogida. En los algoritmos genéticos también influye la población inicial, pero sobre todo en los AGG, al reemplazar toda la población en cada iteración y conservar la mejor solución, se consigue una mayor diversidad y mayor probabilidad de no quedarse atascado en un máximo local.
-
-Comparando los resultados de los fitness promedio y las gráficas de lineas  podemos ver que la búsqueda local en dataset más pequeños alcanza a los algoritmos genéticos que usan el operador aritmético ya que este operador no dá tanta diversidad en el cruce. Por a medida que el tamaño del dataset aumenta , la búsqueda local se va quedando atrás y es fácilmente superada por los algoritmos genéticos .Donde más se nota la diferencia es en los que usan el operador BLX-$alpha$ que como veremos a continuación es el que mejor resultados obtiene.
-
-== Mejor operador para los genéticos
-Como se puede observar en los resultados, en ambos algoritmos genéticos el mejor resultado lo obtiene el operador *BLX-$alpha$*. La principal diferencia entre este y el aritmético es que el *BLX-$alpha$* permite que el gen resultante de los hijos al cruzar los genes de los padres pueda estar fuera del intervalo que genera el mínimo y el máximo de los padres, por tanto los hijos resultantes de los cruces se pueden alejar más de sus padres y permiten explorar más el espacio de soluciones.
-Por otra parte, el cromosoma resultante del cruce aritmético contiene genes que no pueden tener un valor mayor o menor que el mayor o menor de los padres (al ser una combinación lineal) por lo que al aplicar este tipo de cruce, los hijos convergen a la media de los padres obteniendo mejor resultado en entornos explotativos.
-
-Como consecuencia de estas propiedades vemos que en la tabla del ibex35 la diferencia entre la media de los fitness no es tan alta pero en cuanto pasamos a los dataset del sp100 y el sp500 al aumentar el espacio de búsqueda , se ven claramente má recompensados los algoritmos que usan el operador BLX-$alpha$.
-== Comportamiento de los Algoritmos Genéticos Generacionales
-Los AGG reemplazan en todas las iteraciones la población al completo, conservando el mejor de la población anterior e intercambiándolo por el peor de la generación que entra. Este tipo de reemplazo hace que haya más diversidad de soluciones y por tanto el algoritmo tenga menos riesgo de quedarse "atascado" en una zona del espacio de soluciones y explore más soluciones del espacio. Esto  lo podemos comprobar 
-en las tablas podemos analizando que este tipo de algoritmos se ve beneficiado cuando el espacio de búsqueda es más grande ,permitiendole asi obtener el mejor fitness promedio en las ejecuciones donde el dataset es más grande. La única ejecución donde no destaca tanto es en la del ibex35 ya que al ser un dataset pequeño los AGE adquieren un poco de ventaja.
-
-== Comportamiento de los Algoritmos Genéticos Estacionarios
-Los AGE al hacer reemplazos en proporciones pequeñas de la población conservan mejor las soluciones que son buenas pero los hace depender mucho de la población inicial.Podemos comprobar esto fijandonos en los boxplots ya que el AGE con el operador BLX es uno de los algoritmos que más outliers presenta. Fijandonos en las tablas vemos que en los dataset grande claramente gana el AGG pero en  el ibex35 consigue superarlo debido a que en dataset pequeños la capacidad explotativa funciona mejor.
-
-== AGE-BL$alpha$ vs AGG-BL$alpha$
-En cuanto a comparación entre algoritmos genéticos nos fijaremos en los que usan el operador *BLX-$alpha$* para compararlos en igualdad de condiciones cuando usan el mejor operador.
-
-Se puede observar facilmente en los gráficos de lineas que ambos algoritmos tienen resultados muy parecidos y de los mejores en comparación a los otros algoritmos, en datasets pequeños como podría ser el del ibex35 vemos que no se aprecia apenas diferencia ya que la ventaja explorativa del AGG no tiene apenas efecto. La diferencia se puede observar en el dataset de mayor tamaño donde vemos que el AGG (linea morada) consigue mantener su fitness por encima del AGE en la mayoría de las ejecuciones. Por tanto podemos ver que en el SP500 se obtienen mejores soluciones cuando se tiene mayor diversidad en la población del algoritmo que cuando 
-se intenta conservar de manera prematura a los mejores indivíduos (AGE).
-
-== Comparación entre meméticos
-Los algoritmos meméticos usados son una hibridación entre el AGG-BLX$alpha$ y la búsqueda local. Esto nos permite que cada vez que ejecutamos la búsqueda local sobre la cantidad de cromosomas  selecionados en cada caso ,  podamos explotar las soluciones que se encuentran en un entorno del cromosoma seleccionado.Como los resultados obtenidos en todas las variantes de los algoritmos son muy parecidas entre sí  podemos concluir dos cosas: 
-- O bien nuestro espacio de búsqueda no presenta "picos" sobre los que la búsqueda local pueda escalar para mejorar la solución inicial que se le da con el AGG.
-- O bien debemos añadir más iteraciones a la búsqueda local para darle más posibilidades de poder encontrar mejores soluciones en el entorno dado.
-
-Para comprobarlo , he probado a hacer ejecuciones usando 500 evaluaciones en la búsqueda local , como resultado he vist que la solución varía en cuestión de centésimas por lo que considerar el aumento de evaluaciones en la búsqueda local no mejora los resultados.
-
-
-== Meméticos vs mejor AG
-
-Como hemos observado en el apartado anterior , los meméticos tienen resultados muy parecidos , si los comparamos con el AGG-BLX-$alpha$ , que es el algoritmo que se a usado de base para los meméticos , observamos que los fitness medios obtenidos son mejores por parte del algorítmo genético , esto se debe a que el operador BLX-$alpha$ junto al algoritmo generacional funcionan muy bien para el conjunto de datos que se tiene por tanto al aplicar la búsqueda local no se obtienen mejores soluciones.
-
-También hay que tener en cuenta que si el espacio de soluciones no presenta picos pronunciados, la búsqueda local no va a hacer gran efecto sobre los resultados que ya se obtienen con el AGG.
-
-== Análisis resultados 2025
-A la hora de analizar los resultados obtenidos en el año 2025 vemos que  no hay un claro ganador ya que varía dependiendo del dataset escogido.En el ibex 
-== Comparación gráfica fitness 2014-2024 (50 ejecuciones)
-
+== Gráficas de evolución del fitness durante las ejecuciones
 #figure(
   image("img/ib35_linea.png", width: 80%),
   caption: [Comparación fitness para Ibex 35],
@@ -1054,9 +1005,66 @@ A la hora de analizar los resultados obtenidos en el año 2025 vemos que  no hay
   image("img/syp500_linea.png", width: 80%),
   caption: [Boxplot de resultados para S&P500],
 )
+En los gráficos de lineas podemos ver claramente la variabilidad del fitness en cada algoritmo , vemos que la búsqueda local y los algoritmos genéticos con el operador aritmético  con los  menos estables mientras que los genéticos con el operador BLX-$alpha$ y los meméticos presentan una mayor estabilidad en su fitness a lo largo de las 50 ejecuciones.
+#pagebreak()
+= Análisis de los resultados
 
-En estas gráficas podemos ver la evolución del fitness a través de las 50 ejecuciones hechas, vemos que como es lógico en el Algoritmo Greedy se mantiene constante y podemos ver cómo la variabilidad del fitness va disminuyendo en el algoritmo de Búsqueda Aleatoria conforme el conjunto de datos aumenta, sin embargo la variabilidad del fitness de la búsqueda local sigue una distribución parecida en todos los casos.
+Al observar los resultados obtenidos, podemos ver que cada algoritmo se comporta de manera muy diferente dependiendo del conjunto de datos usado. Para poder entender por qué unos algoritmos funcionan mejor que otros, es necesario analizar cómo trabaja cada uno y qué características del problema aprovechan o ignoran.
+== Búsqueda Local vs Algoritmos Genéticos
+Los algoritmos genéticos en el problema del portfolio obtienen mejores resultados, ya que exploran más el espacio de soluciones que la búsqueda local. La búsqueda local es más explotativa, por lo que le es fácil entrar en máximos locales en datasets pequeños como el Ibex 35 (podemos ver que acaba antes que el máximo de evaluaciones), mientras que los algoritmos genéticos exploran un mayor rango de soluciones, por lo que tienen más facilidad de evitar máximos locales. También cabe destacar que la búsqueda local se ve muy afectada por la solución inicial que se toma; al ser esta aleatoria, dependemos más de la "suerte" a la hora de encontrar una mejor solución antes de las evaluaciones permitidas. Esto lo podemos ver claramente en los boxplots, donde la caja de la búsqueda local tiene el cuerpo mucho más grande que la de los otros algoritmos, debido a la variabilidad de la solución inicial escogida. En los algoritmos genéticos también influye la población inicial; a los AGG esto les influye en menor medida ya que, al reemplazar toda la población en cada iteración y conservar la mejor solución, se consigue una mayor diversidad y mayor probabilidad de no quedarse atascado en un máximo local.
 
-Podemos observar también que en algunas ejecuciones la Búsqueda aleatoria ha obtenido mejor fitness que la Búsqueda Local, esto ocurre mayoritariamente en los datos del S&P500 ya que al ser un espacio de soluciones tan grande a la Búsqueda Local se le acaban las evaluaciones muy rápido y en algunos casos puede sacar fitness peores que la Búsqueda Aleatoria.
+Comparando los resultados de los fitness promedio y las gráficas de líneas, podemos ver que la búsqueda local en datasets más pequeños alcanza a los algoritmos genéticos que usan el operador aritmético, ya que este operador no da tanta diversidad en el cruce. Pero a medida que el tamaño del dataset aumenta, la búsqueda local se va quedando atrás y es fácilmente superada por los algoritmos genéticos. Donde más se nota la diferencia es en los que usan el operador BLX-$alpha$, que como veremos a continuación es el que mejores resultados obtiene.
+
+== Mejor operador para los genéticos
+Como se puede observar en los resultados, en ambos algoritmos genéticos el mejor resultado lo obtiene el operador BLX-$alpha$. La principal diferencia entre este y el aritmético es que el BLX-$alpha$ permite que el gen resultante de los hijos al cruzar los genes de los padres pueda estar fuera del intervalo que genera el mínimo y el máximo de los padres, por tanto los hijos resultantes de los cruces se pueden alejar más de sus padres y permiten explorar más el espacio de soluciones.
+Por otra parte, el cromosoma resultante del cruce aritmético contiene genes que no pueden tener un valor mayor o menor que el mayor o menor de los padres (al ser una combinación lineal) por lo que al aplicar este tipo de cruce, los hijos convergen a la media de los padres obteniendo mejor resultado en entornos explotativos.
+
+Como consecuencia de estas propiedades, vemos que en la tabla del ibex35 la diferencia entre la media de los fitness no es tan alta, pero en cuanto pasamos a los dataset del sp100 y el sp500, al aumentar el espacio de búsqueda, se ven claramente más recompensados los algoritmos que usan el operador BLX-$alpha$ ya que exploran más parte del espacio de soluciones.
+Si nos fijamos en los boxplots, vemos que al usar el operador aritmético las cajas son más grandes; esto es debido a que, al generar hijos que se encuentran siempre en el intervalo de valores de los padres, la población inicial influye más en el resultado del algoritmo.
+Por otra parte, las cajas de los que usan el operador BLX-$alpha$ están más comprimidas, sobre todo en espacios de búsqueda pequeños. Los outliers que presentan se encuentran sobre todo cuando se combina con el AGE, ya que la población inicial influye más.
+
+== Comportamiento de los Algoritmos Genéticos Generacionales
+
+Los AGG reemplazan en todas las iteraciones la población al completo, conservando el mejor de la población anterior e intercambiándolo por el peor de la generación que entra. Este tipo de reemplazo hace que haya más diversidad de soluciones y que la población inicial no influya tanto. Esto lo podemos comprobar viendo los boxplots, donde las cajas de los AGG suelen ser las más compactas de todas, debido a que tienen menos variación en sus resultados; por tanto, la población inicial no influye tanto.
+En las tablas podemos ver que este tipo de algoritmos se ve beneficiado cuando el espacio de búsqueda es más grande, permitiéndole así obtener el mejor fitness promedio en las ejecuciones del SP100 y SP500.
+
+== Comportamiento de los Algoritmos Genéticos Estacionarios
+Los AGE, al hacer reemplazos en proporciones pequeñas de la población, conservan mejor las soluciones que son buenas al inicio; esto los hace depender mucho de la población inicial. Podemos comprobar esto fijándonos en los boxplots, ya que el AGE es uno de los algoritmos que más outliers presenta y que más variabilidad tiene, sobre todo cuando se usa el operador aritmético por los motivos comentados anteriormente. Fijándonos en las tablas, vemos que en los dataset grandes claramente gana el AGG, pero en el ibex35 el AGE consigue superarlo debido a que en dataset pequeños la capacidad explotativa funciona mejor.
+
+== AGE-BL$alpha$ vs AGG-BL$alpha$
+En cuanto a comparación entre algoritmos genéticos nos fijaremos en los que usan el operador *BLX-$alpha$* para compararlos en igualdad de condiciones cuando usan el mejor operador.
+
+Se puede observar fácilmente en los gráficos de líneas que ambos algoritmos tienen resultados muy parecidos; en datasets pequeños, como podría ser el del ibex35, vemos que no se aprecia apenas diferencia, ya que la ventaja explorativa del AGG no tiene apenas efecto. La diferencia se puede observar en el dataset de mayor tamaño, donde vemos que el AGG (línea morada) consigue mantener su fitness por encima del AGE en la mayoría de las ejecuciones. Por tanto, podemos ver que en datasets grandes se obtienen mejores soluciones cuando se tiene mayor diversidad en la población del algoritmo que cuando se intenta conservar de manera prematura a los mejores individuos (AGE).
+
+== Comparación entre meméticos
+Los algoritmos meméticos usados son una hibridación entre el AGG-BLX$alpha$ (el mejor de los genéticos) y la búsqueda local. Esto nos permite que cada vez que ejecutamos la búsqueda local sobre la cantidad de cromosomas seleccionados en cada caso, podamos explotar las soluciones que se encuentran en un entorno del cromosoma seleccionado. Como los resultados obtenidos en todas las variantes de los algoritmos son muy parecidos entre sí, podemos concluir dos cosas:
+- O bien nuestro espacio de búsqueda no presenta "picos" sobre los que la búsqueda local pueda escalar para mejorar la solución inicial que se le da con el AGG.
+- O bien debemos añadir más iteraciones a la búsqueda local para darle más posibilidades de poder encontrar mejores soluciones en el entorno dado.
+
+Para comprobarlo, he probado a hacer ejecuciones usando 500 evaluaciones en la búsqueda local; como resultado he visto que la solución varía en cuestión de centésimas, por lo que considerar el aumento de evaluaciones en la búsqueda local no mejora los resultados.
+
+Dentro de que los resultados entre meméticos no son muy distintos , podemos apreciar las diferencias entre AM-RAND y AM-BEST. El que mejor resultados obtiene es el AM-BEST ya que estamos aplicando una mejora (búsqueda local ) sobre soluciones que ya son las mejores de la población por lo que tenemos más probabilidades de encontrar nuevas soluciones mejores.Por otro lado AM-RAND obtiene los peores resultados independientemente del dataset , esto se debe a que aplica la mejor solo sobre un 10% aleatorio de la población por lo que muchas veces se pueden estar mejorando soluciones las cuales son muy malas y no merece la pena mejorar ya que no nos aproximan a ninguna solución mejor.AM-ALL suele estar en un punto intermedio entre los dos anteriores , al aplicar la búsqueda local sobre todas las soluciones. Este enfoque tiene dos puntos negativos que no le permiten superar al AM-BEST:
+- Gasta muchas evaluaciones haciendo la búsqueda local y deja menos iteraciones para el AGG 
+- El coste computacional es mucho más alto y esto lo podemos ver reflejado en el tiempo ya que es el algoritmo que más tarda en ejecutarse.
+
+== Mejor Memético vs mejor AG
+
+En este último apartado voy a comparar el AGG-BLX-$alpha$ con el AM-BEST. Observando los resultados de la tabla, vemos que el que mejor fitness obtiene es el AM-BEST. En el IBEX35 la diferencia es muy pequeña debido a las condiciones del dataset. Donde más diferencia podemos encontrar es en los otros dos casos. En el SP500 gana el AGG; esto puede deberse a que el algoritmo memético gasta evaluaciones en la búsqueda local intentando explotar las mejores soluciones de las que dispone, pero como ya hemos visto, en este dataset la exploración se ve mucho más recompensada que la explotación; por tanto, el AGG puede destinar más evaluaciones a explorar que el AM-BEST. El SP100 parece ser el entorno ideal para el AM-BEST, ya que es un dataset de tamaño intermedio donde vemos que sí puede aprovechar las evaluaciones que invierte en explotar las mejores soluciones. También vemos al mejor algoritmo en este dataset, y presenta muy poca variación en su boxplot, lo que nos indica que la población inicial no influye casi en su comportamiento.
+
+
+== Análisis resultados 2025
+A la hora de analizar los resultados obtenidos en el año 2025. En cuanto al IBEX35, vemos que el mejor resultado lo obtiene el AGG-Arit, obteniendo un beneficio del 5,5%; como hemos visto en apartados anteriores, este algoritmo ha obtenido buenos resultados en los años previos, por lo que era de esperar que el beneficio fuese bueno. Los otros algoritmos también obtienen resultados aceptables, con una media del 3,2% de beneficio y con fitness muy parecidos entre ellos, por lo que vemos que las predicciones sobre 2025 son bastante buenas en este caso.
+
+En el SP100, el beneficio obtenido baja drásticamente y todos los algoritmos se mueven en la zona del 1% de beneficio. No podemos sacar un claro ganador debido a que las diferencias son mínimas, pero el AGE-BLX junto al AM-BEST son los que mejores resultados obtienen. Tiene sentido, ya que han sido también de los que mejores resultados han obtenido en los datos de 2015-2024.
+
+Por último, vemos que en el SP500 es donde peor funcionan las soluciones obtenidas. Los algoritmos AGG-Arit y AGE-Arit presentan pérdidas y los demás algoritmos tienen beneficios muy bajos o nulos. Esto nos dice que las soluciones obtenidas en este problema en el rango 2015-2024 no son buenas aplicadas al año 2025, ya que ninguna obtiene resultados buenos; es más, si nos fijamos en el Random search, vemos que este es el que mejor beneficio obtiene, por lo que las soluciones no están siendo adecuadas para este periodo.
+
+Como resultado de este apartado, vemos que el algoritmo que mejor consigue extrapolar sus soluciones a 2025 es el AGG-BLX y AM-BEST, que aunque no son los que mejor resultado obtienen en todos los dataset, consiguen de media los mejores resultados y no generan pérdidas en ningún momento.
+
 
 == Conclusiones
+Tras el análisis de los resultados, hemos podido comprobar que los algoritmos que mejores resultados han mostrado de forma consistente son AGG-BLX y AM-BEST. Esto se ha visto reflejado tanto en sus resultados durante 2014-2024 como en los resultados de 2025, donde han presentado los mejores resultados teniendo en cuenta todos los datasets.
+
+Si analizamos el comportamiento general de los algoritmos sobre el problema, podemos concluir que nuestro espacio de búsqueda no presenta picos importantes donde los algoritmos meméticos hayan sacado mucha ventaja; el único que sí podría ser un poco más irregular sería el SP100, donde el AM-BEST consiguió superar a todos aprovechando sus cualidades.
+
+Como conclusión, sacamos que en este problema se premia más la exploración que la explotación en el espacio de búsqueda, sobre todo en espacios muy grandes.
