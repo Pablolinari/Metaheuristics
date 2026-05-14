@@ -5,9 +5,9 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # 1. Crear una opción clara para el usuario
-# Si no se especifica, por defecto será Debug para que los errores de Eigen no pasen desapercibidos
+# Si no se especifica, por defecto será Release
 if(NOT CMAKE_BUILD_TYPE)
-  set(CMAKE_BUILD_TYPE Debug CACHE STRING "Elija el tipo de build: Debug o Release" FORCE)
+  set(CMAKE_BUILD_TYPE Release CACHE STRING "Elija el tipo de build: Debug o Release" FORCE)
 endif()
 
 # 2. Configurar Flags de optimización
