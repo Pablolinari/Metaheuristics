@@ -38,7 +38,8 @@ ResultMH<double> Age::optimize(Problem<double> &problem, int maxevals) {
 
     idxparents.clear();
     // torneo para npob veces
-    idxparents = op.tournament(this->tournamentSize, this->populationSize,2, fitnessPoblation);
+    idxparents = op.tournament(this->tournamentSize, this->populationSize, 2,
+                               fitnessPoblation);
 
     // cruce
 
@@ -66,9 +67,8 @@ ResultMH<double> Age::optimize(Problem<double> &problem, int maxevals) {
         }
       }
     }
-    // reemplazo generacional
-    //  busco el peor de la generación nueva y lo elimino
-    //  busco el mejor de la generación nueva y compruebo si es mejor que el
+    // reemplazo
+
     double fitnessFirst = problem.fitness(son[0]);
     evals++;
     if (evals == maxevals) {
@@ -80,7 +80,7 @@ ResultMH<double> Age::optimize(Problem<double> &problem, int maxevals) {
     if (evals == maxevals) {
       break;
     }
-
+    // ordeno los hijos , primero el mejor
     if (fitnessSecond > fitnessFirst) {
       std::swap(fitnessFirst, fitnessSecond);
       std::swap(son[0], son[1]);
@@ -91,7 +91,7 @@ ResultMH<double> Age::optimize(Problem<double> &problem, int maxevals) {
 
     worstFitness = std::numeric_limits<double>::infinity();
     secondWorstFitness = std::numeric_limits<double>::infinity();
-
+		// busco los indices del primero y segundo peor de la poblacion
     for (int i = 0; i < this->populationSize; i++) {
       double tempFitness = fitnessPoblation[i];
       if (tempFitness < worstFitness) {
@@ -104,6 +104,7 @@ ResultMH<double> Age::optimize(Problem<double> &problem, int maxevals) {
         idxSecondWorst = i;
       }
     }
+		// actualizo el mejor resultado
     if (fitnessSecond > bestFitness) {
       bestFitness = fitnessSecond;
       bestSolution = son[1];
@@ -113,15 +114,18 @@ ResultMH<double> Age::optimize(Problem<double> &problem, int maxevals) {
       bestSolution = son[0];
     }
     bool usado = false;
+		// si el peor hijo supera al peor de la poblacion lo cambio
     if (fitnessFirst > worstFitness) {
       poblation[idxWorst] = son[0];
       fitnessPoblation[idxWorst] = fitnessFirst;
-    } else if (fitnessSecond > worstFitness) {
+    } else if (fitnessSecond > worstFitness) {// en caso de que el primer hijo no entre 
+																							// pruebo con el segundo
+
       poblation[idxWorst] = son[1];
       fitnessPoblation[idxWorst] = fitnessSecond;
       usado = true;
     }
-
+		// si el segundo hijo no ha entrado 
     if (!usado && fitnessSecond > secondWorstFitness) {
       poblation[idxSecondWorst] = son[1];
       fitnessPoblation[idxSecondWorst] = fitnessSecond;
