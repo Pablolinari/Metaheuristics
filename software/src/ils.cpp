@@ -67,32 +67,32 @@ ResultMH<double> Ils::localSearch(Problem<double> &problem, int maxevals,
   return ResultMH(startSolution, bestFitness, evals);
 }
 
-void Ils::mutation(tSolution<double>&mutSol,int poblationSize,double ratio){
-	int nMut = std::ceil(poblationSize*ratio);
-	int idx =Random::get(0,poblationSize);
-	int idxend =idx+nMut;
-	if(idxend>poblationSize){
-		idxend = idx-nMut;
-	}
-	Random::shuffle(mutSol.begin()+idx,mutSol.begin()+idxend);
+void Ils::mutation(tSolution<double> &mutSol, int poblationSize, double ratio) {
+  int nMut = std::ceil(poblationSize * ratio);
+  int idxbegin = Random::get(0, poblationSize);
+  int idxend = idxbegin + nMut;
+  if (idxend > poblationSize) {
+    idxend = idxbegin;
+    idxbegin = idxend - nMut;
+  }
+  Random::shuffle(mutSol.begin() + idxbegin, mutSol.begin() + idxend);
 }
 ResultMH<double> Ils::optimize(ProblemDouble &problem, int maxevals) {
   assert(maxevals > 0);
-  tSolution<double> bestSolution;
-  double bestFitness = -std::numeric_limits<double>::infinity();
-  int numsol = 5;
+  int numsol = 4;
   int localsearchevals = 2000;
   int evals = 0;
-  tSolution<double> startSolution = problem.createSolution();
-
+  tSolution<double> bestSolution = problem.createSolution();
+  double bestFitness = problem.fitness(bestSolution);
+  ResultMH<double> localsearchResult =
+      localSearch(problem, localsearchevals, bestSolution);
+  evals += localsearchResult.evaluations;
   for (int i = 0; i < numsol; i++) {
-    ResultMH<double> localsearchSolution =
-        localSearch(problem, localsearchevals, startSolution);
-    evals += localsearchSolution.evaluations;
-		
-    if (localsearchSolution.fitness > bestFitness) {
-      bestSolution = localsearchSolution.solution;
-      bestFitness = localsearchSolution.fitness;
+    if (bestFitness > localsearchResult.fitness) {
+      mutation(bestSolution, problem.getSolutionSize(), 0.2);
+    } else {
+      mutation(localsearchResult.solution, problem.getSolutionSize(), 0.2);
+
     }
   }
 
