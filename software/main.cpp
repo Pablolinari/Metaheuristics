@@ -21,6 +21,7 @@
 #include "include/amrand.h"
 #include "include/ambest.h"
 #include "include/greedy.h"
+#include "include/gwo.h"
 #include "include/localsearch.h"
 #include "include/randomsearch.h"
 #include "include/solution.h"
@@ -103,6 +104,8 @@ int main(int argc, char *argv[]) {
   AmRand amrand(100, 0.8, 0.1, 3);
   AmBest ambest(100, 0.8, 0.1, 3);
 
+  Gwo gwo(30, 2.0);
+
   // Create the specific problem
   ProblemPort problem = ProblemPort(path, low, high, false);
   ProblemPort problem25 = ProblemPort(path, low, high, true);
@@ -110,7 +113,8 @@ int main(int argc, char *argv[]) {
       make_pair("Greedy", &greedyalg),      make_pair("Random", &ralg),
       make_pair("Local Search", &localalg), make_pair("AGG-Arit", &aggarit),
       make_pair("AGG-BLX", &aggblx),        make_pair("AGE-Arit", &agearit),
-      make_pair("AGE-BLX", &ageblx),        make_pair("AM-ALL", &amall),make_pair("AM-RAND", &amrand),make_pair("AM-BEST", &ambest)};
+      make_pair("AGE-BLX", &ageblx),        make_pair("AM-ALL", &amall),make_pair("AM-RAND", &amrand),make_pair("AM-BEST", &ambest),
+      make_pair("GWO", &gwo)};
   Eigen::MatrixX<double> fitness(totalevaluations, algorithms.size());
   Eigen::MatrixX<double> profit2025(totalevaluations, algorithms.size());
   Eigen::MatrixX<double> fitness2025(totalevaluations, algorithms.size());
