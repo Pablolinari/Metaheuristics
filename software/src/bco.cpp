@@ -81,12 +81,12 @@ ResultMH<double> Bco::optimize(Problem<double> &problem, int maxevals) {
   int evals = 0;
   int problemSize = problem.getSolutionSize();
 
-  int nFoodSources = std::max(1, colonySize / 2);
+  int nFoodSources = colonySize/2;
   std::vector<tSolution<double>> foodSources(nFoodSources);
   std::vector<double> fitnesses(nFoodSources);
   std::vector<int> trials(nFoodSources, 0);
 
-  tSolution<double> bestSolution(size);
+  tSolution<double> bestSolution(problemSize);
   double bestFitness = -std::numeric_limits<double>::infinity();
 
   for (int i = 0; i < nFoodSources; i++) {
@@ -103,7 +103,7 @@ ResultMH<double> Bco::optimize(Problem<double> &problem, int maxevals) {
   }
 
   while (evals < maxevals) {
-    // Employed bees phase
+    // fase empleadas
     for (int i = 0; i < nFoodSources && evals < maxevals; i++) {
       tSolution<double> candidate = perturbSolution(foodSources[i], problem);
       double candidateFitness = problem.fitness(candidate);
@@ -125,7 +125,7 @@ ResultMH<double> Bco::optimize(Problem<double> &problem, int maxevals) {
       break;
     }
 
-    // Onlooker bees phase
+    // fase observadoras 
     std::vector<double> probabilities = buildProbabilities(fitnesses);
     int onlookers = nFoodSources;
     for (int k = 0; k < onlookers && evals < maxevals; k++) {
