@@ -1,5 +1,4 @@
 #pragma once
-
 #include "mh.h"
 #include "operator.h"
 #include <utility>
