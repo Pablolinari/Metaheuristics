@@ -2,6 +2,7 @@
 #pragma once
 #include "mh.h"
 #include "problem.h"
+#include "solution.h"
 
 using namespace std;
 
@@ -26,6 +27,7 @@ public:
 
   ResultMH<double> localSearch(Problem<double> &problem, int maxevals,
                                tSolution<double> solInit);
-	void mutation(tSolution<double>&mutSol,int poblationSize , double ratio);
+  tSolution<double> mutation(Problem<double> &problem, tSolution<double> mutSol,
+                             double ratio);
   ResultMH<double> optimize(Problem<double> &problem, int maxevals) override;
 };
