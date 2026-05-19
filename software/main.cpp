@@ -25,6 +25,8 @@
 #include "include/randomsearch.h"
 #include "include/solution.h"
 #include "include/es.h"
+#include "include/ils.h"
+#include "include/bmb.h"
 
 using namespace std;
 using namespace std::chrono;
@@ -103,17 +105,15 @@ int main(int argc, char *argv[]) {
   AmAll amall(100, 0.8, 0.1, 3);
   AmRand amrand(100, 0.8, 0.1, 3);
   AmBest ambest(100, 0.8, 0.1, 3);
-
+	Ils ils = Ils();
+	Bmb bmb = Bmb();
 	Es enfriamiento =Es();
   // Create the specific problem
   ProblemPort problem = ProblemPort(path, low, high, false);
   ProblemPort problem25 = ProblemPort(path, low, high, true);
   std::vector<pair<std::string, MH<double> *>> algorithms = {
       make_pair("Greedy", &greedyalg),      make_pair("Random", &ralg),
-      make_pair("Local Search", &localalg), /*make_pair("AGG-Arit", &aggarit),
-      make_pair("AGG-BLX", &aggblx),        make_pair("AGE-Arit", &aggarit),
-      make_pair("AGE-BLX", &aggblx),        make_pair("AM-ALL", &amall),
-      make_pair("AM-RAND", &amrand),        make_pair("AM-BEST", &ambest)*/make_pair("AGG-BLX", &aggblx),make_pair("AM-BEST", &ambest),make_pair("ES", &enfriamiento)};
+      make_pair("Local Search", &localalg), make_pair("AM-BEST", &ambest),make_pair("BMB", &bmb),make_pair("ILS", &ils),make_pair("ES", &enfriamiento)};
   Eigen::MatrixX<double> fitness(totalevaluations, algorithms.size());
   Eigen::MatrixX<double> profit2025(totalevaluations, algorithms.size());
   Eigen::MatrixX<double> fitness2025(totalevaluations, algorithms.size());
