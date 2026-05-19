@@ -5,3 +5,6 @@
 - revisar pseudocodigos y descripciones 
 - revisar BL 
 
+
+- t_o valor absoluto 
+

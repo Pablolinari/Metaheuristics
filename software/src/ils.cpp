@@ -1,7 +1,6 @@
 #include "../include/ils.h"
 #include <algorithm>
 #include <cmath>
-#include <limits>
 
 ResultMH<double> Ils::localSearch(Problem<double> &problem, int maxevals,
                                   tSolution<double> solInit) {
@@ -69,72 +68,31 @@ ResultMH<double> Ils::localSearch(Problem<double> &problem, int maxevals,
   return ResultMH(startSolution, bestFitness, evals);
 }
 
-namespace {
-int pickDifferentCluster(int current, int minCluster, int maxCluster) {
-  if (minCluster == maxCluster) {
-    return current;
-  }
-  int candidate = current;
-  int attempts = 0;
-  while (candidate == current && attempts < 10) {
-    candidate = Random::get<int>(minCluster, maxCluster);
-    attempts++;
-  }
-  if (candidate == current) {
-    if (current == minCluster) {
-      return minCluster + 1;
-    }
-    return minCluster;
-  }
-  return candidate;
-}
-}
-
 tSolution<double> Ils::mutation(Problem<double> &problem,
                                 tSolution<double> mutSol, double ratio) {
-  tSolution<double> retSol = mutSol;
-  int solutionSize = static_cast<int>(problem.getSolutionSize());
-  if (solutionSize <= 0) {
-    return retSol;
-  }
-  int nMut = std::max(1, static_cast<int>(std::ceil(solutionSize * ratio)));
 
-  std::pair<double, double> bounds = problem.getSolutionDomainRange();
-  int minCluster = static_cast<int>(bounds.first);
-  int maxCluster = static_cast<int>(bounds.second);
-  if (minCluster == maxCluster) {
-    return retSol;
-  }
+	tSolution<double> retSolution = mutSol;
+	int nselection = std::ceil(ratio*problem.getSolutionSize());
 
-  std::vector<int> indices(solutionSize);
-  for (int i = 0; i < solutionSize; i++) {
-    indices[i] = i;
-  }
-  Random::shuffle(indices);
+	int index = Random::get<int>(0,problem.getSolutionSize()-1);
+	int endindex;
 
-  int changed = 0;
-  int idx = 0;
-  while (changed < nMut && idx < solutionSize) {
-    int pos = indices[idx];
-    int currentCluster = static_cast<int>(std::round(retSol(pos)));
-    int newCluster = pickDifferentCluster(currentCluster, minCluster, maxCluster);
-    if (newCluster != currentCluster) {
-      retSol(pos) = static_cast<double>(newCluster);
-      changed++;
-    }
-    idx++;
-  }
+	if(index + nselection > problem.getSolutionSize()){
+		endindex = index;
+		index = endindex-nselection;
+	}else{
+		endindex = index+nselection;
+	}
 
-  if (!problem.isValid(retSol)) {
-    problem.fix(retSol);
-  }
-  return retSol;
+	Random::shuffle(retSolution.begin()+index,retSolution.begin()+endindex);
+
+	return retSolution;
 }
 ResultMH<double> Ils::optimize(ProblemDouble &problem, int maxevals) {
   assert(maxevals > 0);
   int localsearchevals = 2000;
   int evals = 0;
-	int niter = 4;
+  int niter = 4;
 
   tSolution<double> currentSolution = problem.createSolution();
   double currentFitness = problem.fitness(currentSolution);
@@ -146,7 +104,7 @@ ResultMH<double> Ils::optimize(ProblemDouble &problem, int maxevals) {
   tSolution<double> bestSolution = resultLocal.solution;
   double bestFitness = resultLocal.fitness;
 
-  for(int i=0; i< niter;i++) {
+  for (int i = 0; i < niter; i++) {
 
     tSolution<double> mutSol = mutation(problem, bestSolution, 0.2);
     ResultMH<double> iterLocal = localSearch(problem, localsearchevals, mutSol);
