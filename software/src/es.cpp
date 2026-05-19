@@ -8,7 +8,7 @@ ResultMH<double> Es::optimize(Problem<double> &problem, int maxevals) {
 	assert(maxevals > 0);
 	int evals = 0;
 	int succes = 0;
-	int size = static_cast<int>(problem.getSolutionSize());
+	int size = problem.getSolutionSize();
 
 	tSolution<double> currentSolution = problem.createSolution();
 	double currentFitness = problem.fitness(currentSolution);
