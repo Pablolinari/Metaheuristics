@@ -6,6 +6,7 @@
 
 ResultMH<double> Es::optimize(Problem<double> &problem, int maxevals) {
   assert(maxevals > 0);
+  const int max_evals = 100000;
   int evals = 0;
   int succes = 0;
   int size = problem.getSolutionSize();
@@ -17,23 +18,14 @@ ResultMH<double> Es::optimize(Problem<double> &problem, int maxevals) {
   tSolution<double> bestSolution = currentSolution;
   double bestFitness = currentFitness;
 
-  int max_vecinos = std::max(1, 10 * size);
-  int max_exitos = std::max(1, 1 * size);
-  int nEnfriamientos = maxevals / max_vecinos;
-  if (nEnfriamientos < 1) {
-    nEnfriamientos = 1;
-  }
+  int max_vecinos = 10 * size;
+  int max_exitos = 1 * size;
+  int nEnfriamientos = max_evals / max_vecinos;
   double phi = 0.3;
   double mu = 0.2;
-  double inicialTemp = (mu * std::fabs(currentFitness)) / -std::log(phi);
-  if (inicialTemp <= 0.0) {
-    inicialTemp = 1e-6;
-  }
+  double inicialTemp = (mu * currentFitness) / -std::log(phi);
   double finalTemp = 1e-3;
   if (finalTemp >= inicialTemp) {
-    finalTemp = inicialTemp * 0.5;
-  }
-  if (finalTemp <= 0.0) {
     finalTemp = inicialTemp * 0.5;
   }
 
@@ -52,19 +44,18 @@ ResultMH<double> Es::optimize(Problem<double> &problem, int maxevals) {
   }
 
   int enfriamientos = 0;
-  while (evals < maxevals && enfriamientos < nEnfriamientos) {
+  while (evals < max_evals) {
     succes = 0;
     int vecinos_generados = 0;
     Random::shuffle(neighbors);
     for (const std::pair<int, int> &move : neighbors) {
       if (vecinos_generados >= max_vecinos || succes >= max_exitos ||
-          evals >= maxevals) {
+          evals >= max_evals) {
         break;
       }
-
-      tSolution<double> candidate = currentSolution;
       int i = move.first;
       int j = move.second;
+      tSolution<double> candidate = currentSolution;
       double ratio = Random::get<double>(0.05, 0.3);
       double amount = candidate(i) * ratio;
       if (amount <= 0.0) {
@@ -107,8 +98,15 @@ ResultMH<double> Es::optimize(Problem<double> &problem, int maxevals) {
     if (succes == 0) {
       break;
     }
-    temp = temp / (1.0 + beta * temp);
-    enfriamientos++;
+    if (enfriamientos < nEnfriamientos) {
+      temp = temp / (1.0 + beta * temp);
+      if (temp < finalTemp) {
+        temp = finalTemp;
+      }
+      enfriamientos++;
+    } else {
+      temp = finalTemp;
+    }
   }
   return ResultMH(bestSolution, bestFitness, evals);
 }
