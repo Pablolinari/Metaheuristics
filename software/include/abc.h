@@ -13,11 +13,11 @@ using MHDouble = MH<double>;
 using ProblemDouble = Problem<double>;
 using ResultMDouble = ResultMH<double>;
 
-class Bco : public MHDouble {
+class Abc: public MHDouble {
 
 public:
-  Bco(int colonySize = 30, int trialLimit = 100);
-  virtual ~Bco() {}
+  Abc(int colonySize = 30, int trialLimit = 100);
+	~Abc() {}
 
   ResultMH<double> optimize(Problem<double> &problem, int maxevals) override;
 

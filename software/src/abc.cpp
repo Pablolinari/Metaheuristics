@@ -1,12 +1,13 @@
-#include "../include/bco.h"
+#include "../include/abc.h"
 #include <algorithm>
 #include <cassert>
 #include <limits>
 #include <numeric>
 
-Bco::Bco(int colonySize, int trialLimit)
-    : colonySize(colonySize), trialLimit(trialLimit) {}
+Abc::Abc(int colonySize, int trialLimit)
+    : MH(),colonySize(colonySize), trialLimit(trialLimit) {}
 
+namespace {
 tSolution<double> perturbSolution(const tSolution<double> &solution,
                                   Problem<double> &problem) {
   tSolution<double> candidate = solution;
@@ -75,13 +76,18 @@ int rouletteSelect(const std::vector<double> &probabilities) {
   }
   return static_cast<int>(probabilities.size() - 1);
 }
+} // namespace
 
-ResultMH<double> Bco::optimize(Problem<double> &problem, int maxevals) {
+ResultMH<double> Abc::optimize(Problem<double> &problem, int maxevals) {
   assert(maxevals > 0);
   int evals = 0;
-  int problemSize = problem.getSolutionSize();
+  int problemSize = static_cast<int>(problem.getSolutionSize());
+  if (problemSize == 0) {
+    tSolution<double> emptySolution(0);
+    return ResultMH(emptySolution, -std::numeric_limits<double>::infinity(), 0);
+  }
 
-  int nFoodSources = colonySize/2;
+  int nFoodSources = std::max(1, colonySize / 2);
   std::vector<tSolution<double>> foodSources(nFoodSources);
   std::vector<double> fitnesses(nFoodSources);
   std::vector<int> trials(nFoodSources, 0);

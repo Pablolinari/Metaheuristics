@@ -21,7 +21,7 @@ set(CMAKE_CXX_FLAGS_RELEASE "-O3  -DNDEBUG")
 message(STATUS "Configurando proyecto en modo: ${CMAKE_BUILD_TYPE}")
 
 # 3. Archivos y Dependencias
-file(GLOB SOURCES "src/*.cpp")
+file(GLOB  SOURCES "src/*.cpp")
 #find_package(Eigen3 REQUIRED)
 
 add_executable(program main.cpp ${SOURCES})
