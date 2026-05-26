@@ -1,12 +1,14 @@
 #pragma once
-#include "mh.h"
+#include "mhtrayectory.h"
 #include "operator.h"
 #include <utility>
 
-class Es : public MH<double> {
+class Es : public MHTrayectory<double> {
 public:
-  Es():MH(){}
+  Es() : MHTrayectory() {}
   virtual ~Es() {}
 
-  ResultMH<double> optimize(Problem<double> &problem, int maxevals) override;
+  ResultMH<double> optimize(Problem<double> &problem,
+                            const tSolution<double> &current, tFitness fitness,
+                            int maxevals) override;
 };

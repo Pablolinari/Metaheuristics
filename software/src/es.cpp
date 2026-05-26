@@ -4,7 +4,7 @@
 #include <cmath>
 #include <vector>
 
-ResultMH<double> Es::optimize(Problem<double> &problem, int maxevals) {
+ResultMH<double> Es::optimize(Problem<double> &problem, const tSolution<double>&current,tFitness fitness ,int maxevals) {
   assert(maxevals > 0);
   const int max_evals = maxevals;
   int evals = 0;
@@ -13,8 +13,8 @@ ResultMH<double> Es::optimize(Problem<double> &problem, int maxevals) {
   double lo = range.first;
   double hi = range.second;
 
-  tSolution<double> currentSolution = problem.createSolution();
-  double currentFitness = problem.fitness(currentSolution);
+  tSolution<double> currentSolution = current;
+  double currentFitness = fitness;
   evals++;
 
   tSolution<double> bestSolution = currentSolution;
