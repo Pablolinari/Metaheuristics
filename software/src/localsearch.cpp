@@ -1,11 +1,13 @@
 #include "../include/localsearch.h"
 
-ResultMH<double> LocalSearch::optimize(Problem<double> &problem, int maxevals) {
+
+
+
+ResultMH<double> LocalSearch::optimize(Problem<double> &problem, const tSolution<double> &current,tFitness fitness,int maxevals) {
   assert(maxevals >= 1);
-  double ratio = 0.4;
   // primera solución aleatoria
-  tSolution<double> startSolution = problem.createSolution();
-  double bestFitness = problem.fitness(startSolution);
+  tSolution<double> startSolution = current;
+  double bestFitness =fitness; 
   bool improved = true;
   std::vector<std::pair<int, int>> neighbors;
   // genero el vector vecindario

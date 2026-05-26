@@ -79,7 +79,7 @@ int main(int argc, char *argv[]) {
   // Create the algorithms
   RandomSearch ralg = RandomSearch();
   Greedy greedyalg = Greedy();
-  LocalSearch localalg = LocalSearch();
+  LocalSearch localalg = LocalSearch(0.4);
 
   AmBest ambest(100, 0.8, 0.1, 3);
 

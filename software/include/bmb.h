@@ -24,7 +24,5 @@ class Bmb : public MHDouble {
 public:
   Bmb() : MH() {};
   ~Bmb() {};
-	ResultMH<double> localSearch(Problem<double> &problem, int maxevals,
-                                 tSolution<double> solInit) ;
   ResultMH<double> optimize(Problem<double> &problem, int maxevals) override;
 };

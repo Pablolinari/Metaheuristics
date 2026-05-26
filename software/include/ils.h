@@ -25,8 +25,6 @@ public:
   Ils() : MH() {}
   virtual ~Ils() {}
 
-  ResultMH<double> localSearch(Problem<double> &problem, int maxevals,
-                               tSolution<double> solInit);
   tSolution<double> mutation(Problem<double> &problem, tSolution<double> mutSol,
                              double ratio);
   ResultMH<double> optimize(Problem<double> &problem, int maxevals) override;

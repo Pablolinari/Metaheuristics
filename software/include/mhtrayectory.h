@@ -1,5 +1,5 @@
 #pragma once
-#include <mh.h>
+#include "../include/mh.h"
 
 /**
  * Trayectory-based metaheuristic algorithm interface.
@@ -15,9 +15,9 @@ public:
    * @param maxevals The maximum number of evaluations.
    * @see MHTrayectory::optimize()
    */
-  ResultMH<tDomain> optimize(Problem<tDomain> *problem, int maxevals) override {
-    tSolution<tDomain> initial = problem->createSolution();
-    tFitness fitness = problem->fitness(initial);
+  ResultMH<tDomain> optimize(Problem<tDomain> &problem, int maxevals) override {
+    tSolution<tDomain> initial = problem.createSolution();
+    tFitness fitness = problem.fitness(initial);
     return optimize(problem, initial, fitness, maxevals);
   }
 
@@ -31,7 +31,7 @@ public:
    * @param fitness The fitness of the initial solution.
    * @param maxevals The maximum number of evaluations.
    */
-  virtual ResultMH<tDomain> optimize(Problem<tDomain> *problem,
+  virtual ResultMH<tDomain> optimize(Problem<tDomain> &problem,
                                      const tSolution<tDomain> &current,
                                      tFitness fitness, int maxevals) = 0;
 };

@@ -1,5 +1,5 @@
 #pragma once
-#include "mh.h"
+#include "mhtrayectory.h"
 #include "problem.h"
 
 using namespace std;
@@ -13,14 +13,14 @@ using namespace std;
  */
 // Instanciamos la plantilla con el tipo que nos interese
 //
-using MHDouble = MH<double>;
-using ProblemDouble = Problem<double>;
-using ResultMDouble = ResultMH<double>;
 
-class LocalSearch : public MHDouble {
-
+class LocalSearch : public MHTrayectory<double> {
+private:
+	double ratio;
 public:
-  LocalSearch() : MH() {}
+  LocalSearch(double ratio) : MHTrayectory(),ratio(ratio) {}
   virtual ~LocalSearch() {}
-  virtual ResultMH<double> optimize(Problem<double> &problem, int maxevals);
+  virtual ResultMH<double> optimize(Problem<double> &problem,
+                                    const tSolution<double> &current,
+                                    tFitness fitness, int maxevals) override;
 };
