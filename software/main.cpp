@@ -13,16 +13,15 @@
 #include <vector>
 
 // All all algorithms
-#include "include/agearit.h"
-#include "include/ageblx.h"
 #include "include/ambest.h"
+#include "include/bmb.h"
+#include "include/es.h"
 #include "include/greedy.h"
+#include "include/ils.h"
+#include "include/ilses.h"
 #include "include/localsearch.h"
 #include "include/randomsearch.h"
 #include "include/solution.h"
-#include "include/es.h"
-#include "include/ils.h"
-#include "include/bmb.h"
 
 #include "include/abc.h"
 
@@ -83,17 +82,25 @@ int main(int argc, char *argv[]) {
 
   AmBest ambest(100, 0.8, 0.1, 3);
 
-	Ils ils = Ils();
-	Bmb bmb = Bmb();
-	Es enfriamiento =Es();
+  Ils ils = Ils();
+  IlsEs ilses = IlsEs();
+  Bmb bmb = Bmb();
+  Es enfriamiento = Es();
 
-	Abc abc = Abc(50,50);
+  Abc abc = Abc(50, 50);
   // Create the specific problem
   ProblemPort problem = ProblemPort(path, low, high, false);
   ProblemPort problem25 = ProblemPort(path, low, high, true);
   std::vector<pair<std::string, MH<double> *>> algorithms = {
-      make_pair("Greedy", &greedyalg),      make_pair("Random", &ralg),
-      make_pair("Local Search", &localalg), make_pair("AM-BEST", &ambest),make_pair("BMB", &bmb),make_pair("ILS", &ils),make_pair("ES", &enfriamiento),make_pair("ABC", &abc)};
+      make_pair("Greedy", &greedyalg),
+      make_pair("Random", &ralg),
+      make_pair("Local Search", &localalg),
+      make_pair("AM-BEST", &ambest),
+      make_pair("BMB", &bmb),
+      make_pair("ILS-BL", &ils),
+      make_pair("ES", &enfriamiento),
+      make_pair("ILS-ES", &ilses),
+      make_pair("ABC", &abc)};
   Eigen::MatrixX<double> fitness(totalevaluations, algorithms.size());
   Eigen::MatrixX<double> profit2025(totalevaluations, algorithms.size());
   Eigen::MatrixX<double> fitness2025(totalevaluations, algorithms.size());

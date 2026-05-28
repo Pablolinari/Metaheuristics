@@ -38,7 +38,7 @@
   #image("logo.jpg", width: 60%)
   #v(3cm)
 
-  #block(text(weight: "bold", 2.5em)[Práctica 2])
+  #block(text(weight: "bold", 2.5em)[Práctica 3])
   #v(0.5em)
   #block(text(weight: "bold", 1.8em)[Problema del portfolio])
   #v(1cm)
@@ -242,155 +242,8 @@ pesos que ya estén activos, de no ser así si la diferencia es mayor que el lí
   ```]
 
 
-El principal objetivo de los algoritmos es maximizar la función fitness, la cual trata de maximizar el beneficio y minimizar el riesgo en una sola fórmula. El parámetro lambda se usará a modo de ajuste, cuando más alto sea su valor el algoritmo valorará mejor soluciones con poco beneficio pero que sean seguras, es decir, que tengan poco riesgo, mientras que cuanto más cercano a 0 sea lambda, el algoritmo valorará mejor las soluciones con máximo beneficio posible, ignorando el riesgo.El valor que se usa durante la práctica es $lambda=500$ que es el indicado en el guión. 
+El principal objetivo de los algoritmos es maximizar la función fitness, la cual trata de maximizar el beneficio y minimizar el riesgo en una sola fórmula. El parámetro lambda se usará a modo de ajuste, cuando más alto sea su valor el algoritmo valorará mejor soluciones con poco beneficio pero que sean seguras, es decir, que tengan poco riesgo, mientras que cuanto más cercano a 0 sea lambda, el algoritmo valorará mejor las soluciones con máximo beneficio posible, ignorando el riesgo.El valor que se usa durante la práctica es $lambda=500$ que es el indicado en el guión.
 
-== Operadores
-
-Para agrupar los operadores usados en los diferentes algoritmos he utilizado una clase *Operator* la cual tiene como métodos públicos los operadores usados en los algoritmos genéticos y meméticos.
-
-=== Operadores de cruce
-En este problema se han utilizado dos operadores de cruce, *Aritmético* y *BLX-$alpha$*
-
-En ambos operadores, si los padres seleccionados son iguales, los hijos serán iguales a los padres.
-
-El operador aritmético genera un aleatorio entre 0 y 1, para cada posición *i* de los padres, con el aleatorio escogido hace una combinación lineal distinta para cada hijo entre los genes de los padres. Si los genes de los padres son iguales en una determinada posición, no se genera la transformación, de esta manera conseguimos que si todos los genes de los padres son iguales, los hijos sean iguales.
-
-Al ser este cruce una combinación lineal, los genes de los hijos resultantes, nunca podrán tener un valor menor que el menor gen de los padres ni mayor que el mayor de los genes de sus padres. Esto hace que cuando se aplica este operador tienda a converger hacia el centro de los padres, con un comportamiento explotativo.
-
-#block(fill: luma(240), inset: 8pt, radius: 4pt, width: 100%)[
-  ```py
-  # Pseudocódigo del operador aritmético
-   funcion arithmetic(padre1 , padre2):
-     hijo1(padre1.size) ## genero los hijos con el mismo tamaño que los padres
-     hijo2(padre1.size) ## en el problema que tratamos todos los cromosomas miden lo mismo
-
-       for i in range(0,tamaniopadres):
-
-       if (padre1[i] == padre2[i]):
-       # asigno el mismo gen a los hijos
-       # de esta forma si los padres son idénticos
-       # sus hijos también los son
-       hijo1[i]=padre1[i]
-       hijo2[i]=padre1[i]
-       else:
-       sigma = double aleatorio entre 0 y 1
-       hijo1[i] =sigma*padre1[i]+(1-sigma)*padre2[i]
-       hijo2[i] =sigma*padre2[i]+(1-sigma)*padre1[i]
-      return pareja de hijos (hijo1, hijo2)
-  ```]
-
-El operador BLX-alpha genera un intervalo entre el mínimo y el máximo de los genes seleccionados de los padres, a este intervalo se le añade un parámetro *alpha*gap*, el cual permite que el intervalo se agrande según el *alpha* escogido y la distancia entre el mínimo y el máximo. Esto permite que el valor aleatorio que se genere en ese intervalo para cada hijo,
-pueda ser más grande o más pequeño que los valores que los padres tenían, por lo que permite explorar más soluciones y mantiene más diversidad ya que se generan genes que están fuera de los rangos de los padres.
-#block(fill: luma(240), inset: 8pt, radius: 4pt, width: 100%)[
-  ```py
-  # Pseudocódigo del operador BLX-alpha
-   funcion arithmetic(padre1 , padre2):
-     hijo1(padre1.size) ## genero los hijos con el mismo tamaño que los padres
-     hijo2(padre1.size) ## en el problema que tratamos todos los cromosomas miden lo mismo
-
-      for i in range(0,tamaniopadres):
-
-      if(padre1[i] == padre2[i]):
-       # asigno el mismo gen a los hijos
-       # de esta forma si los padres son idénticos
-       # sus hijos también los son
-       hijo1[i]=padre1[i]
-       hijo2[i]=padre1[i]
-      else:
-        cmax = double máximo entre padre1[i],padre2[i]
-        cmin = double mínimo entre padre1[i],padre2[i]
-       gap = cmax-cmin
-       hijo1[i] = aleatorio entre (cmin-gap*alpha,cmax+gap*alpha)
-       hijo2[i] = aleatorio entre (cmin-gap*alpha,cmax+gap*alpha)
-     return pareja de hijos (hijo1, hijo2)
-  ```]
-
-Ambos operadores devuelven parejas de hijos que pueden no ser válidos, por lo que se tendrán que arreglar ambos cuando estos se usen en los correspondientes algoritmos.
-=== Operador de selección
-Para la selección de los padres se usa un torneo entre k cromosomas elegidos al azar de la población actual. Estos k cromosomas compiten por ver quién tiene mejor fitness y el que gane se convierte en padre. La función recibe como parámetros el número de seleccionados por torneo (k), el tamaño de la población, el número de padres que se deben de seleccionar y el vector de fitness de la población, para economizar las evaluaciones. Como resultado la función devuelve un vector de índices de los cromosomas escogidos para ser padres.
-#block(fill: luma(240), inset: 8pt, radius: 4pt, width: 100%)[
-  ```py
-  # Pseudocódigo del operador tournament
-    funcion tournament(tournamentsize, populationsize, selectionsize, fitnesspoblation):
-    vector idxparents # vector con los índices de los padres
-    # repito el torneo tantas veces como necesite
-        for i in range(0, selectionsize):
-        idxbest = 0
-
-        for j in range(0, tournamentsize):
-          idx = aleatorio entre 0 y populationsize-1
-        #selecciono el mejor de entre los participantes del torneo
-          if fitnesspoblation[idx] > fitnessTournament:
-            fitnessTournament = fitnesspoblation[idx]
-            idxBest = idx
-        #añado el mejor del torneo a la lista de padres
-        idxparents.pushback(idxBest)
-    return idxparents
-  ```]
-=== Operador de mutación
-A la hora de hacer la mutación en los algoritmos usaremos el siguiente método:
-
-#block(fill: luma(240), inset: 8pt, radius: 4pt, width: 100%)[
-  ```py
-  # Pseudocódigo del operador de mutación
-  funcion mutation(mutSol, problem, mutationRate, maxAttempts):
-    problembounds = problem.getSolutionDomainRange()
-    solutionsize = problem.getSolutionSize()
-
-    validDonors = []
-    #busco un donante valido
-    for i in range(0, solutionsize):
-      amount = mutSol(i) * mutationRate
-      if amount <= 0.0:
-        continuar
-      firstAfter = mutSol(i) - amount
-      firstValid = firstAfter == 0.0 o
-                   (firstAfter >= problembounds.first y
-                    firstAfter <= problembounds.second)
-      if firstValid:
-        validDonors.pushback(i)
-
-    if validDonors está vacío:
-      return false
-    # busco un receptor valido 
-    for attempt in range(0, maxAttempts):
-      pickDonor = aleatorio entre 0 y validDonors.size - 1
-      candidateFirst = validDonors[pickDonor]
-      amount = mutSol(candidateFirst) * mutationRate
-
-      validReceivers = []
-      for i in range(0, solutionsize):
-        if i == candidateFirst:
-          continuar
-        secondAfter = mutSol(i) + amount
-        secondValid = secondAfter == 0.0 o
-                      (secondAfter >= problembounds.first y
-                       secondAfter <= problembounds.second)
-        if secondValid:
-          validReceivers.pushback(i)
-
-      if validReceivers está vacío:
-        continuar
-
-      idx = aleatorio entre 0 y validReceivers.size - 1
-      candidateSecond = validReceivers[idx]
-
-      mutSol(candidateFirst) -= amount
-      mutSol(candidateSecond) += amount
-      return true
-
-    return false
-  ```]
-La función de mutación recibe como parámetros la solución a mutar (por referencia), un objeto
-problema, el ratio de mutación y el número máximo de intentos que tenemos para elegir el segundo gen.
-
-Como se puede observar, el proceso de mutación se divide en dos partes:
-
-- En el primer bucle se buscan todos los genes a los cuales se les puede restar el porcentaje indicado en la variable *mutationrate* y que siguen cumpliendo las restricciones del problema.Si no se encuentran posibles donantes se acaba la ejecución.
-
-- En el segundo bucle, se selecciona un gen donante del vector calculado previamente y se buscan todos los posibles genes que puedan recibir la cantidad que se le va a restar a este gen.Si no se encuentra ningún gen que pueda recibir dicha cantidad , se vuelve a escoger un donante aleatorio y se repite el proceso. Este proceso se repite todas las veces que permita el limite de intentos marcado por *maxattempts* . En la práctica , tras varias pruebas el límite se ha puesto lo suficientemente alto para que se pueda encontrar el gen receptor.
-
-#pagebreak()
 = Estructura de los algoritmos
 
 == Local Search
@@ -454,10 +307,32 @@ Si la solución generada no es válida o no mejora la solución actual, restaura
 
 Mientras que no se superen las restricciones de las evaluaciones y se sigan encontrando vecinos mejores en cada vecindario seguiremos intentando encontrar la mejor solución. En caso de recorrer todo el vecindario y no encontrar una solución mejor o que se superen las evaluaciones permitidas, se detendrá la búsqueda.
 
-== Algoritmo Enfriamiento simulado
-== Algoritmo ILS
-== Algoritmo ILS-ES
 == Algoritmo BMB
+#block(fill: luma(240), inset: 8pt, radius: 4pt, width: 100%)[
+  ```py
+  function bmb(maxevals):
+    bestsolution = none
+    bestfitness = -infinito
+    numsol = numero de soluciones aleatorias a generar
+    localsearchevals = numero de evaluaciones de BL
+    evals=0
+    for i in range(0,numsol):
+      randsol = solucion aleatoria
+      randfitness = fitness(randsol)
+
+      localsearch(randsol,randfitness,localsearchevals)
+      evals += evaluaciones loacalsearch
+
+      if(fitness solución localsearch > bestfitness ):
+        bestSolution = solucion localsearch
+        bestfitness = fitness localsearch
+
+    return(bestsolution,bestfitness,evals)
+  ```]
+== Algoritmo ILS
+
+== Algoritmo Enfriamiento simulado
+== Algoritmo ILS-ES 
 = Estructura del código
 
 El código de la práctica está organizado en una estructura modular que facilita la compilación y ejecución. A continuación se describe la organización del proyecto y el manual de usuario para compilar y ejecutar el programa.
@@ -473,8 +348,8 @@ El proyecto está organizado de la siguiente manera:
     - `agg.cpp` : Implementación del algoritmo AGG
     - `am.cpp` : Implementación del algoritmo AM
     - `amall.cpp` : Implementación de applyLocalSearch para amAll
-    - `ambest.cpp` : Implementación de applyLocalSearch para amBest  
-    - `amrand.cpp` : Implementación de applyLocalSearch para amRand     
+    - `ambest.cpp` : Implementación de applyLocalSearch para amBest
+    - `amrand.cpp` : Implementación de applyLocalSearch para amRand
     - `pportfolio.cpp` : Implementación de la clase del problema
     - `randomsearch.cpp` : Implementación del algoritmo de búsqueda aleatoria
     - `greedy.cpp` : Implementación del algoritmo Greedy
@@ -483,7 +358,7 @@ El proyecto está organizado de la siguiente manera:
   - `include/` : Contiene los archivos de cabecera (.h y .hpp)
     - `age.h`: Clase base para los algoritmos genéticos estacionarios
     - `agg.h`: Clase base para los algoritmos genéticos generacionales
-    - `am.h`: Clase base para los algoritmos meméticos 
+    - `am.h`: Clase base para los algoritmos meméticos
     - `agearit.h`, `ageblx.h`: Clases hijas de `age.h` con los correspondientes operadores
     - `aggarit.h`, `aggblx.h`: Clases hijas de `agg.h` con los correspondientes operadores
     - `amall.h`, `ambest.h`, `amrand.h`: Clases de los algoritmos meméticos.
