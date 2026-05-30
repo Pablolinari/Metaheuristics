@@ -380,7 +380,7 @@ En ILS (Iterated Local Search) se parte de una solución inicial mejorada con B�
 
 == Algoritmo Enfriamiento simulado
 
-El algoritmo de Enfriamiento Simulado (ES) es una búsqueda local probabilística que permite aceptar empeoramientos con cierta probabilidad para escapar de óptimos locales. Se define un número máximo de vecinos por temperatura, un número máximo de éxitos y una temperatura inicial calculada en función del fitness. En cada iteración se generan vecinos moviendo parte del peso de una empresa a otra, se evalúa el candidato y se acepta si mejora o con probabilidad $e^{-\Delta / T}$. La temperatura se actualiza con un esquema de enfriamiento Cauchy hasta que no se obtienen éxitos o se superan las evaluaciones.
+El algoritmo de Enfriamiento Simulado (ES) es una búsqueda local probabilística que permite aceptar empeoramientos con cierta probabilidad para escapar de óptimos locales. Se define un número máximo de vecinos por temperatura, un número máximo de éxitos y una temperatura inicial calculada en función del fitness. En cada iteración se generan vecinos moviendo parte del peso de una empresa a otra, se evalúa el candidato y se acepta si mejora o con probabilidad $Delta(T)$. La temperatura se actualiza con un esquema de enfriamiento Cauchy hasta que no se obtienen éxitos o se superan las evaluaciones.
 
 #block(fill: luma(240), inset: 8pt, radius: 4pt, width: 100%)[
   ```py
@@ -671,6 +671,10 @@ La ejecución se ha hecho como se indicó en el apartado anterior, cambiando en 
     [Random], [-4.980], [-3.378], [0.052], [10000], [0.005],
     [BL], [-4.608], [-3.115], [0.020], [1517.36], [0.001],
     [AM-BEST], [-4.494], [-3.084], [0.032], [10000], [0.005],
+    [BMB], [-4.566], [-3.104], [0.022], [6990.3], [0.001],
+    [ILS], [-4.598], [-3.113], [0.020], [5596], [0.004],
+    [ES], [-4.594], [-3.113], [0.022], [10000], [0.003],
+    [ILS-ES], [-4.592], [-3.112], [0.022], [10000], [0.004],
   ),
   caption: [Resultados de Ibex 35 (Medias)],
 )
@@ -692,6 +696,10 @@ La ejecución se ha hecho como se indicó en el apartado anterior, cambiando en 
     [Random], [-3.408], [-4.174], [0.088], [10000], [0.02],
     [BL], [-3.118], [-3.888], [0.096], [8984.76], [0.01],
     [AM-BEST], [-2.814], [-3.755], [0.101], [10000], [0.044],
+    [BMB], [-3.023], [-3.837], [0.092], [10000], [0.022],
+    [ILS], [-3.097], [-3.877], [0.093], [10000], [0.014],
+    [ES], [-3.103], [-3.895], [0.095], [10000], [0.048],
+    [ILS-ES], [-3.085], [-3.885], [0.092], [10000], [0.063],
   ),
   caption: [Resultados de S&P100 (Medias)],
 )
@@ -712,11 +720,11 @@ La ejecución se ha hecho como se indicó en el apartado anterior, cambiando en 
     [Greedy], [-2.749], [-3.776], [0.013], [1], [0.001],
     [Random], [-3.638], [-4.389], [0.026], [10000], [0.253],
     [BL], [-3.517], [-4.324], [0.010], [10000], [0.220],
-    [AM-BEST], [-3.220], [-4.156], [0.001], [10000], [0.456],
-    [ILS], [-3.517], [-4.324], [0.010], [10000], [0.220],
-    [BMB], [-3.517], [-4.324], [0.010], [10000], [0.220],
-    [ES], [-3.517], [-4.324], [0.010], [10000], [0.220],
-    [ILS-ES], [-3.517], [-4.324], [0.010], [10000], [0.220],
+    [AM-BEST], [-3.220], [-4.156], [0.005], [10000], [0.456],
+    [BMB], [-3.663], [-4.450], [0.013], [10000], [0.238],
+    [ILS], [-3.655], [-4.404], [-0.001], [10000], [1.345],
+    [ES], [-3.451], [-4.343], [0.012], [10000], [2.606],
+    [ILS-ES], [-3.541], [-4.330], [0.015], [10000], [0.170],
   ),
   caption: [Resultados de S&P500 (Medias)],
 )

@@ -39,13 +39,16 @@ ResultMH<double> Ils::optimize(ProblemDouble &problem, int maxevals) {
   evals += resultLocal.evaluations;
   tSolution<double> bestSolution = resultLocal.solution;
   double bestFitness = resultLocal.fitness;
-
+	// BL siempre devuelve solución mejor o igual que random 
+	
   for (int i = 0; i < niter; i++) {
-
+		//muto la mejor solución 	
     tSolution<double> mutSol = mutation(problem, bestSolution, 0.2);
+		//hago la BL sobre la nueva solución
     ResultMH<double> iterLocal = localsearch.optimize(problem, mutSol, problem.fitness(mutSol),localsearchevals);
 		
     evals += iterLocal.evaluations;
+		// si no consigo mejorar , no la actualizo
     if (iterLocal.fitness > bestFitness) {
       bestFitness = iterLocal.fitness;
       bestSolution = iterLocal.solution;

@@ -29,13 +29,16 @@ ResultMH<double> Es::optimize(Problem<double> &problem,
   double mu = 0.2;
   double tempFinal = 1e-3;
   double tempInicial = (mu * std::abs(currentFitness)) / -std::log(phi);
-  while (tempInicial <= tempFinal) {
+  while (tempInicial <= tempFinal && evals < maxEvals) {
     currentSolution = problem.createSolution();
     currentFitness = problem.fitness(currentSolution);
     evals++;
     bestSolution = currentSolution;
     bestFitness = currentFitness;
     tempInicial = (mu * std::abs(currentFitness)) / -std::log(phi);
+  }
+  if (tempInicial <= tempFinal) {
+    tempInicial = tempFinal * 10.0;
   }
 
   double beta =
@@ -70,7 +73,7 @@ ResultMH<double> Es::optimize(Problem<double> &problem,
 
       double valorI = currentSolution[i];
       double valorJ = currentSolution[j];
-      if (valorI <= lower || valorJ >= upper) {
+      if (valorI <= 0.0 || valorI <= lower || valorJ >= upper) {
         pos++;
         continue;
       }
@@ -79,7 +82,7 @@ ResultMH<double> Es::optimize(Problem<double> &problem,
       double tope2 = (upper - valorJ) / valorI;
       double tope3 = 0.3;
       double ratio = std::min({tope1, tope2, tope3});
-      if (ratio == 0.0) {
+      if (!(ratio > 0.0)) {
         pos++;
         continue;
       }
