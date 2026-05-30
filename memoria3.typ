@@ -23,6 +23,7 @@
 
 // Regla para que el primer párrafo tras un título SÍ tenga sangría
 // (En LaTeX estándar el primero no tiene, pero muchos lo prefieren así)
+
 #show heading: it => {
   it
   par(text(size: 0pt, ""))
@@ -329,10 +330,174 @@ Mientras que no se superen las restricciones de las evaluaciones y se sigan enco
 
     return(bestsolution,bestfitness,evals)
   ```]
+El algoritmo BMB (Basic Multi-start) genera varias soluciones iniciales aleatorias y aplica Búsqueda Local a cada una de ellas. En la implementación se generan 5 soluciones y a cada una se le aplica BL con 2000 evaluaciones y ratio 0.4. Finalmente, se conserva la mejor solución encontrada entre todos los arranques. Esta estrategia reduce la dependencia de la solución inicial al explorar diferentes zonas del espacio de búsqueda.
 == Algoritmo ILS
 
+En ILS (Iterated Local Search) se parte de una solución inicial mejorada con Búsqueda Local y, a partir de la mejor solución encontrada, se aplica una mutación que perturba parcialmente el vector. Tras la perturbación se vuelve a aplicar Búsqueda Local y se actualiza la mejor solución si se obtiene un fitness superior. En la implementación se realizan 4 iteraciones con 2000 evaluaciones de BL por iteración.
+
+#block(fill: luma(240), inset: 8pt, radius: 4pt, width: 100%)[
+  ```py
+  # Pseudocódigo de la mutación ILS
+  function mutation(solucion, ratio):
+    nselection = ceil(ratio * ncompany)
+    index = aleatorio entre 0 y ncompany-1
+    if index + nselection > ncompany:
+      endindex = index
+      index = endindex - nselection
+    else:
+      endindex = index + nselection
+    desordenar(solucion[index:endindex])
+    return solucion
+  ```]
+
+#block(fill: luma(240), inset: 8pt, radius: 4pt, width: 100%)[
+  ```py
+  # Pseudocódigo del algoritmo ILS
+  function ils(maxevals):
+    localsearchevals = 2000
+    niter = 4
+    evals = 0
+
+    current = solucion_aleatoria
+    currentfitness = fitness(current)
+    evals += 1
+
+    result = localSearch(current, currentfitness, localsearchevals)
+    evals += result.evals
+    bestsolution = result.solution
+    bestfitness = result.fitness
+
+    for i in range(0, niter):
+      mutsol = mutation(bestsolution, 0.2)
+      iter = localSearch(mutsol, fitness(mutsol), localsearchevals)
+      evals += iter.evals
+      if iter.fitness > bestfitness:
+        bestfitness = iter.fitness
+        bestsolution = iter.solution
+
+    return (bestsolution, bestfitness, evals)
+  ```]
+
 == Algoritmo Enfriamiento simulado
-== Algoritmo ILS-ES 
+
+El algoritmo de Enfriamiento Simulado (ES) es una búsqueda local probabilística que permite aceptar empeoramientos con cierta probabilidad para escapar de óptimos locales. Se define un número máximo de vecinos por temperatura, un número máximo de éxitos y una temperatura inicial calculada en función del fitness. En cada iteración se generan vecinos moviendo parte del peso de una empresa a otra, se evalúa el candidato y se acepta si mejora o con probabilidad $e^{-\Delta / T}$. La temperatura se actualiza con un esquema de enfriamiento Cauchy hasta que no se obtienen éxitos o se superan las evaluaciones.
+
+#block(fill: luma(240), inset: 8pt, radius: 4pt, width: 100%)[
+  ```py
+  # Pseudocódigo del algoritmo ES
+  function es(problem, current, currentfitness, maxevals):
+    evals = 0
+    n = problem.getSolutionSize()
+    (low, high) = problem.getSolutionDomainRange()
+
+    maxVecinos = 10 * n
+    maxExitos = 1 * n
+    nEnfriamientos = max(1, maxevals / maxVecinos)
+    phi = 0.3
+    mu = 0.2
+    tempFinal = 1e-3
+    tempInicial = (mu * abs(currentfitness)) / -log(phi)
+
+    while tempInicial <= tempFinal:
+      current = solucion_aleatoria
+      currentfitness = fitness(current)
+      evals += 1
+      tempInicial = (mu * abs(currentfitness)) / -log(phi)
+
+    beta = (tempInicial - tempFinal) / (nEnfriamientos * tempInicial * tempFinal)
+    temp = tempInicial
+
+    neighbors = todas las parejas (i, j)
+    bestsolution = current
+    bestfitness = currentfitness
+
+    hayExito = true
+    while evals < maxevals and hayExito:
+      vecinosGenerados = 0
+      exitos = 0
+      mezclar(neighbors)
+      pos = 0
+
+      while vecinosGenerados < maxVecinos and exitos < maxExitos and
+            evals < maxevals and pos < neighbors.size:
+        (i, j) = neighbors[pos]
+        if i == j:
+          pos += 1
+          continue
+        if current[i] <= low or current[j] >= high:
+          pos += 1
+          continue
+
+        ratio = min(1 - low / current[i], (high - current[j]) / current[i], 0.3)
+        if ratio == 0:
+          pos += 1
+          continue
+
+        vecinosGenerados += 1
+        valorI = current[i]
+        valorJ = current[j]
+        current[i] = (1 - ratio) * valorI
+        current[j] = valorJ + ratio * valorI
+
+        if es válida current:
+          candidateFitness = fitness(current)
+          evals += 1
+          incremento = currentfitness - candidateFitness
+          u = aleatorio entre 0 y 1
+          if incremento < 0 o u <= exp(-incremento / temp):
+            currentfitness = candidateFitness
+            exitos += 1
+            mezclar(neighbors)
+            pos = 0
+            if currentfitness > bestfitness:
+              bestfitness = currentfitness
+              bestsolution = current
+          else:
+            current[i] = valorI
+            current[j] = valorJ
+            pos += 1
+        else:
+          current[i] = valorI
+          current[j] = valorJ
+          pos += 1
+
+      temp = temp / (1 + beta * temp)
+      hayExito = exitos > 0
+
+    return (bestsolution, bestfitness, evals)
+  ```]
+
+== Algoritmo ILS-ES
+
+ILS-ES combina ILS con Enfriamiento Simulado en lugar de Búsqueda Local. La estructura es idéntica a ILS, pero la fase de mejora usa ES durante 2000 evaluaciones. Esto introduce una exploración más amplia que la BL al aceptar movimientos no necesariamente mejores según la temperatura actual.
+
+#block(fill: luma(240), inset: 8pt, radius: 4pt, width: 100%)[
+  ```py
+  # Pseudocódigo del algoritmo ILS-ES
+  function ils_es(maxevals):
+    localsearchevals = 2000
+    niter = 4
+    evals = 0
+
+    current = solucion_aleatoria
+    currentfitness = fitness(current)
+    evals += 1
+
+    result = es(problem, current, currentfitness, localsearchevals)
+    evals += result.evals
+    bestsolution = result.solution
+    bestfitness = result.fitness
+
+    for i in range(0, niter):
+      mutsol = mutation(bestsolution, 0.2)
+      iter = es(problem, mutsol, fitness(mutsol), localsearchevals)
+      evals += iter.evals
+      if iter.fitness > bestfitness:
+        bestfitness = iter.fitness
+        bestsolution = iter.solution
+
+    return (bestsolution, bestfitness, evals)
+  ```]
 = Estructura del código
 
 El código de la práctica está organizado en una estructura modular que facilita la compilación y ejecución. A continuación se describe la organización del proyecto y el manual de usuario para compilar y ejecutar el programa.
