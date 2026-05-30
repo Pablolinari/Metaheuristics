@@ -8,6 +8,7 @@ ResultMH<double> Es::optimize(Problem<double> &problem,
                               const tSolution<double> &current,
                               tFitness fitness, int maxevals) {
   assert(maxevals > 0);
+  // limites de evaluaciones y dominio del problema
   const int maxEvals = maxevals;
   int evals = 0;
   int problemSize = problem.getSolutionSize();
@@ -15,20 +16,26 @@ ResultMH<double> Es::optimize(Problem<double> &problem,
   double lower = bounds.first;
   double upper = bounds.second;
 
+  // solucion inicial y su fitness
   tSolution<double> currentSolution = current;
   double currentFitness = fitness;
   evals++;
 
+  // mejor solucion encontrada hasta el momento
   tSolution<double> bestSolution = currentSolution;
   double bestFitness = currentFitness;
 
+  // parametros del enfriamiento simulado
   int maxVecinos = 10 * problemSize;
   int maxExitos = 1 * problemSize;
   int nEnfriamientos = std::max(1, maxEvals / maxVecinos);
   double phi = 0.3;
   double mu = 0.2;
   double tempFinal = 1e-3;
+  // temperatura inicial dependiente del fitness
   double tempInicial = (mu * std::abs(currentFitness)) / -std::log(phi);
+  // si la temperatura inicial es demasiado baja, reinicio con soluciones
+  // aleatorias
   while (tempInicial <= tempFinal && evals < maxEvals) {
     currentSolution = problem.createSolution();
     currentFitness = problem.fitness(currentSolution);
@@ -37,14 +44,17 @@ ResultMH<double> Es::optimize(Problem<double> &problem,
     bestFitness = currentFitness;
     tempInicial = (mu * std::abs(currentFitness)) / -std::log(phi);
   }
+  // aseguro una temperatura inicial util
   if (tempInicial <= tempFinal) {
     tempInicial = tempFinal * 10.0;
   }
 
+  // factor de enfriamiento
   double beta =
       (tempInicial - tempFinal) / (nEnfriamientos * tempInicial * tempFinal);
   double temp = tempInicial;
 
+  // precomputo el vecindario de pares (i, j)
   std::vector<std::pair<int, int>> neighbors;
   neighbors.reserve(problemSize * problemSize);
   for (int i = 0; i < problemSize; i++) {
@@ -55,6 +65,7 @@ ResultMH<double> Es::optimize(Problem<double> &problem,
 
   int enfriamientos = 0;
   bool hayExito = true;
+  // bucle principal de enfriamiento
   while (evals < maxEvals && hayExito) {
     int vecinosGenerados = 0;
     int exitos = 0;
@@ -66,6 +77,7 @@ ResultMH<double> Es::optimize(Problem<double> &problem,
            evals < maxEvals && pos < totalPos) {
       int i = neighbors[pos].first;
       int j = neighbors[pos].second;
+      // descarto movimientos invalidos o sin cambio
       if (i == j) {
         pos++;
         continue;
@@ -73,11 +85,13 @@ ResultMH<double> Es::optimize(Problem<double> &problem,
 
       double valorI = currentSolution[i];
       double valorJ = currentSolution[j];
+      // compruebo limites antes de mover masa entre posiciones
       if (valorI <= 0.0 || valorI <= lower || valorJ >= upper) {
         pos++;
         continue;
       }
 
+      // calculo el ratio maximo permitido para el intercambio
       double tope1 = 1.0 - (lower / valorI);
       double tope2 = (upper - valorJ) / valorI;
       double tope3 = 0.3;
@@ -88,6 +102,7 @@ ResultMH<double> Es::optimize(Problem<double> &problem,
       }
 
       vecinosGenerados++;
+      // aplico el movimiento al vecino
       currentSolution[i] = (1.0 - ratio) * valorI;
       currentSolution[j] = valorJ + ratio * valorI;
       if (problem.isValid(currentSolution)) {
@@ -95,27 +110,32 @@ ResultMH<double> Es::optimize(Problem<double> &problem,
         evals++;
         double incremento = currentFitness - candidateFitness;
         double u = Random::get<double>(0.0, 1.0);
+        // acepto si mejora o por criterio de Metropolis
         if (incremento < 0.0 || (u <= std::exp(-incremento / temp))) {
           currentFitness = candidateFitness;
           exitos++;
           Random::shuffle(neighbors);
           pos = 0;
+          // actualizo mejor solucion
           if (currentFitness > bestFitness) {
             bestFitness = currentFitness;
             bestSolution = currentSolution;
           }
         } else {
+          // deshago el cambio si no se acepta
           currentSolution[i] = valorI;
           currentSolution[j] = valorJ;
           pos++;
         }
       } else {
+        // deshago el cambio si la solucion no es valida
         currentSolution[i] = valorI;
         currentSolution[j] = valorJ;
         pos++;
       }
     }
 
+    // actualizo la temperatura y criterio de parada por exitos
     temp = temp / (1.0 + beta * temp);
     hayExito = exitos > 0;
     enfriamientos++;
