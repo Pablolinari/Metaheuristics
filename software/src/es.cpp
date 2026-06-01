@@ -13,8 +13,8 @@ ResultMH<double> Es::optimize(Problem<double> &problem,
   int evals = 0;
   int problemSize = problem.getSolutionSize();
   std::pair<double, double> bounds = problem.getSolutionDomainRange();
-  double lower = bounds.first;
-  double upper = bounds.second;
+  double low = bounds.first;
+  double high = bounds.second;
 
   // solucion inicial y su fitness
   tSolution<double> currentSolution = current;
@@ -32,6 +32,7 @@ ResultMH<double> Es::optimize(Problem<double> &problem,
   double phi = 0.3;
   double mu = 0.2;
   double tempFinal = 1e-3;
+  double ratiovecino = 0.3;
   // temperatura inicial dependiente del fitness
   double tempInicial = (mu * std::abs(currentFitness)) / -std::log(phi);
   // si la temperatura inicial es demasiado baja, reinicio con soluciones
@@ -59,7 +60,9 @@ ResultMH<double> Es::optimize(Problem<double> &problem,
   neighbors.reserve(problemSize * problemSize);
   for (int i = 0; i < problemSize; i++) {
     for (int j = 0; j < problemSize; j++) {
-      neighbors.emplace_back(i, j);
+      if (i != j) {
+        neighbors.emplace_back(i, j);
+      }
     }
   }
 
@@ -77,25 +80,19 @@ ResultMH<double> Es::optimize(Problem<double> &problem,
            evals < maxEvals && pos < totalPos) {
       int i = neighbors[pos].first;
       int j = neighbors[pos].second;
-      // descarto movimientos invalidos o sin cambio
-      if (i == j) {
-        pos++;
-        continue;
-      }
 
-      double valorI = currentSolution[i];
-      double valorJ = currentSolution[j];
+      double valori = currentSolution[i];
+      double valorj = currentSolution[j];
       // compruebo limites antes de mover masa entre posiciones
-      if (valorI <= 0.0 || valorI <= lower || valorJ >= upper) {
+      if (valori <= 0.0 || valori <= low || valorj >= high) {
         pos++;
         continue;
       }
 
       // calculo el ratio maximo permitido para el intercambio
-      double tope1 = 1.0 - (lower / valorI);
-      double tope2 = (upper - valorJ) / valorI;
-      double tope3 = 0.3;
-      double ratio = std::min({tope1, tope2, tope3});
+      double ratio = std::min(
+          {1.0 - (low / valori), (high - valorj) / valori, ratiovecino});
+
       if (!(ratio > 0.0)) {
         pos++;
         continue;
@@ -103,14 +100,15 @@ ResultMH<double> Es::optimize(Problem<double> &problem,
 
       vecinosGenerados++;
       // aplico el movimiento al vecino
-      currentSolution[i] = (1.0 - ratio) * valorI;
-      currentSolution[j] = valorJ + ratio * valorI;
+      currentSolution[i] = (1.0 - ratio) * valori;
+      currentSolution[j] = valorj + ratio * valori;
+
       if (problem.isValid(currentSolution)) {
         double candidateFitness = problem.fitness(currentSolution);
         evals++;
         double incremento = currentFitness - candidateFitness;
         double u = Random::get<double>(0.0, 1.0);
-        // acepto si mejora o por criterio de Metropolis
+        // acepto si mejora la solución o por probabilidad;
         if (incremento < 0.0 || (u <= std::exp(-incremento / temp))) {
           currentFitness = candidateFitness;
           exitos++;
@@ -123,14 +121,14 @@ ResultMH<double> Es::optimize(Problem<double> &problem,
           }
         } else {
           // deshago el cambio si no se acepta
-          currentSolution[i] = valorI;
-          currentSolution[j] = valorJ;
+          currentSolution[i] = valori;
+          currentSolution[j] = valorj;
           pos++;
         }
       } else {
         // deshago el cambio si la solucion no es valida
-        currentSolution[i] = valorI;
-        currentSolution[j] = valorJ;
+        currentSolution[i] = valori;
+        currentSolution[j] = valorj;
         pos++;
       }
     }

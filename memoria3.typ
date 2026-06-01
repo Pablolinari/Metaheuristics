@@ -244,6 +244,30 @@ pesos que ya estén activos, de no ser así si la diferencia es mayor que el lí
 
 
 El principal objetivo de los algoritmos es maximizar la función fitness, la cual trata de maximizar el beneficio y minimizar el riesgo en una sola fórmula. El parámetro lambda se usará a modo de ajuste, cuando más alto sea su valor el algoritmo valorará mejor soluciones con poco beneficio pero que sean seguras, es decir, que tengan poco riesgo, mientras que cuanto más cercano a 0 sea lambda, el algoritmo valorará mejor las soluciones con máximo beneficio posible, ignorando el riesgo.El valor que se usa durante la práctica es $lambda=500$ que es el indicado en el guión.
+== Operadores 
+En esta práctica el único operador que se utiliza es el operador de mutación el cual vemos a continuación.
+
+
+
+#block(fill: luma(240), inset: 8pt, radius: 4pt, width: 100%)[
+  ```py
+  # Pseudocódigo del operador de mutación
+  funcion mutation(mutSol, ratio):
+    solucion = mutSol
+    nselection = ceil(ratio * ncompany)
+    index = aleatorio entre 0 y ncompany-1
+
+    if index + nselection > ncompany:
+      endindex = index
+      index = endindex - nselection
+    else:
+      endindex = index + nselection
+
+    desordenar(solucion[index:endindex])
+    return solucion
+  ```]
+
+El operador de mutación se utiliza en el ILS y consiste en desordenar el 20% de las posiciones de un vector solución seleccionadas en un rango aleatorio. 
 
 = Estructura de los algoritmos
 
@@ -726,6 +750,7 @@ La ejecución se ha hecho como se indicó en el apartado anterior, cambiando en 
     [ES], [-3.451], [-4.343], [0.012], [10000], [2.606],
     [ILS-ES], [-3.541], [-4.330], [0.015], [10000], [0.170],
   ),
+
   caption: [Resultados de S&P500 (Medias)],
 )
 Los valores presentados en la tabla corresponden a las medias de 5 ejecuciones independientes con diferentes semillas aleatorias.
@@ -767,9 +792,38 @@ En los gráficos de lineas podemos ver claramente la variabilidad del fitness en
 
 #pagebreak()
 = Análisis de los resultados
+
+Al observar los resultados obtenidos, podemos ver que el comportamiento de los algoritmos cambia bastante según el tamaño del dataset. 
+
+== Comparación global de fitness (2015-2024) y gráficas
+=== Enfriamiento simulado 
+
+Podemos ver que el enfriamiento simulado supera a todos los algoritmos de la práctica 3 en cuanto a fitness, pero no logra superar al mejor algoritmo de la práctica 2 (AM-BEST). Esto se debe a que el AM-BEST es capaz de explotar y explorar el espacio de soluciones mucho mejor que el ES.
+
+Si lo comparamos con la BL, vemos que aunque el enfriamiento simulado es mejor, la diferencia en el fitness no es tan grande para que esta mejora suponga una gran diferencia. Esto se debe a que, para que el enfriamiento simulado gane a la búsqueda local, debemos tener datasets donde empeorar la solución actual nos pueda llevar a una solución mejor; si el espacio no tiene mínimos locales que sean profundos separando los máximos, el permitir empeorar una solución como se hace en el ES no sacará tanta ventaja frente a la búsqueda local, que no permite empeorar las soluciones. Vemos que en el IB35 y en el S&P100 la diferencia entre BL y ES no es tan grande, mientras que en S&P500 la diferencia en fitness sí es más grande. Esto se debe a que en el dataset de S&P500 permitir empeorar soluciones sí da más ventaja. También debemos recordar que al ser un dataset más grande, la solución inicial influye más; esto lo podemos comprobar en los boxplots, donde vemos que cuanto más grande es el dataset, más grande es el rango generado por el boxplot. Si observamos los boxplots de BL y ES, vemos que el ES tiene menos variabilidad; por tanto, le afecta menos la decisión de la solución inicial que a la BL. Si nos fijamos en los gráficos de líneas (rojo y verde), vemos que el ES suele tener un fitness más estable a lo largo de las ejecuciones que la BL. 
+
+
+
+
+
+=== ILS vs BMB vs ILS-ES
+
+En este apartado compararé los algoritmos ILS, ILS-ES y BMB, que tienen estructuras parecidas y sus resultados son similares. Mirando los boxplots y las gráficas de líneas podemos ver que en estos algoritmos influye bastante la selección de las soluciones iniciales, viendo que cuanto mayor es el dataset, más repercusión tienen. En los datasets de IB35 y S&P100 los resultados son bastante buenos, ya que BMB llega a superar a la búsqueda local y el ILS y ILS-ES consiguen igualarla. En el dataset de S&P500, si nos fijamos en los boxplots, presentan resultados con una variabilidad mucho mayor que la de random por parte de los tres algoritmos; en el BMB esto se debe a que, al escoger las soluciones, como debemos dividir las iteraciones de la BL en 5 soluciones, la BL tiene menos oportunidad de encontrar una solución buena con ese rango de iteraciones ya que el espacio es muy grande, por tanto dependerá mucho de las soluciones seleccionadas. Por parte del ILS, vemos que el que usa ES tiene una caja más pequeña en el S&P500; esto se debe a que ES funciona mejor en este dataset; por el contrario, cuando aplicamos la BL, sí se ve mucha más variabilidad. 
+
+Si nos fijamos en la tabla de resultados, vemos que en los datasets de S&P100 e IB35 BMB consigue superar a ES. Por otro lado, ILS no consigue superar nunca a ES ni a BMB en ninguna de sus versiones.
+
+=== Comparación general
+
+Como resultado de los apartados anteriores, podemos ver que en el periodo 2015-2024 los algoritmos de esta práctica que mejores resultados obtienen son el ES y el BMB. Por el contrario, ILS no consigue destacar sobre ninguno de los anteriores; esto puede deberse a la mutación usada, ya que al desordenar un 20% del vector podemos estar poniendo pesos altos en empresas muy malas y esto perjudica bastante a nuestra solución. Dentro de las dos variantes de ILS, vemos que la que mejor funciona es la ILS-ES ya que obtiene mejores resultados de media y presenta una menor dependencia de las soluciones iniciales escogidas. Ninguno de estos algoritmos consigue superar al mejor de la práctica 2 ni al Greedy, esto se debe a que la heurística del Greedy es bastante buena para este problema y el algoritmo de la práctica 2 es mucho más potente que los algoritmos que estamos usando en esta práctica y con las restricciones de evaluaciones que tenemos.
+
+== Resultados en 2025 y beneficio
+
+Al evaluar en 2025 se ve que, dentro de BL, ES, BMB, ILS e ILS-ES, el algoritmo con mejor fitness no siempre coincide con el que mayor beneficio obtiene. En IBEX35 las diferencias son pequeñas y los cinco se comportan de forma muy parecida, lo que sugiere un mercado más estable y menor ventaja de los mecanismos de exploración. En S\&P100 aparece un desacople entre calidad de solución y beneficio, lo que indica sensibilidad al riesgo y a la composición final de la cartera. En S\&P500 el rendimiento empeora para todos y la variabilidad pesa más, por lo que las decisiones de perturbación y búsqueda intensiva afectan de forma desigual. Esto confirma que la generalización a 2025 es especialmente complicada en el dataset más grande.
+
+
 == Conclusiones
 Tras el análisis de los resultados, hemos podido comprobar que los algoritmos que mejores resultados han mostrado de forma consistente son AGG-BLX y AM-BEST. Esto se ha visto reflejado tanto en sus resultados durante 2014-2024 como en los resultados de 2025, donde han presentado los mejores resultados teniendo en cuenta todos los datasets.
 
-Si analizamos el comportamiento general de los algoritmos sobre el problema, podemos concluir que nuestro espacio de búsqueda no presenta picos importantes donde los algoritmos meméticos hayan sacado mucha ventaja; el único que sí podría ser un poco más irregular sería el SP100, donde el AM-BEST consiguió superar a todos aprovechando sus cualidades.
+Si analizamos el comportamiento general de los algoritmos sobre el problema, podemos concluir que nuestro espacio de búsqueda no presenta picos importantes donde los algoritmos meméticos hayan sacado mucha ventaja; el único que sí podría ser un poco más irregular sería el S\&P100, donde el AM-BEST consiguió superar a todos aprovechando sus cualidades.
 
 Como conclusión, sacamos que en este problema se premia más la exploración que la explotación en el espacio de búsqueda, sobre todo en espacios muy grandes.
