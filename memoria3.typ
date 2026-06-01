@@ -533,26 +533,15 @@ El proyecto está organizado de la siguiente manera:
 - `software/` : Directorio raíz que contiene todo el código fuente
   - `main.cpp` : Archivo principal que ejecuta los algoritmos
   - `src/` : Contiene las implementaciones (.cpp)
-    - `age.cpp` : Implementación del algoritmo AGE
-    - `agg.cpp` : Implementación del algoritmo AGG
-    - `am.cpp` : Implementación del algoritmo AM
-    - `amall.cpp` : Implementación de applyLocalSearch para amAll
     - `ambest.cpp` : Implementación de applyLocalSearch para amBest
-    - `amrand.cpp` : Implementación de applyLocalSearch para amRand
     - `pportfolio.cpp` : Implementación de la clase del problema
     - `randomsearch.cpp` : Implementación del algoritmo de búsqueda aleatoria
     - `greedy.cpp` : Implementación del algoritmo Greedy
     - `localsearch.cpp` : Implementación del algoritmo de búsqueda local
-    - `operator.cpp` : Implementación de la clase Operator
   - `include/` : Contiene los archivos de cabecera (.h y .hpp)
-    - `age.h`: Clase base para los algoritmos genéticos estacionarios
-    - `agg.h`: Clase base para los algoritmos genéticos generacionales
     - `am.h`: Clase base para los algoritmos meméticos
-    - `agearit.h`, `ageblx.h`: Clases hijas de `age.h` con los correspondientes operadores
-    - `aggarit.h`, `aggblx.h`: Clases hijas de `agg.h` con los correspondientes operadores
     - `amall.h`, `ambest.h`, `amrand.h`: Clases de los algoritmos meméticos.
     - `pportfolio.h`, `greedy.h`, `localsearch.h`, `randomsearch.h`
-    - `operator.h` : Clase de operadores genéticos
     - `problem.h` : Clase base abstracta
     - `mh.h` : Clase base para los algoritmos de metaheurísticas
     - `solution.h` : Estructura para representar soluciones
@@ -753,7 +742,7 @@ La ejecución se ha hecho como se indicó en el apartado anterior, cambiando en 
 
   caption: [Resultados de S&P500 (Medias)],
 )
-Los valores presentados en la tabla corresponden a las medias de 5 ejecuciones independientes con diferentes semillas aleatorias.
+Los valores presentados en la tabla corresponden a las medias de 50 ejecuciones independientes con diferentes semillas aleatorias.
 
 == Boxplots de los resultados
 
@@ -788,7 +777,7 @@ A continuación se muestran los boxplots de los resultados obtenidos para cada c
   image("img/syp500_linea.png", width: 80%),
   caption: [Boxplot de resultados para S&P500],
 )
-En los gráficos de lineas podemos ver claramente la variabilidad del fitness en cada algoritmo , vemos que la búsqueda local y los algoritmos genéticos con el operador aritmético  con los  menos estables mientras que los genéticos con el operador BLX-$alpha$ y los meméticos presentan una mayor estabilidad en su fitness a lo largo de las 50 ejecuciones.
+
 
 #pagebreak()
 = Análisis de los resultados
@@ -798,9 +787,11 @@ Al observar los resultados obtenidos, podemos ver que el comportamiento de los a
 == Comparación global de fitness (2015-2024) y gráficas
 === Enfriamiento simulado 
 
-Podemos ver que el enfriamiento simulado supera a todos los algoritmos de la práctica 3 en cuanto a fitness, pero no logra superar al mejor algoritmo de la práctica 2 (AM-BEST). Esto se debe a que el AM-BEST es capaz de explotar y explorar el espacio de soluciones mucho mejor que el ES.
+Podemos ver que el enfriamiento simulado supera a todos los algoritmos de la práctica 3 en cuanto a fitness en el dataset del S&P500, pero no logra superar al mejor algoritmo de la práctica 2 (AM-BEST). Esto se debe a que el AM-BEST es capaz de explotar y explorar el espacio de soluciones mucho mejor que el ES.
 
-Si lo comparamos con la BL, vemos que aunque el enfriamiento simulado es mejor, la diferencia en el fitness no es tan grande para que esta mejora suponga una gran diferencia. Esto se debe a que, para que el enfriamiento simulado gane a la búsqueda local, debemos tener datasets donde empeorar la solución actual nos pueda llevar a una solución mejor; si el espacio no tiene mínimos locales que sean profundos separando los máximos, el permitir empeorar una solución como se hace en el ES no sacará tanta ventaja frente a la búsqueda local, que no permite empeorar las soluciones. Vemos que en el IB35 y en el S&P100 la diferencia entre BL y ES no es tan grande, mientras que en S&P500 la diferencia en fitness sí es más grande. Esto se debe a que en el dataset de S&P500 permitir empeorar soluciones sí da más ventaja. También debemos recordar que al ser un dataset más grande, la solución inicial influye más; esto lo podemos comprobar en los boxplots, donde vemos que cuanto más grande es el dataset, más grande es el rango generado por el boxplot. Si observamos los boxplots de BL y ES, vemos que el ES tiene menos variabilidad; por tanto, le afecta menos la decisión de la solución inicial que a la BL. Si nos fijamos en los gráficos de líneas (rojo y verde), vemos que el ES suele tener un fitness más estable a lo largo de las ejecuciones que la BL. 
+Si lo comparamos con la BL, vemos que aunque el enfriamiento simulado es mejor, la diferencia en el fitness no es tan grande para que esta mejora suponga una gran diferencia. Esto se debe a que, para que el enfriamiento simulado gane a la búsqueda local, debemos tener datasets donde empeorar la solución actual nos pueda llevar a una solución mejor, si el espacio no tiene mínimos locales que sean profundos separando los máximos, el permitir empeorar una solución como se hace en el ES no sacará tanta ventaja frente a la búsqueda local, que no permite empeorar las soluciones. Vemos que en el IB35 y en el S&P100 la diferencia entre BL y ES no es tan grande, mientras que en S&P500 la diferencia en fitness sí es más grande. Esto se debe a que en el dataset de S&P500 permitir empeorar soluciones sí da más ventaja. También debemos recordar que al ser un dataset más grande, la solución inicial influye más, esto lo podemos comprobar en los boxplots, donde vemos que cuanto más grande es el dataset, más grande es el rango generado por el boxplot. Si observamos los boxplots de BL y ES, vemos que el ES tiene menos variabilidad; por tanto, le afecta menos la decisión de la solución inicial que a la BL. Si nos fijamos en los gráficos de líneas (rojo y verde), vemos que el ES suele tener un fitness más estable a lo largo de las ejecuciones que la BL. 
+
+Si comparamos el ES con los demás algoritmos de la práctica 3 vemos que BMB le gana en el IB35 y S&P100 ya que al ser espacios más pequeños a el BMB le es suficiente con las iteraciones asignadas a cada solución para superar al ES.Podemos observar también que a nivel de tiempo de ejecución ES es mucho más costoso que los demás.
 
 
 
@@ -808,22 +799,23 @@ Si lo comparamos con la BL, vemos que aunque el enfriamiento simulado es mejor, 
 
 === ILS vs BMB vs ILS-ES
 
-En este apartado compararé los algoritmos ILS, ILS-ES y BMB, que tienen estructuras parecidas y sus resultados son similares. Mirando los boxplots y las gráficas de líneas podemos ver que en estos algoritmos influye bastante la selección de las soluciones iniciales, viendo que cuanto mayor es el dataset, más repercusión tienen. En los datasets de IB35 y S&P100 los resultados son bastante buenos, ya que BMB llega a superar a la búsqueda local y el ILS y ILS-ES consiguen igualarla. En el dataset de S&P500, si nos fijamos en los boxplots, presentan resultados con una variabilidad mucho mayor que la de random por parte de los tres algoritmos; en el BMB esto se debe a que, al escoger las soluciones, como debemos dividir las iteraciones de la BL en 5 soluciones, la BL tiene menos oportunidad de encontrar una solución buena con ese rango de iteraciones ya que el espacio es muy grande, por tanto dependerá mucho de las soluciones seleccionadas. Por parte del ILS, vemos que el que usa ES tiene una caja más pequeña en el S&P500; esto se debe a que ES funciona mejor en este dataset; por el contrario, cuando aplicamos la BL, sí se ve mucha más variabilidad. 
+En este apartado compararé los algoritmos ILS, ILS-ES y BMB, que tienen estructuras parecidas y sus resultados son similares. Mirando los boxplots y las gráficas de líneas podemos ver que en estos algoritmos influye bastante la selección de las soluciones iniciales, viendo que cuanto mayor es el dataset, más repercusión tienen. En los datasets de IB35 y S&P100 los resultados son bastante buenos, ya que BMB llega a superar a la búsqueda local y el ILS y ILS-ES consiguen superarala pero no con tanta ventaja. En el dataset de S&P500, si nos fijamos en los boxplots, presentan resultados con una variabilidad mucho mayor que la de random por parte de los tres algoritmos, en el BMB esto se debe a que, al escoger las soluciones, como debemos dividir las iteraciones de la BL en 5 soluciones, la BL tiene menos oportunidad de encontrar una solución buena con ese rango de iteraciones ya que el espacio es muy grande, por tanto dependerá mucho de las soluciones seleccionadas. Por parte del ILS, vemos que el que usa ES tiene una caja más pequeña en el S&P500; esto se debe a que ES funciona mejor en este dataset; por el contrario, cuando aplicamos la BL, sí se ve mucha más variabilidad. 
 
-Si nos fijamos en la tabla de resultados, vemos que en los datasets de S&P100 e IB35 BMB consigue superar a ES. Por otro lado, ILS no consigue superar nunca a ES ni a BMB en ninguna de sus versiones.
+Si nos fijamos en la tabla de resultados, vemos que en los datasets de S&P100 e IB35 BMB consigue superar a ES. Por otro lado, ILS no consigue superar claramente nunca a ES ni a BMB en ninguna de sus versiones ya que en los datasets medianos la diferencia que obtiene es mínima.
+
+
 
 === Comparación general
 
-Como resultado de los apartados anteriores, podemos ver que en el periodo 2015-2024 los algoritmos de esta práctica que mejores resultados obtienen son el ES y el BMB. Por el contrario, ILS no consigue destacar sobre ninguno de los anteriores; esto puede deberse a la mutación usada, ya que al desordenar un 20% del vector podemos estar poniendo pesos altos en empresas muy malas y esto perjudica bastante a nuestra solución. Dentro de las dos variantes de ILS, vemos que la que mejor funciona es la ILS-ES ya que obtiene mejores resultados de media y presenta una menor dependencia de las soluciones iniciales escogidas. Ninguno de estos algoritmos consigue superar al mejor de la práctica 2 ni al Greedy, esto se debe a que la heurística del Greedy es bastante buena para este problema y el algoritmo de la práctica 2 es mucho más potente que los algoritmos que estamos usando en esta práctica y con las restricciones de evaluaciones que tenemos.
+Como resultado de los apartados anteriores, podemos ver que en el periodo 2015-2024 los algoritmos de esta práctica que mejores resultados obtienen son el ES y el BMB. Por el contrario, ILS no consigue destacar sobre ninguno de los anteriores, esto puede deberse a la mutación usada, ya que al desordenar un 20% del vector podemos estar poniendo pesos altos en empresas muy malas y esto perjudica bastante a nuestra solución. Dentro de las dos variantes de ILS, vemos que la que mejor funciona es la ILS-ES ya que obtiene mejores resultados de media y presenta una menor dependencia de las soluciones iniciales escogidas. Ninguno de estos algoritmos consigue superar al mejor de la práctica 2 ni al Greedy, esto se debe a que la heurística del Greedy es bastante buena para este problema y el algoritmo de la práctica 2 es mucho más potente que los algoritmos que estamos usando en esta práctica y con las restricciones de evaluaciones que tenemos.
 
 == Resultados en 2025 y beneficio
 
-Al evaluar en 2025 se ve que, dentro de BL, ES, BMB, ILS e ILS-ES, el algoritmo con mejor fitness no siempre coincide con el que mayor beneficio obtiene. En IBEX35 las diferencias son pequeñas y los cinco se comportan de forma muy parecida, lo que sugiere un mercado más estable y menor ventaja de los mecanismos de exploración. En S\&P100 aparece un desacople entre calidad de solución y beneficio, lo que indica sensibilidad al riesgo y a la composición final de la cartera. En S\&P500 el rendimiento empeora para todos y la variabilidad pesa más, por lo que las decisiones de perturbación y búsqueda intensiva afectan de forma desigual. Esto confirma que la generalización a 2025 es especialmente complicada en el dataset más grande.
+Al evaluar en 2025 se ve que, dentro de BL, ES, BMB, ILS e ILS-ES, el algoritmo con mejor fitness no siempre coincide con el que mayor beneficio obtiene. En IBEX35 las diferencias son pequeñas y los cinco se comportan de forma muy parecida, lo que nos indica un mercado más estable y menor ventaja de los mecanismos de exploración. En S\&P100 no se relaciona directamente mayor fitness con mayor beneficio, lo que indica que las  soluciones que obtienen algoritmos como el BMB o el random a pesar de no tener el mejor fitness obtienen la mejor solución , esto se debe a que son soluciones más arriesgadas que obtienen mejores resultados pero que tienen peor fitness . En S\&P500 el rendimiento empeora para todos y la variabilidad de los algoritmos pesa más . Esto confirma que la generalización a 2025 es especialmente complicada en el dataset más grande.Empeorando sobre todo los resultados de algoritmos como ILS y ES.
 
 
 == Conclusiones
-Tras el análisis de los resultados, hemos podido comprobar que los algoritmos que mejores resultados han mostrado de forma consistente son AGG-BLX y AM-BEST. Esto se ha visto reflejado tanto en sus resultados durante 2014-2024 como en los resultados de 2025, donde han presentado los mejores resultados teniendo en cuenta todos los datasets.
 
-Si analizamos el comportamiento general de los algoritmos sobre el problema, podemos concluir que nuestro espacio de búsqueda no presenta picos importantes donde los algoritmos meméticos hayan sacado mucha ventaja; el único que sí podría ser un poco más irregular sería el S\&P100, donde el AM-BEST consiguió superar a todos aprovechando sus cualidades.
+Tras analizar los distintos algoritmos vemos que los ganadores en cada dataset son : BMB en IBEX35 y S&P100 y ES en S&P500.Los resultados son bastante ajustados entre BMB y ES , vemos que la opción de búsqueda multiarranque es más eficiente en espacios pequeños ya que con las evaluaciones que destina a la búsqueda local le es suficiente para encontrar una solución buena , mientras que a medida que se agranda el espacio , el BMB pierde fuerza y el algoritmo de Enfriamiento simulado obtiene los mejores resultados sobre los demás. También podemos concluir que en este caso ILS funciona mejor cuando se aplica enfriamiento simulado en cada ocasión en vez de búsqueda local. 
 
-Como conclusión, sacamos que en este problema se premia más la exploración que la explotación en el espacio de búsqueda, sobre todo en espacios muy grandes.
+Por tanto como conclusión sacamos que los algoritmos analizados en la práctica 3 no consiguen superar al mejor de la práctica 2, y en general , quedan bastante peor que este. Por párte de la práctica 1 , en datasets medianos , superan al random y consiguen igualar a la búsqueda local la mayoría de veces (como observamos en los gráficos de líneas), pero una vez agrandamos el dataset , el comportamiento es más impredecible y no suelen quedar por encima de del Random.
