@@ -18,7 +18,7 @@ Mean evaluations 1 | Mean time (miliseconds): 0
 Random
 Mean fitness of 50 evaluations : -4.9807
 Fitness 2025 :-3.3783 | Profit 2025 :0.0521752
-Mean evaluations 10000 | Mean time (miliseconds): 7.02
+Mean evaluations 10000 | Mean time (miliseconds): 7.14
 
 Local Search
 Mean fitness of 50 evaluations : -4.60883
@@ -28,7 +28,7 @@ Mean evaluations 1517.36 | Mean time (miliseconds): 0
 AM-BEST
 Mean fitness of 50 evaluations : -4.49494
 Fitness 2025 :-3.08521 | Profit 2025 :0.0320638
-Mean evaluations 10000 | Mean time (miliseconds): 9.88
+Mean evaluations 10000 | Mean time (miliseconds): 10.08
 
 BMB
 Mean fitness of 50 evaluations : -4.56621
@@ -41,14 +41,14 @@ Fitness 2025 :-3.11375 | Profit 2025 :0.0203439
 Mean evaluations 5595.46 | Mean time (miliseconds): 0.44
 
 ES
-Mean fitness of 50 evaluations : -4.57139
-Fitness 2025 :-3.1068 | Profit 2025 :0.0242255
-Mean evaluations 10000 | Mean time (miliseconds): 1
+Mean fitness of 50 evaluations : -4.5946
+Fitness 2025 :-3.11458 | Profit 2025 :0.0232168
+Mean evaluations 10000 | Mean time (miliseconds): 3.28
 
 ILS-ES
-Mean fitness of 50 evaluations : -4.57076
-Fitness 2025 :-3.10605 | Profit 2025 :0.0245758
-Mean evaluations 10001 | Mean time (miliseconds): 1
+Mean fitness of 50 evaluations : -4.59403
+Fitness 2025 :-3.11309 | Profit 2025 :0.0216799
+Mean evaluations 10001 | Mean time (miliseconds): 4
 
 CSV generado en: ../ib35.csv
 ------------S&P100---------------\n
@@ -71,37 +71,37 @@ Mean evaluations 1 | Mean time (miliseconds): 0
 Random
 Mean fitness of 50 evaluations : -3.40855
 Fitness 2025 :-4.17498 | Profit 2025 :0.0880462
-Mean evaluations 10000 | Mean time (miliseconds): 24
+Mean evaluations 10000 | Mean time (miliseconds): 23.8
 
 Local Search
 Mean fitness of 50 evaluations : -3.1187
 Fitness 2025 :-3.88835 | Profit 2025 :0.0964705
-Mean evaluations 8984.76 | Mean time (miliseconds): 10.64
+Mean evaluations 8984.76 | Mean time (miliseconds): 10.54
 
 AM-BEST
 Mean fitness of 50 evaluations : -2.81629
 Fitness 2025 :-3.76051 | Profit 2025 :0.10115
-Mean evaluations 10000 | Mean time (miliseconds): 104.88
+Mean evaluations 10000 | Mean time (miliseconds): 104.12
 
 BMB
 Mean fitness of 50 evaluations : -3.02397
 Fitness 2025 :-3.83777 | Profit 2025 :0.0927594
-Mean evaluations 10000 | Mean time (miliseconds): 22.46
+Mean evaluations 10000 | Mean time (miliseconds): 22.56
 
 ILS-BL
 Mean fitness of 50 evaluations : -3.09773
 Fitness 2025 :-3.87787 | Profit 2025 :0.0936544
-Mean evaluations 10000 | Mean time (miliseconds): 14.36
+Mean evaluations 10000 | Mean time (miliseconds): 14.32
 
 ES
-Mean fitness of 50 evaluations : -3.04688
-Fitness 2025 :-3.87295 | Profit 2025 :0.093857
-Mean evaluations 10000 | Mean time (miliseconds): 10
+Mean fitness of 50 evaluations : -3.10547
+Fitness 2025 :-3.89143 | Profit 2025 :0.0953991
+Mean evaluations 10000 | Mean time (miliseconds): 46.56
 
 ILS-ES
-Mean fitness of 50 evaluations : -3.03492
-Fitness 2025 :-3.87433 | Profit 2025 :0.0950411
-Mean evaluations 10001 | Mean time (miliseconds): 10
+Mean fitness of 50 evaluations : -3.08609
+Fitness 2025 :-3.88215 | Profit 2025 :0.0921158
+Mean evaluations 10001 | Mean time (miliseconds): 60.96
 
 CSV generado en: ../syp100.csv
 ------------S&P500---------------\n
@@ -124,36 +124,36 @@ Mean evaluations 1 | Mean time (miliseconds): 0
 Random
 Mean fitness of 50 evaluations : -3.63828
 Fitness 2025 :-4.38934 | Profit 2025 :0.0266328
-Mean evaluations 10000 | Mean time (miliseconds): 272.44
+Mean evaluations 10000 | Mean time (miliseconds): 270.86
 
 Local Search
 Mean fitness of 50 evaluations : -3.51722
 Fitness 2025 :-4.32404 | Profit 2025 :0.0108477
-Mean evaluations 10000 | Mean time (miliseconds): 222.56
+Mean evaluations 10000 | Mean time (miliseconds): 222.66
 
 AM-BEST
 Mean fitness of 50 evaluations : -3.20503
 Fitness 2025 :-4.12372 | Profit 2025 :0.0035791
-Mean evaluations 10000 | Mean time (miliseconds): 1082.54
+Mean evaluations 10000 | Mean time (miliseconds): 1072.36
 
 BMB
 Mean fitness of 50 evaluations : -3.66307
 Fitness 2025 :-4.45096 | Profit 2025 :0.00519289
-Mean evaluations 10000 | Mean time (miliseconds): 290.12
+Mean evaluations 10000 | Mean time (miliseconds): 286.1
 
 ILS-BL
 Mean fitness of 50 evaluations : -3.655
 Fitness 2025 :-4.40475 | Profit 2025 :0.0133894
-Mean evaluations 10000 | Mean time (miliseconds): 233.58
+Mean evaluations 10000 | Mean time (miliseconds): 232.06
 
 ES
-Mean fitness of 50 evaluations : -3.47273
-Fitness 2025 :-4.35165 | Profit 2025 :0.00196996
-Mean evaluations 10000 | Mean time (miliseconds): 180.2
+Mean fitness of 50 evaluations : -3.4408
+Fitness 2025 :-4.32986 | Profit 2025 :0.00147264
+Mean evaluations 10000 | Mean time (miliseconds): 1340.28
 
 ILS-ES
-Mean fitness of 50 evaluations : -3.45247
-Fitness 2025 :-4.28492 | Profit 2025 :0.0126887
-Mean evaluations 10001 | Mean time (miliseconds): 183.92
+Mean fitness of 50 evaluations : -3.49816
+Fitness 2025 :-4.32356 | Profit 2025 :0.00974266
+Mean evaluations 10001 | Mean time (miliseconds): 1949.78
 
 CSV generado en: ../syp500.csv

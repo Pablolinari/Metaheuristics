@@ -112,6 +112,8 @@ ResultMH<double> Es::optimize(Problem<double> &problem,
         if (incremento < 0.0 || (u <= std::exp(-incremento / temp))) {
           currentFitness = candidateFitness;
           exitos++;
+					pos =0;
+					Random::shuffle(neighbors);
           // actualizo mejor solucion
           if (currentFitness > bestFitness) {
             bestFitness = currentFitness;

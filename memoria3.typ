@@ -252,10 +252,10 @@ En esta práctica el único operador que se utiliza es el operador de mutación 
   # Pseudocódigo del operador de mutación
   funcion mutation(mutSol, ratio):
     solucion = mutSol
-    nselection = ceil(ratio * ncompany)
-    index = aleatorio entre 0 y ncompany-1
+    nselection =  ratio * problemSize
+    index = aleatorio entre 0 y problemSize-1
 
-    if index + nselection > ncompany:
+    if index + nselection > problemSize:
       endindex = index
       index = endindex - nselection
     else:
@@ -461,7 +461,6 @@ El algoritmo de Enfriamiento Simulado  es una búsqueda local probabilística qu
           if incremento < 0 o u <= exp(-incremento / temp):
             currentfitness = candidateFitness
             exitos += 1
-            pos = 0
             if currentfitness > bestfitness:
               bestfitness = currentfitness
               bestsolution = current
@@ -697,7 +696,7 @@ La ejecución se ha hecho como se indicó en el apartado anterior, cambiando en 
     [BMB], [-4.566], [-3.104], [0.022], [6990.3], [0.001],
     [ILS], [-4.598], [-3.113], [0.020], [5596], [0.004],
     [ES], [-4.594], [-3.113], [0.022], [10000], [0.003],
-    [ILS-ES], [-4.592], [-3.112], [0.022], [10000], [0.004],
+    [ILS-ES], [-4.594], [-3.112], [0.022], [10000], [0.004],
   ),
   caption: [Resultados de Ibex 35 (Medias)],
 )
@@ -721,8 +720,8 @@ La ejecución se ha hecho como se indicó en el apartado anterior, cambiando en 
     [AM-BEST], [-2.814], [-3.755], [0.101], [10000], [0.044],
     [BMB], [-3.023], [-3.837], [0.092], [10000], [0.022],
     [ILS], [-3.097], [-3.877], [0.093], [10000], [0.014],
-    [ES], [-3.103], [-3.895], [0.095], [10000], [0.048],
-    [ILS-ES], [-3.085], [-3.885], [0.092], [10000], [0.063],
+    [ES], [-3.105], [-3.895], [0.095], [10000], [0.048],
+    [ILS-ES], [-3.105], [-3.885], [0.092], [10000], [0.063],
   ),
   caption: [Resultados de S&P100 (Medias)],
 )
@@ -746,8 +745,8 @@ La ejecución se ha hecho como se indicó en el apartado anterior, cambiando en 
     [AM-BEST], [-3.220], [-4.156], [0.005], [10000], [0.456],
     [BMB], [-3.663], [-4.450], [0.013], [10000], [0.238],
     [ILS], [-3.655], [-4.404], [-0.001], [10000], [1.345],
-    [ES], [-3.451], [-4.343], [0.012], [10000], [2.606],
-    [ILS-ES], [-3.541], [-4.330], [0.015], [10000], [0.170],
+    [ES], [-3.440], [-4.343], [0.012], [10000], [2.606],
+    [ILS-ES], [-3.498], [-4.330], [0.015], [10000], [0.170],
   ),
 
   caption: [Resultados de S&P500 (Medias)],
@@ -797,9 +796,9 @@ Al observar los resultados obtenidos, podemos ver que el comportamiento de los a
 == Comparación global de fitness (2015-2024) y gráficas
 === Enfriamiento simulado
 
-Podemos ver que el enfriamiento simulado supera a todos los algoritmos de la práctica 3 en cuanto a fitness en el dataset del S&P500, pero no logra superar al mejor algoritmo de la práctica 2 (AM-BEST). Esto se debe a que el AM-BEST es capaz de explotar y explorar el espacio de soluciones mucho mejor que el ES.
+Podemos ver que el enfriamiento simulado supera a todos los algoritmos de la práctica 3 en cuanto a fitness en el dataset del S&P500 y se ve superado por muy poco por los demás algoritmos en el IB35 y el S&P100, ademas no logra superar al mejor algoritmo de la práctica 2 (AM-BEST). Esto se debe a que el AM-BEST es capaz de explotar y explorar el espacio de soluciones mucho mejor que el ES.
 
-Si lo comparamos con la BL, vemos que aunque el enfriamiento simulado es mejor, la diferencia en el fitness no es tan grande para que esta mejora suponga una gran diferencia. Esto se debe a que, para que el enfriamiento simulado gane a la búsqueda local, debemos tener datasets donde empeorar la solución actual nos pueda llevar a una solución mejor, si el espacio no tiene mínimos locales que sean profundos separando los máximos, el permitir empeorar una solución como se hace en el ES no sacará tanta ventaja frente a la búsqueda local, que no permite empeorar las soluciones. Vemos que en el IB35 y en el S&P100 la diferencia entre BL y ES no es tan grande, mientras que en S&P500 la diferencia en fitness sí es más grande. Esto se debe a que en el dataset de S&P500 permitir empeorar soluciones sí da más ventaja. También debemos recordar que al ser un dataset más grande, la solución inicial influye más, esto lo podemos comprobar en los boxplots, donde vemos que cuanto más grande es el dataset, más grande es el rango generado por el boxplot. Si observamos los boxplots de BL y ES, vemos que el ES tiene menos variabilidad; por tanto, le afecta menos la decisión de la solución inicial que a la BL. Si nos fijamos en los gráficos de líneas (rojo y verde), vemos que el ES suele tener un fitness más estable a lo largo de las ejecuciones que la BL.
+Si lo comparamos con la BL, vemos que aunque el enfriamiento simulado es mejor, la diferencia en el fitness no es tan grande para que esta mejora suponga una gran diferencia como ocurría en la práctica 2. Esto se debe a que, para que el enfriamiento simulado gane a la búsqueda local, debemos tener datasets donde empeorar la solución actual nos pueda llevar a una solución mejor, si el espacio no tiene mínimos locales que sean profundos separando los máximos, el permitir empeorar una solución como se hace en el ES no sacará tanta ventaja frente a la búsqueda local, que no permite empeorar las soluciones. Vemos que en el IB35 y en el S&P100 la diferencia entre BL y ES no es tan grande, mientras que en S&P500 la diferencia en fitness sí es más grande. Esto se debe a que en el dataset de S&P500 permitir empeorar soluciones sí da más ventaja. También debemos recordar que al ser un dataset más grande, la solución inicial influye más, esto lo podemos comprobar en los boxplots, donde vemos que cuanto más grande es el dataset, más grande es el rango generado por el boxplot. Si observamos los boxplots de BL y ES, vemos que el ES tiene menos variabilidad; por tanto, le afecta menos la decisión de la solución inicial que a la BL. Si nos fijamos en los gráficos de líneas (rojo y verde), vemos que el ES suele tener un fitness más estable a lo largo de las ejecuciones que la BL.
 
 Si comparamos el ES con los demás algoritmos de la práctica 3 vemos que BMB le gana en el IB35 y S&P100 ya que al ser espacios más pequeños a el BMB le es suficiente con las iteraciones asignadas a cada solución para superar al ES.Podemos observar también que a nivel de tiempo de ejecución ES es mucho más costoso que los demás.
 
@@ -809,10 +808,9 @@ Si comparamos el ES con los demás algoritmos de la práctica 3 vemos que BMB le
 
 === ILS vs BMB vs ILS-ES
 
-En este apartado compararé los algoritmos ILS, ILS-ES y BMB, que tienen estructuras parecidas y sus resultados son similares. Mirando los boxplots y las gráficas de líneas podemos ver que en estos algoritmos influye bastante la selección de las soluciones iniciales, viendo que cuanto mayor es el dataset, más repercusión tienen. En los datasets de IB35 y S&P100 los resultados son bastante buenos, ya que BMB llega a superar a la búsqueda local y el ILS y ILS-ES consiguen superarala pero no con tanta ventaja. En el dataset de S&P500, si nos fijamos en los boxplots, presentan resultados con una variabilidad mucho mayor que la de random por parte de los tres algoritmos, en el BMB esto se debe a que, al escoger las soluciones, como debemos dividir las iteraciones de la BL en 5 soluciones, la BL tiene menos oportunidad de encontrar una solución buena con ese rango de iteraciones ya que el espacio es muy grande, por tanto dependerá mucho de las soluciones seleccionadas. Por parte del ILS, vemos que el que usa ES tiene una caja más pequeña en el S&P500; esto se debe a que ES funciona mejor en este dataset; por el contrario, cuando aplicamos la BL, sí se ve mucha más variabilidad.
+En este apartado compararé los algoritmos ILS, ILS-ES y BMB, que tienen estructuras parecidas y sus resultados son similares. Mirando los boxplots y las gráficas de líneas podemos ver que en estos algoritmos influye bastante la selección de las soluciones iniciales,sobre todo en el ILS viendo que cuanto mayor es el dataset, más repercusión tienen. En los datasets de IB35 y S&P100 los resultados son bastante buenos, ya que BMB llega a superar a la búsqueda local y el ILS y ILS-ES consiguen superarala pero no con tanta ventaja. En el dataset de S&P500, si nos fijamos en los boxplots, presentan resultados con una variabilidad mucho mayor que la de random por parte de los tres algoritmos, en el BMB esto se debe a que, al escoger las soluciones, como debemos dividir las iteraciones de la BL en 5 soluciones, la BL tiene menos oportunidad de encontrar una solución buena con ese rango de iteraciones ya que el espacio es muy grande, por tanto dependerá mucho de las soluciones seleccionadas. Por parte del ILS, vemos que el que usa ES tiene una caja más pequeña en el S&P500, esto se debe a que ES funciona mejor en este dataset, por el contrario, cuando aplicamos la BL, sí se ve mucha más variabilidad.
 
-Si nos fijamos en la tabla de resultados, vemos que en los datasets de S&P100 e IB35 BMB consigue superar a ES. Por otro lado, ILS no consigue superar claramente nunca a ES ni a BMB en ninguna de sus versiones ya que en los datasets medianos la diferencia que obtiene es mínima.
-
+Si nos fijamos en la tabla de resultados, vemos que en los datasets de S&P100 e IB35 BMB consigue superar a ES, ya que la variedad de soluciones que tiene para búscar le permite no depender tanto de la solución inicial. Por otro lado, ILS no consigue superar claramente nunca a ES ni a BMB en ninguna de sus versiones ya que en los datasets medianos la diferencia que obtiene es mínima.
 
 
 === Comparación general
@@ -828,4 +826,4 @@ Al evaluar en 2025 se ve que, dentro de BL, ES, BMB, ILS e ILS-ES, el algoritmo 
 
 Tras analizar los distintos algoritmos vemos que los ganadores en cada dataset son : BMB en IBEX35 y S&P100 y ES en S&P500.Los resultados son bastante ajustados entre BMB y ES , vemos que la opción de búsqueda multiarranque es más eficiente en espacios pequeños ya que con las evaluaciones que destina a la búsqueda local le es suficiente para encontrar una solución buena , mientras que a medida que se agranda el espacio , el BMB pierde fuerza y el algoritmo de Enfriamiento simulado obtiene los mejores resultados sobre los demás. También podemos concluir que en este caso ILS funciona mejor cuando se aplica enfriamiento simulado en cada ocasión en vez de búsqueda local.
 
-Por tanto como conclusión sacamos que los algoritmos analizados en la práctica 3 no consiguen superar al mejor de la práctica 2, y en general , quedan bastante peor que este. Por párte de la práctica 1 , en datasets medianos , superan al random y consiguen igualar a la búsqueda local la mayoría de veces (como observamos en los gráficos de líneas), pero una vez agrandamos el dataset , el comportamiento es más impredecible y no suelen quedar por encima de del Random.
+Por tanto como conclusión sacamos que los algoritmos analizados en la práctica 3 no consiguen superar al mejor de la práctica 2, y en general , quedan bastante peor que este. Por párte de la práctica 1 , en datasets medianos , superan al random y consiguen igualar a la búsqueda local la mayoría de veces (como observamos en los gráficos de líneas), pero una vez agrandamos el dataset , el comportamiento es más impredecible y no suelen quedar por encima  del Random.Por lo que podemos elegir como mejores algoritmos de esta práctica al BMB y al ES.
