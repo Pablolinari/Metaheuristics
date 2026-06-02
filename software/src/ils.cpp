@@ -31,7 +31,6 @@ ResultMH<double> Ils::optimize(ProblemDouble &problem, int maxevals) {
 
   tSolution<double> currentSolution = problem.createSolution();
   double currentFitness = problem.fitness(currentSolution);
-  evals++;
 	LocalSearch localsearch  = LocalSearch(0.4);
 
   ResultMH<double> resultLocal =

@@ -9,12 +9,12 @@ ResultMH<double> Bmb::optimize(ProblemDouble &problem, int maxevals) {
   int numsol = 5;
   int localsearchevals = 2000;
   int evals = 0;
-	LocalSearch localsearch = LocalSearch(0.4);
+  LocalSearch localsearch = LocalSearch(0.4);
   for (int i = 0; i < numsol; i++) {
-		tSolution<double> randsol = problem.createSolution();
-		double randfitness = problem.fitness(randsol);
+    tSolution<double> randsol = problem.createSolution();
+    double randfitness = problem.fitness(randsol);
     ResultMH<double> localsearchSolution =
-        localsearch.optimize(problem,randsol,randfitness,localsearchevals );
+        localsearch.optimize(problem, randsol, randfitness, localsearchevals);
     evals += localsearchSolution.evaluations;
     if (localsearchSolution.fitness > bestFitness) {
       bestSolution = localsearchSolution.solution;

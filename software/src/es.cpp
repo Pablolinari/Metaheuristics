@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <cassert>
 #include <cmath>
+#include <utility>
 #include <vector>
 
 ResultMH<double> Es::optimize(Problem<double> &problem,
@@ -27,8 +28,8 @@ ResultMH<double> Es::optimize(Problem<double> &problem,
 
   // parametros del enfriamiento simulado
   int maxVecinos = 10 * problemSize;
-  int maxExitos = 1 * problemSize;
-  int nEnfriamientos = std::max(1, maxEvals / maxVecinos);
+  int maxExitos = problemSize;
+  int nEnfriamientos = maxEvals / maxVecinos;
   double phi = 0.3;
   double mu = 0.2;
   double tempFinal = 1e-3;
@@ -57,11 +58,10 @@ ResultMH<double> Es::optimize(Problem<double> &problem,
 
   // precomputo el vecindario de pares (i, j)
   std::vector<std::pair<int, int>> neighbors;
-  neighbors.reserve(problemSize * problemSize);
   for (int i = 0; i < problemSize; i++) {
     for (int j = 0; j < problemSize; j++) {
       if (i != j) {
-        neighbors.emplace_back(i, j);
+        neighbors.push_back(std::make_pair(i, j));
       }
     }
   }
@@ -74,7 +74,7 @@ ResultMH<double> Es::optimize(Problem<double> &problem,
     int exitos = 0;
     Random::shuffle(neighbors);
     int pos = 0;
-    int totalPos = static_cast<int>(neighbors.size());
+    int totalPos = neighbors.size();
 
     while (vecinosGenerados < maxVecinos && exitos < maxExitos &&
            evals < maxEvals && pos < totalPos) {
@@ -112,8 +112,6 @@ ResultMH<double> Es::optimize(Problem<double> &problem,
         if (incremento < 0.0 || (u <= std::exp(-incremento / temp))) {
           currentFitness = candidateFitness;
           exitos++;
-          Random::shuffle(neighbors);
-          pos = 0;
           // actualizo mejor solucion
           if (currentFitness > bestFitness) {
             bestFitness = currentFitness;

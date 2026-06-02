@@ -244,10 +244,8 @@ pesos que ya estén activos, de no ser así si la diferencia es mayor que el lí
 
 
 El principal objetivo de los algoritmos es maximizar la función fitness, la cual trata de maximizar el beneficio y minimizar el riesgo en una sola fórmula. El parámetro lambda se usará a modo de ajuste, cuando más alto sea su valor el algoritmo valorará mejor soluciones con poco beneficio pero que sean seguras, es decir, que tengan poco riesgo, mientras que cuanto más cercano a 0 sea lambda, el algoritmo valorará mejor las soluciones con máximo beneficio posible, ignorando el riesgo.El valor que se usa durante la práctica es $lambda=500$ que es el indicado en el guión.
-== Operadores 
+== Operadores
 En esta práctica el único operador que se utiliza es el operador de mutación el cual vemos a continuación.
-
-
 
 #block(fill: luma(240), inset: 8pt, radius: 4pt, width: 100%)[
   ```py
@@ -267,7 +265,8 @@ En esta práctica el único operador que se utiliza es el operador de mutación 
     return solucion
   ```]
 
-El operador de mutación se utiliza en el ILS y consiste en desordenar el 20% de las posiciones de un vector solución seleccionadas en un rango aleatorio. 
+El operador de mutación se utiliza en el ILS y consiste en desordenar el 20% de las posiciones de un vector solución seleccionadas en un rango aleatorio.
+
 
 = Estructura de los algoritmos
 
@@ -354,76 +353,64 @@ Mientras que no se superen las restricciones de las evaluaciones y se sigan enco
 
     return(bestsolution,bestfitness,evals)
   ```]
-El algoritmo BMB (Basic Multi-start) genera varias soluciones iniciales aleatorias y aplica Búsqueda Local a cada una de ellas. En la implementación se generan 5 soluciones y a cada una se le aplica BL con 2000 evaluaciones y ratio 0.4. Finalmente, se conserva la mejor solución encontrada entre todos los arranques. Esta estrategia reduce la dependencia de la solución inicial al explorar diferentes zonas del espacio de búsqueda.
+El algoritmo BMB  genera varias soluciones iniciales aleatorias y aplica Búsqueda Local a cada una de ellas. En la implementación se generan 5 soluciones y a cada una se le aplica BL con 2000 evaluaciones y ratio 0.4. Finalmente, se conserva la mejor solución encontrada entre todos los arranques. Esta estrategia reduce la dependencia de la solución inicial al explorar diferentes zonas del espacio de búsqueda.
 == Algoritmo ILS
 
-En ILS (Iterated Local Search) se parte de una solución inicial mejorada con Búsqueda Local y, a partir de la mejor solución encontrada, se aplica una mutación que perturba parcialmente el vector. Tras la perturbación se vuelve a aplicar Búsqueda Local y se actualiza la mejor solución si se obtiene un fitness superior. En la implementación se realizan 4 iteraciones con 2000 evaluaciones de BL por iteración.
+En ILS  se parte de una solución inicial mejorada con Búsqueda Local y, a partir de la mejor solución encontrada, se aplica una mutación que perturba parcialmente el vector. Tras la perturbación se vuelve a aplicar Búsqueda Local y se actualiza la mejor solución si se obtiene un fitness superior. En la implementación se realizan 4 iteraciones con 2000 evaluaciones de BL por iteración.
 
-#block(fill: luma(240), inset: 8pt, radius: 4pt, width: 100%)[
-  ```py
-  # Pseudocódigo de la mutación ILS
-  function mutation(solucion, ratio):
-    nselection = ceil(ratio * ncompany)
-    index = aleatorio entre 0 y ncompany-1
-    if index + nselection > ncompany:
-      endindex = index
-      index = endindex - nselection
-    else:
-      endindex = index + nselection
-    desordenar(solucion[index:endindex])
-    return solucion
-  ```]
 
 #block(fill: luma(240), inset: 8pt, radius: 4pt, width: 100%)[
   ```py
   # Pseudocódigo del algoritmo ILS
   function ils(maxevals):
-    localsearchevals = 2000
-    niter = 4
+    localsearchevals = evaluaciones para BL
+    niter = numero de iteraciones
     evals = 0
 
-    current = solucion_aleatoria
+    current = solucion aleatoria
     currentfitness = fitness(current)
     evals += 1
 
-    result = localSearch(current, currentfitness, localsearchevals)
-    evals += result.evals
-    bestsolution = result.solution
+    localSearch(current, currentfitness, localsearchevals)
+    evals += evaluaciones BL
+    # el resultado se queda igual que el inicial o mejor
+    bestsolution = resultado local search
     bestfitness = result.fitness
 
     for i in range(0, niter):
+      #aplico la mutación a la mejor solución
       mutsol = mutation(bestsolution, 0.2)
-      iter = localSearch(mutsol, fitness(mutsol), localsearchevals)
-      evals += iter.evals
-      if iter.fitness > bestfitness:
-        bestfitness = iter.fitness
-        bestsolution = iter.solution
+      localSearch(mutsol, fitness(mutsol), localsearchevals)
+      evals += evaluaciones BL
+      if fitness BL > bestfitness:
+        bestfitness = fitness BL
+        bestsolution = solución BL
 
     return (bestsolution, bestfitness, evals)
   ```]
 
 == Algoritmo Enfriamiento simulado
 
-El algoritmo de Enfriamiento Simulado (ES) es una búsqueda local probabilística que permite aceptar empeoramientos con cierta probabilidad para escapar de óptimos locales. Se define un número máximo de vecinos por temperatura, un número máximo de éxitos y una temperatura inicial calculada en función del fitness. En cada iteración se generan vecinos moviendo parte del peso de una empresa a otra, se evalúa el candidato y se acepta si mejora o con probabilidad $Delta(T)$. La temperatura se actualiza con un esquema de enfriamiento Cauchy hasta que no se obtienen éxitos o se superan las evaluaciones.
+El algoritmo de Enfriamiento Simulado  es una búsqueda local probabilística que permite aceptar empeoramientos con cierta probabilidad para escapar de óptimos locales. Se define un número máximo de vecinos por temperatura, un número máximo de éxitos y una temperatura inicial calculada en función del fitness. En cada iteración se generan vecinos moviendo parte del peso de una empresa a otra, se evalúa el candidato y se acepta si mejora o con probabilidad $Delta(T)$. La temperatura se actualiza con un esquema de enfriamiento Cauchy hasta que no se obtienen éxitos o se superan las evaluaciones.
 
 #block(fill: luma(240), inset: 8pt, radius: 4pt, width: 100%)[
   ```py
   # Pseudocódigo del algoritmo ES
   function es(problem, current, currentfitness, maxevals):
     evals = 0
-    n = problem.getSolutionSize()
-    (low, high) = problem.getSolutionDomainRange()
+    problemSize = tamaño del problema
+    (low, high) = restricciones del problema
 
-    maxVecinos = 10 * n
-    maxExitos = 1 * n
-    nEnfriamientos = max(1, maxevals / maxVecinos)
+    maxVecinos = 10*problemSize
+    maxExitos = problemSize
+    nEnfriamientos= maxevals / maxVecinos
     phi = 0.3
     mu = 0.2
     tempFinal = 1e-3
     tempInicial = (mu * abs(currentfitness)) / -log(phi)
-
+    # aseguro que la temperatura inicial no sea demasiado baja
     while tempInicial <= tempFinal:
-      current = solucion_aleatoria
+      currentsolution = solucion aleatoria
       currentfitness = fitness(current)
       evals += 1
       tempInicial = (mu * abs(currentfitness)) / -log(phi)
@@ -431,11 +418,11 @@ El algoritmo de Enfriamiento Simulado (ES) es una búsqueda local probabilístic
     beta = (tempInicial - tempFinal) / (nEnfriamientos * tempInicial * tempFinal)
     temp = tempInicial
 
-    neighbors = todas las parejas (i, j)
-    bestsolution = current
-    bestfitness = currentfitness
-
+    neighbors = generar vecindario de parejas i,j
+    bestsolution = currentsolution
+    bestfitness = currentfitnessfitness
     hayExito = true
+
     while evals < maxevals and hayExito:
       vecinosGenerados = 0
       exitos = 0
@@ -445,21 +432,22 @@ El algoritmo de Enfriamiento Simulado (ES) es una búsqueda local probabilístic
       while vecinosGenerados < maxVecinos and exitos < maxExitos and
             evals < maxevals and pos < neighbors.size:
         (i, j) = neighbors[pos]
-        if i == j:
-          pos += 1
-          continue
+        # compruebo que esté en el rango
         if current[i] <= low or current[j] >= high:
           pos += 1
           continue
-
+        # selecciono la cantidad que puedo extraer de la posición seleccionada
         ratio = min(1 - low / current[i], (high - current[j]) / current[i], 0.3)
+
+        #compruebo que no sea 0
         if ratio == 0:
           pos += 1
           continue
 
+        # guardo los valores antiguos y actualizo los vecinos
         vecinosGenerados += 1
-        valorI = current[i]
-        valorJ = current[j]
+        valori = current[i]
+        valorj = current[j]
         current[i] = (1 - ratio) * valorI
         current[j] = valorJ + ratio * valorI
 
@@ -468,60 +456,74 @@ El algoritmo de Enfriamiento Simulado (ES) es una búsqueda local probabilístic
           evals += 1
           incremento = currentfitness - candidateFitness
           u = aleatorio entre 0 y 1
+          ## selecciono la solución si mejora o si empeora la
+          ## selecciono con probabilidad u
           if incremento < 0 o u <= exp(-incremento / temp):
             currentfitness = candidateFitness
             exitos += 1
-            mezclar(neighbors)
             pos = 0
             if currentfitness > bestfitness:
               bestfitness = currentfitness
               bestsolution = current
           else:
-            current[i] = valorI
-            current[j] = valorJ
+            # si no acepto la solución reestablezco los valores
+            current[i] = valori
+            current[j] = valorj
             pos += 1
         else:
-          current[i] = valorI
-          current[j] = valorJ
+          current[i] = valori
+          current[j] = valorj
           pos += 1
-
+      # actualizo la temperatura
       temp = temp / (1 + beta * temp)
       hayExito = exitos > 0
 
     return (bestsolution, bestfitness, evals)
   ```]
-
+El código que se usa para generar vecinos es el mismo que la BL  y es el siguiente:
+#block(fill: luma(240), inset: 8pt, radius: 4pt, width: 100%)[
+  ```py
+  neighbors vector de parejas
+   for i in range(0,nvecinos):
+    for i in range(0,nvecinos):
+       if (i != j):
+         añado la pareja (i,j) al vector
+  ```]
 == Algoritmo ILS-ES
 
 ILS-ES combina ILS con Enfriamiento Simulado en lugar de Búsqueda Local. La estructura es idéntica a ILS, pero la fase de mejora usa ES durante 2000 evaluaciones. Esto introduce una exploración más amplia que la BL al aceptar movimientos no necesariamente mejores según la temperatura actual.
 
 #block(fill: luma(240), inset: 8pt, radius: 4pt, width: 100%)[
   ```py
-  # Pseudocódigo del algoritmo ILS-ES
-  function ils_es(maxevals):
-    localsearchevals = 2000
-    niter = 4
+  # Pseudocódigo del algoritmo ILS
+  function ilses(maxevals):
+    localsearchevals = evaluaciones para ES
+    niter = numero de iteraciones
     evals = 0
 
-    current = solucion_aleatoria
+    current = solucion aleatoria
     currentfitness = fitness(current)
     evals += 1
 
-    result = es(problem, current, currentfitness, localsearchevals)
-    evals += result.evals
-    bestsolution = result.solution
+    localSearch(current, currentfitness, localsearchevals)
+    evals += evaluaciones ES
+    # el resultado se queda igual que el inicial o mejor
+    bestsolution = resultado ES
     bestfitness = result.fitness
 
     for i in range(0, niter):
+      #aplico la mutación a la mejor solución
       mutsol = mutation(bestsolution, 0.2)
-      iter = es(problem, mutsol, fitness(mutsol), localsearchevals)
-      evals += iter.evals
-      if iter.fitness > bestfitness:
-        bestfitness = iter.fitness
-        bestsolution = iter.solution
+      localSearch(mutsol, fitness(mutsol), localsearchevals)
+      evals += evaluaciones ES
+      if fitness ES > bestfitness:
+        bestfitness = fitness ES
+        bestsolution = solución ES
 
     return (bestsolution, bestfitness, evals)
   ```]
+
+
 = Estructura del código
 
 El código de la práctica está organizado en una estructura modular que facilita la compilación y ejecución. A continuación se describe la organización del proyecto y el manual de usuario para compilar y ejecutar el programa.
@@ -538,10 +540,18 @@ El proyecto está organizado de la siguiente manera:
     - `randomsearch.cpp` : Implementación del algoritmo de búsqueda aleatoria
     - `greedy.cpp` : Implementación del algoritmo Greedy
     - `localsearch.cpp` : Implementación del algoritmo de búsqueda local
+    - `es.cpp` : Implementación de el algoritmo ES
+    - `ils.cpp` : Implementación de el algoritmo ILS
+    - `ilses.cpp` : Implementación de el algoritmo ILS-ES
+    - `bmb.cpp` : Implementación de el algoritmo BMB
   - `include/` : Contiene los archivos de cabecera (.h y .hpp)
     - `am.h`: Clase base para los algoritmos meméticos
     - `amall.h`, `ambest.h`, `amrand.h`: Clases de los algoritmos meméticos.
-    - `pportfolio.h`, `greedy.h`, `localsearch.h`, `randomsearch.h`
+    - `pportfolio.h`, `greedy.h`, `localsearch.h`, `randomsearch.h`: Cabeceras de los algoritmos P1.
+    - `es.h` : Definición de el algoritmo ES
+    - `ils.h` : Definición de el algoritmo ILS
+    - `ilses.h` : Definición de el algoritmo ILS-ES
+    - `bmb.h` :  Definición de el algoritmo BMB
     - `problem.h` : Clase base abstracta
     - `mh.h` : Clase base para los algoritmos de metaheurísticas
     - `solution.h` : Estructura para representar soluciones
@@ -782,14 +792,14 @@ A continuación se muestran los boxplots de los resultados obtenidos para cada c
 #pagebreak()
 = Análisis de los resultados
 
-Al observar los resultados obtenidos, podemos ver que el comportamiento de los algoritmos cambia bastante según el tamaño del dataset. 
+Al observar los resultados obtenidos, podemos ver que el comportamiento de los algoritmos cambia bastante según el tamaño del dataset.
 
 == Comparación global de fitness (2015-2024) y gráficas
-=== Enfriamiento simulado 
+=== Enfriamiento simulado
 
 Podemos ver que el enfriamiento simulado supera a todos los algoritmos de la práctica 3 en cuanto a fitness en el dataset del S&P500, pero no logra superar al mejor algoritmo de la práctica 2 (AM-BEST). Esto se debe a que el AM-BEST es capaz de explotar y explorar el espacio de soluciones mucho mejor que el ES.
 
-Si lo comparamos con la BL, vemos que aunque el enfriamiento simulado es mejor, la diferencia en el fitness no es tan grande para que esta mejora suponga una gran diferencia. Esto se debe a que, para que el enfriamiento simulado gane a la búsqueda local, debemos tener datasets donde empeorar la solución actual nos pueda llevar a una solución mejor, si el espacio no tiene mínimos locales que sean profundos separando los máximos, el permitir empeorar una solución como se hace en el ES no sacará tanta ventaja frente a la búsqueda local, que no permite empeorar las soluciones. Vemos que en el IB35 y en el S&P100 la diferencia entre BL y ES no es tan grande, mientras que en S&P500 la diferencia en fitness sí es más grande. Esto se debe a que en el dataset de S&P500 permitir empeorar soluciones sí da más ventaja. También debemos recordar que al ser un dataset más grande, la solución inicial influye más, esto lo podemos comprobar en los boxplots, donde vemos que cuanto más grande es el dataset, más grande es el rango generado por el boxplot. Si observamos los boxplots de BL y ES, vemos que el ES tiene menos variabilidad; por tanto, le afecta menos la decisión de la solución inicial que a la BL. Si nos fijamos en los gráficos de líneas (rojo y verde), vemos que el ES suele tener un fitness más estable a lo largo de las ejecuciones que la BL. 
+Si lo comparamos con la BL, vemos que aunque el enfriamiento simulado es mejor, la diferencia en el fitness no es tan grande para que esta mejora suponga una gran diferencia. Esto se debe a que, para que el enfriamiento simulado gane a la búsqueda local, debemos tener datasets donde empeorar la solución actual nos pueda llevar a una solución mejor, si el espacio no tiene mínimos locales que sean profundos separando los máximos, el permitir empeorar una solución como se hace en el ES no sacará tanta ventaja frente a la búsqueda local, que no permite empeorar las soluciones. Vemos que en el IB35 y en el S&P100 la diferencia entre BL y ES no es tan grande, mientras que en S&P500 la diferencia en fitness sí es más grande. Esto se debe a que en el dataset de S&P500 permitir empeorar soluciones sí da más ventaja. También debemos recordar que al ser un dataset más grande, la solución inicial influye más, esto lo podemos comprobar en los boxplots, donde vemos que cuanto más grande es el dataset, más grande es el rango generado por el boxplot. Si observamos los boxplots de BL y ES, vemos que el ES tiene menos variabilidad; por tanto, le afecta menos la decisión de la solución inicial que a la BL. Si nos fijamos en los gráficos de líneas (rojo y verde), vemos que el ES suele tener un fitness más estable a lo largo de las ejecuciones que la BL.
 
 Si comparamos el ES con los demás algoritmos de la práctica 3 vemos que BMB le gana en el IB35 y S&P100 ya que al ser espacios más pequeños a el BMB le es suficiente con las iteraciones asignadas a cada solución para superar al ES.Podemos observar también que a nivel de tiempo de ejecución ES es mucho más costoso que los demás.
 
@@ -799,7 +809,7 @@ Si comparamos el ES con los demás algoritmos de la práctica 3 vemos que BMB le
 
 === ILS vs BMB vs ILS-ES
 
-En este apartado compararé los algoritmos ILS, ILS-ES y BMB, que tienen estructuras parecidas y sus resultados son similares. Mirando los boxplots y las gráficas de líneas podemos ver que en estos algoritmos influye bastante la selección de las soluciones iniciales, viendo que cuanto mayor es el dataset, más repercusión tienen. En los datasets de IB35 y S&P100 los resultados son bastante buenos, ya que BMB llega a superar a la búsqueda local y el ILS y ILS-ES consiguen superarala pero no con tanta ventaja. En el dataset de S&P500, si nos fijamos en los boxplots, presentan resultados con una variabilidad mucho mayor que la de random por parte de los tres algoritmos, en el BMB esto se debe a que, al escoger las soluciones, como debemos dividir las iteraciones de la BL en 5 soluciones, la BL tiene menos oportunidad de encontrar una solución buena con ese rango de iteraciones ya que el espacio es muy grande, por tanto dependerá mucho de las soluciones seleccionadas. Por parte del ILS, vemos que el que usa ES tiene una caja más pequeña en el S&P500; esto se debe a que ES funciona mejor en este dataset; por el contrario, cuando aplicamos la BL, sí se ve mucha más variabilidad. 
+En este apartado compararé los algoritmos ILS, ILS-ES y BMB, que tienen estructuras parecidas y sus resultados son similares. Mirando los boxplots y las gráficas de líneas podemos ver que en estos algoritmos influye bastante la selección de las soluciones iniciales, viendo que cuanto mayor es el dataset, más repercusión tienen. En los datasets de IB35 y S&P100 los resultados son bastante buenos, ya que BMB llega a superar a la búsqueda local y el ILS y ILS-ES consiguen superarala pero no con tanta ventaja. En el dataset de S&P500, si nos fijamos en los boxplots, presentan resultados con una variabilidad mucho mayor que la de random por parte de los tres algoritmos, en el BMB esto se debe a que, al escoger las soluciones, como debemos dividir las iteraciones de la BL en 5 soluciones, la BL tiene menos oportunidad de encontrar una solución buena con ese rango de iteraciones ya que el espacio es muy grande, por tanto dependerá mucho de las soluciones seleccionadas. Por parte del ILS, vemos que el que usa ES tiene una caja más pequeña en el S&P500; esto se debe a que ES funciona mejor en este dataset; por el contrario, cuando aplicamos la BL, sí se ve mucha más variabilidad.
 
 Si nos fijamos en la tabla de resultados, vemos que en los datasets de S&P100 e IB35 BMB consigue superar a ES. Por otro lado, ILS no consigue superar claramente nunca a ES ni a BMB en ninguna de sus versiones ya que en los datasets medianos la diferencia que obtiene es mínima.
 
@@ -816,6 +826,6 @@ Al evaluar en 2025 se ve que, dentro de BL, ES, BMB, ILS e ILS-ES, el algoritmo 
 
 == Conclusiones
 
-Tras analizar los distintos algoritmos vemos que los ganadores en cada dataset son : BMB en IBEX35 y S&P100 y ES en S&P500.Los resultados son bastante ajustados entre BMB y ES , vemos que la opción de búsqueda multiarranque es más eficiente en espacios pequeños ya que con las evaluaciones que destina a la búsqueda local le es suficiente para encontrar una solución buena , mientras que a medida que se agranda el espacio , el BMB pierde fuerza y el algoritmo de Enfriamiento simulado obtiene los mejores resultados sobre los demás. También podemos concluir que en este caso ILS funciona mejor cuando se aplica enfriamiento simulado en cada ocasión en vez de búsqueda local. 
+Tras analizar los distintos algoritmos vemos que los ganadores en cada dataset son : BMB en IBEX35 y S&P100 y ES en S&P500.Los resultados son bastante ajustados entre BMB y ES , vemos que la opción de búsqueda multiarranque es más eficiente en espacios pequeños ya que con las evaluaciones que destina a la búsqueda local le es suficiente para encontrar una solución buena , mientras que a medida que se agranda el espacio , el BMB pierde fuerza y el algoritmo de Enfriamiento simulado obtiene los mejores resultados sobre los demás. También podemos concluir que en este caso ILS funciona mejor cuando se aplica enfriamiento simulado en cada ocasión en vez de búsqueda local.
 
 Por tanto como conclusión sacamos que los algoritmos analizados en la práctica 3 no consiguen superar al mejor de la práctica 2, y en general , quedan bastante peor que este. Por párte de la práctica 1 , en datasets medianos , superan al random y consiguen igualar a la búsqueda local la mayoría de veces (como observamos en los gráficos de líneas), pero una vez agrandamos el dataset , el comportamiento es más impredecible y no suelen quedar por encima de del Random.
