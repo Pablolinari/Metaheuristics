@@ -99,7 +99,8 @@ int main(int argc, char *argv[]) {
       make_pair("BMB", &bmb),
       make_pair("ILS-BL", &ils),
       make_pair("ES", &enfriamiento),
-      make_pair("ILS-ES", &ilses)};
+      make_pair("ILS-ES", &ilses),
+      make_pair("ABC", &abc)};
 
   Eigen::MatrixX<double> fitness(totalevaluations, algorithms.size());
   Eigen::MatrixX<double> profit2025(totalevaluations, algorithms.size());
