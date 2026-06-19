@@ -67,13 +67,13 @@
 
 // --- CONTENIDO ---
 
-= Funcionamiento del algoritmo
+= Descripción del algoritmo
 
-El algoritmo *Artificial Bee Colony* (ABC), propuesto por Karaboga y Basturk en 2007, es una metaheurística poblacional inspirada en el comportamiento de búsqueda de alimento de las colonias de abejas. La idea central es que un conjunto de abejas explora el espacio de búsqueda en torno a una serie de *fuentes de alimento*, intensificando la exploración alrededor de las fuentes más prometedoras y abandonando aquellas que se agotan.
+El algoritmo *Artificial Bee Colony* (ABC), propuesto por Dervis Karaboga en 2007, es una metaheurística poblacional inspirada en el comportamiento de búsqueda de alimento de las colonias de abejas. La idea central es que un conjunto de abejas explora el espacio de búsqueda en torno a una serie de *fuentes de alimento*, intensificando la exploración alrededor de las fuentes más prometedoras y abandonando aquellas que se agotan.
 
-En el contexto de este problema cada *fuente de alimento* representa una solución candidata (un vector de pesos del portfolio), y la *cantidad de néctar* de una fuente se corresponde con el valor de fitness de esa solución. El objetivo del algoritmo es, por tanto, encontrar la fuente con mayor cantidad de néctar, es decir, la solución que maximiza la función objetivo.
+En el contexto de este problema cada *fuente de alimento* representa una solución candidata, y la *cantidad de néctar* de una fuente se corresponde con el valor de fitness de esa solución. El objetivo del algoritmo es, por tanto, encontrar la fuente con mayor cantidad de néctar, es decir, la solución que maximiza la función objetivo.
 
-== La metáfora de la colonia
+==Explicación de los componentes del algoritmo
 
 La colonia se divide en tres tipos de abejas, cada uno con un papel distinto dentro de la búsqueda:
 
@@ -82,7 +82,7 @@ La colonia se divide en tres tipos de abejas, cada uno con un papel distinto den
 - *Abejas exploradoras (scout bees)*: cuando una fuente se agota (no mejora durante muchos ciclos) se abandona, y la abeja empleada asociada se convierte en exploradora, buscando una fuente completamente nueva de forma aleatoria (diversificación).
 
 El número de fuentes de alimento $S N$ es la mitad del tamaño total de la colonia, y coincide tanto con el número de abejas empleadas como con el de abejas observadoras (cada fuente tiene una empleada asociada).
-
+== Funcionamiento  del algoritmo
 == Parámetros del algoritmo
 
 El comportamiento del algoritmo se controla mediante los siguientes parámetros:
