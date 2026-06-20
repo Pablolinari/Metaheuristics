@@ -36,7 +36,7 @@
 // --- PORTADA ---
 #align(center)[
   #v(1cm)
-  #image("../logo.jpg", width: 60%)
+  #image("logo.jpg", width: 60%)
   #v(3cm)
 
   #block(text(weight: "bold", 2.5em)[Artificial Bee Colony])
