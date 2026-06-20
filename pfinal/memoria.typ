@@ -69,37 +69,43 @@
 
 = Descripción del algoritmo
 
-El algoritmo *Artificial Bee Colony* (ABC), propuesto por Dervis Karaboga en 2007, es una metaheurística poblacional inspirada en el comportamiento de búsqueda de alimento de las colonias de abejas. La idea central es que un conjunto de abejas explora el espacio de búsqueda en torno a una serie de *fuentes de alimento*, intensificando la exploración alrededor de las fuentes más prometedoras y abandonando aquellas que se agotan.
+El algoritmo *Artificial Bee Colony* (ABC), propuesto por Dervis Karaboga en 2007, es una metaheurística poblacional inspirada en el comportamiento de búsqueda de alimento de las colonias de abejas. La idea del algoritmo es que un conjunto de abejas explora el espacio de búsqueda  en el que hay una serie de fuentes de alimentos, intensificando la exploración alrededor de las fuentes más prometedoras y abandonando aquellas que se agotan.
 
-En el contexto de este problema cada *fuente de alimento* representa una solución candidata, y la *cantidad de néctar* de una fuente se corresponde con el valor de fitness de esa solución. El objetivo del algoritmo es, por tanto, encontrar la fuente con mayor cantidad de néctar, es decir, la solución que maximiza la función objetivo.
+En el contexto de este problema cada *fuente de alimento* representa una solución candidata, y la cantidad de néctar de una fuente se corresponde con el valor de fitness de esa solución. El objetivo del algoritmo es, por tanto, encontrar la fuente con mayor cantidad de néctar, es decir, la solución que maximiza la función objetivo.
 
 ==Explicación de los componentes del algoritmo
 
 La colonia se divide en tres tipos de abejas, cada uno con un papel distinto dentro de la búsqueda:
 
-- *Abejas empleadas (employed bees)*: cada una está asociada a una fuente de alimento concreta y se encarga de explotarla, buscando soluciones mejores en su vecindario.
-- *Abejas observadoras (onlooker bees)*: esperan en la colmena y eligen qué fuentes explotar en función de la información que comparten las empleadas. Las fuentes con más néctar tienen más probabilidad de ser elegidas, lo que concentra el esfuerzo en las zonas prometedoras (intensificación).
-- *Abejas exploradoras (scout bees)*: cuando una fuente se agota (no mejora durante muchos ciclos) se abandona, y la abeja empleada asociada se convierte en exploradora, buscando una fuente completamente nueva de forma aleatoria (diversificación).
+- *Abejas obreras (worker bees)*: cada una está asociada a una fuente de alimento concreta y se encarga de explotarla buscando soluciones mejores en su vecindario.
+- *Abejas observadoras (onlooker bees)*: esperan en la colmena y eligen qué fuentes explotar en función de la información que comparten las obreras. Las fuentes con más néctar tienen más probabilidad de ser elegidas, esto hace que se concentre la búsqueda en las funetes de alimento más prometedoras.
+- *Abejas exploradoras (scout bees)*: cuando una fuente se agota se abandona, y la abeja obrera que trabajaba sobre esta se convierte en exploradora, buscando una fuente de alimento nueva.
 
-El número de fuentes de alimento $S N$ es la mitad del tamaño total de la colonia, y coincide tanto con el número de abejas empleadas como con el de abejas observadoras (cada fuente tiene una empleada asociada).
+El número de fuentes de alimento, según se indica en el artículo, es la mitad del tamaño total de la colonia, y coincide tanto con el número de abejas trabajadoras como con el de abejas observadoras ya que cada fuente tiene una trabajadora asociada.
+
+Esta forma de inicializar la población es la propuesta en el artículo , no obstante veremos que se puede modificar este parámetro para cambiar el comportamiento del algoritmo aunque no sea el parámetro que más influya.
+
 == Funcionamiento  del algoritmo
 == Parámetros del algoritmo
 
 El comportamiento del algoritmo se controla mediante los siguientes parámetros:
 
 - *colonySize*: tamaño total de la colonia. El número de fuentes de alimento se calcula como $S N = "colonySize" / 2$. En la implementación se usa un valor de 50, por lo que $S N = 25$.
-- *trialLimit* (parámetro _limit_ del artículo): número máximo de ciclos que una fuente puede permanecer sin mejorar antes de ser abandonada. Controla cuándo entra en juego la fase exploradora.
+
+- *Limit* : número máximo de ciclos que una fuente puede permanecer sin mejorar antes de ser abandonada. Controla cuanto se pueden explotar las soluciones.
 - *maxevals*: número máximo de evaluaciones de la función objetivo, que actúa como criterio de parada.
 
-== Ecuaciones fundamentales
+== Ecuaciones
 
-El algoritmo se apoya en dos ecuaciones clave. La primera genera una *solución candidata* $v_i$ a partir de una fuente existente $x_i$, perturbando una única componente $j$ elegida al azar:
+El algoritmo usa dos ecuaciones . La primera genera una solución candidata $v_i$ a partir de una fuente existente $x_i$, perturbando una única componente $j$ elegida al azar:
 
 $ v_(i j) = x_(i j) + phi.alt_(i j) dot (x_(i j) - x_(k j)) $
 
-donde $k != i$ es otra fuente vecina elegida aleatoriamente y $phi.alt_(i j)$ es un número aleatorio en el intervalo $[-1, 1]$. El resto de componentes de $v_i$ se copian directamente de $x_i$. Intuitivamente, la nueva solución se acerca o se aleja de una fuente vecina en una sola dimensión.
+donde $k != i$ es otra fuente vecina elegida aleatoriamente y $phi.alt_(i j)$ es un número aleatorio en el intervalo $[-1, 1]$. El resto de componentes de $v_i$ se copian directamente de $x_i$.La nueva solución se acerca o se aleja de una fuente vecina en una sola dimensión.
 
-La segunda ecuación calcula la *probabilidad* de que cada fuente sea seleccionada por una observadora, de forma proporcional a su néctar:
+Para entenderlo mejor , este movimiento en el problema del portfolio equivale a tomar una solución $i$ , y sumar o resar a una empresa de dicha solución un porcentaje de la misma empresa pero de la otra solución escogida $k$.De esta forma nos acercaríamos o alejaríamos de la solución escogida en dicha componente. 
+
+La segunda ecuación calcula la probabilidad de que cada fuente sea seleccionada por una observadora, de forma proporcional a su néctar:
 
 $ p_i = "fit"_i / (sum_(n=1)^(S N) "fit"_n) $
 
@@ -107,23 +113,23 @@ Cuanto mayor es el fitness de una fuente, mayor es su probabilidad de ser explot
 
 == Etapas del algoritmo
 
-La ejecución del algoritmo se organiza en una etapa inicial de inicialización seguida de un bucle de ciclos. Cada ciclo se compone de tres fases consecutivas (empleadas, observadoras y exploradoras), que se repiten hasta agotar el número máximo de evaluaciones.
+La ejecución se divide en 4 fases claras donde se identifica el comportamiento de cada abeja con su rol.
 
 === Etapa 1: Inicialización
 
-Se generan $S N$ fuentes de alimento de forma aleatoria mediante `createSolution()`, asegurando que cada una cumple las restricciones del problema (pesos en $["low", "high"]$ que suman 1). Se evalúa el fitness de cada una y se memoriza la mejor solución encontrada hasta el momento. Además, se inicializa a 0 un contador de _trials_ por cada fuente, que registra cuántos ciclos lleva sin mejorar.
+Se generan $S N$ fuentes de alimento de forma aleatoria, asegurando que cada una cumple las restricciones del problema (en el caso del portfolio se comprueban las restriciones necesarias). Se evalúa el fitness de cada una y se memoriza la mejor solución encontrada hasta el momento. Además, se inicializa a 0 un contador de _trials_ por cada fuente, que registra cuántos ciclos lleva sin mejorar.
 
 === Etapa 2: Fase de abejas empleadas
 
-Cada abeja empleada explota su propia fuente $x_i$. Para ello genera una solución candidata $v_i$ aplicando la ecuación (2.2) y la evalúa. A continuación se aplica una *selección greedy*: si la candidata es mejor que la fuente original, la sustituye y el contador de _trials_ de esa fuente se reinicia a 0; en caso contrario, la fuente se mantiene y su contador de _trials_ se incrementa. Esta fase explora el vecindario de todas las fuentes existentes.
+Cada abeja empleada explota su propia fuente $x_i$. Para ello genera una solución candidata $v_i$ aplicando la ecuación (2.2) y la evalúa. A continuación se aplica una selección greedy: si la candidata es mejor que la fuente original, la sustituye y el contador de _trials_ de esa fuente se reinicia a 0, en caso contrario, la fuente se mantiene y su contador de _trials_ se incrementa. Esta fase genera por cada fuente de alimento una posible solución mejor usando la ecuación previamente vista, si esta solución es mejor será la que se use como base para la explotación.
 
 === Etapa 3: Fase de abejas observadoras
 
-Primero se calculan las probabilidades de selección de cada fuente con la ecuación (2.1). Después, se reparten $S N$ observadoras: cada una elige una fuente mediante *selección por ruleta* (las fuentes con más néctar tienen más probabilidad) y la explota igual que una empleada, generando una candidata con la ecuación (2.2) y aplicando de nuevo la selección greedy. Como las mejores fuentes tienden a ser elegidas varias veces, esta fase intensifica la búsqueda en las regiones más prometedoras del espacio.
+Esta etapa consiste en el "baile de las obreras" donde cada obrera vuelve a la colmena e intentará convencer a las observadoras de elegir su fuente de alimento , las observadoras eligirán con mayor probabilidad la fuente que más nectar tenga.Los pasos que se siguen una vez la obrera vuelve a la colmena son los siguientes. Primero se calculan las probabilidades de selección de cada fuente con la segunda ecuación . Después, se reparten $S N$ observadoras: cada una elige una fuente mediante selección por ruleta ,(las fuentes con más néctar tienen más probabilidad) y la explota igual que una empleada, usando la misma ecuación y aplicando de nuevo la selección greedy. Como las mejores fuentes tienden a ser elegidas varias veces, esta fase intensifica la búsqueda en las regiones más prometedoras del espacio. Es decir que podemos tener varias abejas observadoras en la misma fuente de alimento, esto ocurrirá sobre todo en las fuente más prometedoras donde como es lógico, interesa intensificar la búsqueda.
 
 === Etapa 4: Fase de abeja exploradora
 
-Al final de cada ciclo se comprueba si alguna fuente se ha agotado. Se localiza la fuente con mayor número de _trials_ acumulados y, si este supera el `trialLimit`, dicha fuente se abandona: se sustituye por una nueva solución aleatoria generada con `createSolution()`, se evalúa y su contador de _trials_ vuelve a 0. Se permite *como máximo una* abeja exploradora por ciclo. Esta fase introduce diversificación y evita que el algoritmo quede estancado en óptimos locales.
+Al final de cada ciclo se comprueba si alguna fuente se ha agotado. Se localiza la fuente con mayor número de _trials_ acumulados y, si este supera el _Limit_, dicha fuente se abandona, se sustituye y la abeja exploradora buscaría una nueva, que a modo práctico consiste en crear una nueva solución aleatoria,se evalúa la nueva solución y su contador de _trials_ vuelve a 0. Se permite como máximo una abeja exploradora por ciclo. Esta fase introduce diversificación y evita que el algoritmo quede estancado en óptimos locales.
 
 En las tres fases se actualiza siempre la mejor solución global encontrada, que es la que finalmente devuelve el algoritmo.
 
@@ -178,5 +184,19 @@ En las tres fases se actualiza siempre la mejor solución global encontrada, que
 
 La formulación original de ABC está pensada para la optimización de funciones numéricas sin restricciones, por lo que ha sido necesario realizar dos adaptaciones:
 
-- *Reparación de soluciones*: la ecuación (2.2) perturba una componente y, en general, rompe las restricciones del problema (los pesos deben sumar 1 y estar en $["low", "high"]$ o ser 0). Por ello, tras generar cada candidata se comprueba su validez y, si no es factible, se repara con `problem.fix()` antes de evaluarla.
-- *Desplazamiento de las probabilidades*: la ecuación (2.1) asume cantidades de néctar no negativas, pero el fitness del portfolio (beneficio menos $lambda$ por riesgo) puede ser negativo. Para poder aplicar la ruleta, se desplazan todos los valores de fitness sumándoles una constante que deja el peor de ellos ligeramente por encima de 0, conservando las diferencias relativas entre fuentes. Si todas las fuentes tienen el mismo fitness se reparte la probabilidad de forma uniforme.
+- *Reparación de soluciones*: la ecuación que se usa para explorar nuevas soluciones modifica una componente y, en general, rompe las restricciones del problema (los pesos deben sumar 1 y estar en $["low", "high"]$ o ser 0). Por ello, tras generar cada candidata se comprueba su validez y, si no es factible, se repara con `problem.fix()` antes de evaluarla.
+- *Desplazamiento de las probabilidades*: la ecuación (2.1) asume cantidades de néctar no negativas, pero el fitness del portfolio  puede ser negativo, de hecho en la práctica es siempre negativo. Para poder aplicar la ruleta, se desplazan todos los valores de fitness sumándoles una constante que deja el peor de ellos ligeramente por encima de 0, conservando las diferencias relativas entre fuentes.
+
+Por lo que respecta a la implementación , la  diferencia entre la implementación para el problema del portfolio y para el *cec2017* son las mencionadas previamente y el uso de las funciones de la clase *pPortfolio* , principalmente usadas para poder arreglar y generar soluciones con las restricciones del problema.
+
+
+#pagebreak()
+
+== Mejoras del algoritmo
+
+=== Hibridación con Local Search
+
+
+
+
+
