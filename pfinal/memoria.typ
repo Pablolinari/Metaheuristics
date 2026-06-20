@@ -196,6 +196,10 @@ Por lo que respecta a la implementación , la  diferencia entre la implementaci�
 
 === Hibridación con Local Search
 
+Com primera opción de mejora se opta por hibridarlo con la Búsqueda Local, el enfoque que se usa puede ser de dos maneras distintas.
+
+- Como primera prueba se ha usado la búsqueda local para intensificar la búsqueda sobre la mejor solución. Esta búsqueda local no se ejecuta sobre todas las posibles mejores soluciones, sino que se tiene un contador y cada 
+
 
 
 
