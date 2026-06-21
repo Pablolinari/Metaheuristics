@@ -158,7 +158,7 @@ double artificial_bee_colony_gbest(int dim, int seed, int lower, int upper,
 }
 
 int main() {
-  int dim = 30;
+  int dim = 100;
   int seed = 42;
   int lower = -100;
   int upper = 100;

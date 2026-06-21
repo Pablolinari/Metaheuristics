@@ -58,8 +58,14 @@ def discover_dimensions(algos):
     return sorted(dims)
 
 
-def plot_dimension(dim, data, out_dir):
-    """data: {algoritmo: Serie F01..F30}. Genera barras agrupadas + resumen de victorias."""
+def plot_dimension(dim, data, out_dir, scale="norm"):
+    """data: {algoritmo: Serie F01..F30}. Genera barras agrupadas + resumen de victorias.
+
+    scale="norm": normaliza cada funcion respecto al mejor algoritmo (ratio al
+        minimo de esa funcion), de modo que el mejor vale 1 y se aprecia cuantas
+        veces peor es cada algoritmo en cada funcion.
+    scale="log": error absoluto en escala logaritmica (comportamiento anterior).
+    """
     algos = list(data.keys())
     funcs = list(next(iter(data.values())).index)
     n_func = len(funcs)
@@ -67,18 +73,27 @@ def plot_dimension(dim, data, out_dir):
 
     matrix = np.array([[float(data[a][f]) for f in funcs] for a in algos])  # [algo, func]
 
-    # ---- Grafico de barras agrupado (escala log) ----
+    # ---- Grafico de barras agrupado ----
     fig, ax = plt.subplots(figsize=(max(12, n_func * 0.5), 6))
     width = 0.8 / n_algo
     x = np.arange(n_func)
     # evita ceros/negativos en log
     plot_vals = np.where(matrix <= 0, 1e-12, matrix)
+
+    if scale == "norm":
+        # ratio respecto al mejor (minimo) de cada funcion -> mejor = 1
+        col_min = plot_vals.min(axis=0, keepdims=True)
+        plot_vals = plot_vals / col_min
+        ylabel = "Error relativo al mejor (log, 1 = mejor)"
+    else:
+        ylabel = "Error al optimo (log, menor = mejor)"
+
     for i, a in enumerate(algos):
         ax.bar(x + i * width, plot_vals[i], width, label=a)
     ax.set_yscale("log")
     ax.set_xticks(x + width * (n_algo - 1) / 2)
     ax.set_xticklabels(funcs, rotation=90, fontsize=8)
-    ax.set_ylabel("Error al optimo (log, menor = mejor)")
+    ax.set_ylabel(ylabel)
     ax.set_title(f"Comparativa de fitness por funcion - dimension {dim}")
     ax.legend()
     fig.tight_layout()
@@ -119,6 +134,9 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--dir", default=".", help="directorio base con las carpetas results*")
     ap.add_argument("--out", default="graficas", help="carpeta de salida para las imagenes")
+    ap.add_argument("--scale", default="norm", choices=["norm", "log"],
+                    help="norm: error relativo al mejor por funcion (mejor visibilidad); "
+                         "log: error absoluto en escala log")
     args = ap.parse_args()
 
     algos = find_algorithms(args.dir)
@@ -138,7 +156,7 @@ def main():
                 data[name] = row
         if len(data) < 1:
             continue
-        plot_dimension(dim, data, args.out)
+        plot_dimension(dim, data, args.out, scale=args.scale)
 
 
 if __name__ == "__main__":

@@ -315,41 +315,25 @@ La diferencia conceptual entre las dos variantes es clara: en el *Tipo 1* el com
 ]
 
 = Propuestas de mejora
-== Vuelos de Levy
+== ABC guiado por la mejor solución global (Gbest-guided ABC)
 
-Una de las mejoras que se pueden aplicar consiste en cambiar la forma en la que las abejas generan nuevas soluciones. En el ABC clásico el movimiento que define la ecuación (2.2) es *local y acotado*: la perturbación $phi.alt_(i j) dot (x_(i j) - x_(k j))$ produce pasos de tamaño parecido y, como $phi.alt in [-1, 1]$, nunca genera un salto grande. Esto explora bien en las cercanías de una fuente, pero hace que el algoritmo tenga dificultades para escapar de óptimos locales.
+Una de las mejoras que se pueden aplicar consiste en cambiar la forma en la que las abejas generan nuevas soluciones. En el ABC clásico el movimiento que define la ecuación (2.2) es puramente *local y no informado*: la perturbación $phi.alt_(i j) dot (x_(i j) - x_(k j))$ desplaza la fuente $i$ en la dirección de otra fuente $k$ elegida al azar, sin tener en cuenta dónde se encuentra la mejor solución conocida. Esto favorece la exploración, pero ralentiza la convergencia, ya que la información de la mejor solución encontrada no se aprovecha para guiar la búsqueda.
 
-Los *vuelos de Levy* sustituyen ese movimiento por una caminata aleatoria en la que la longitud de cada paso sigue una distribución de *cola pesada*: la mayoría de los pasos son pequeños (lo que permite un refinamiento local fino), pero de vez en cuando aparece un salto muy largo capaz de sacar a la abeja de la cuenca de atracción en la que está atascada. Esta combinación de pasos cortos y saltos largos esporádicos mejora la exploración global del espacio de búsqueda.
+El *Gbest-guided ABC* (GABC), propuesto por Zhu y Kwong (2010), corrige esta carencia inspirándose en la actualización de velocidad de la optimización por enjambre de partículas (PSO): añade a la ecuación de movimiento un término adicional que atrae cada nueva fuente hacia la *mejor solución global* encontrada hasta el momento. De este modo el algoritmo conserva la componente exploratoria del ABC y, al mismo tiempo, incorpora una presión de explotación que acelera la convergencia hacia las regiones prometedoras del espacio de búsqueda.
 
-=== Generación del paso: algoritmo de Mantegna
+=== Regla de generación del candidato
 
-No existe una fórmula cerrada sencilla para muestrear directamente una distribución de Levy estable, por lo que se utiliza el *método de Mantegna*, que aproxima un paso de Levy a partir de dos variables aleatorias normales. El paso se calcula como:
+La regla de generación del candidato (ecuación 2.2) se reemplaza por una expresión con dos términos de perturbación. Sobre la componente $j$ elegida al azar:
 
-$
-  "paso" = u / (|v|^(1 / beta)) , quad u tilde N(0, sigma_u^2) , quad v tilde N(0, 1)
-$
+$ v_(i j) = x_(i j) + phi.alt_(i j) dot (x_(i j) - x_(k j)) + psi_(i j) dot (y_j - x_(i j)) $
 
-donde $beta in (0, 2]$ es el exponente de la distribución (se usa $beta = 1.5$) y la desviación $sigma_u$ se obtiene una única vez, ya que es constante para un $beta$ fijo:
+donde $y$ es la mejor solución global encontrada hasta el momento y cada término cumple un papel concreto:
 
-$
-  sigma_u = ( (Gamma(1 + beta) dot sin(pi beta \/ 2)) / (Gamma((1 + beta) / 2) dot beta dot 2^((beta - 1) / 2)) )^(1 / beta)
-$
+- El término $phi.alt_(i j) dot (x_(i j) - x_(k j))$, con $phi.alt_(i j) in [-1, 1]$ y $k != i$ una fuente aleatoria, es el *movimiento clásico del ABC* y aporta la *exploración*: genera diversidad muestreando en la vecindad de otras fuentes de la población.
+- El término $psi_(i j) dot (y_j - x_(i j))$ es la *aportación del GABC* y proporciona la *explotación*: arrastra la fuente $i$ hacia la mejor solución global, de forma proporcional a la distancia que las separa, lo que acelera la convergencia.
+- El factor $psi_(i j)$ es un número aleatorio uniforme en $[0, C]$, donde $C$ es una constante positiva (se usa $C = 1.5$, valor recomendado por los autores) que controla el *peso de la atracción* hacia la mejor solución. Un valor de $C$ demasiado grande provoca una convergencia prematura, mientras que uno demasiado pequeño desaprovecha la guía global.
 
-siendo $Gamma$ la función gamma. La cola pesada surge del cociente $u \/ |v|^(1\/beta)$: cuando $v$ toma un valor cercano a 0, el denominador se hace minúsculo y el paso se dispara, generando el salto largo ocasional; el resto del tiempo $v$ tiene un tamaño normal y el paso resultante es pequeño.
-
-=== Aplicación en el ABC
-
-La regla de generación del candidato (ecuación 2.2) se reemplaza por un paso de Levy dirigido hacia la mejor fuente del enjambre. Sobre la componente $j$ elegida al azar:
-
-$ v_(i j) = x_(i j) + alpha dot "paso" dot (x_(i j) - x_("best" j)) $
-
-donde cada factor cumple un papel concreto:
-
-- El término $(x_(i j) - x_("best" j))$ aporta *dirección y escala* al salto: lo orienta respecto a la mejor solución encontrada y lo hace proporcional a la distancia a la que se encuentra la abeja de ella, de modo que las fuentes lejanas dan saltos grandes y las cercanas refinan finamente.
-- El factor $alpha$ (con valor $0.01$) es un *factor de escala* que evita que los saltos largos se salgan de forma sistemática del dominio del problema.
-- Como $u$ está centrada en 0, el paso puede ser positivo o negativo, por lo que el candidato puede acercarse o alejarse de la mejor fuente, manteniendo la diversidad de la población.
-
-Al igual que en el ABC clásico, tras generar la candidata se recorta al dominio $["lower", "upper"]$ antes de evaluarla. El resto de fases del algoritmo (observadoras con ruleta, exploradoras según el _Limit_ y criterio de parada) se mantienen idénticas, de forma que la única diferencia con el ABC original es la regla de movimiento, lo que permite atribuir cualquier cambio en el rendimiento exclusivamente a la incorporación de los vuelos de Levy.
+Al igual que en el ABC clásico, tras generar la candidata se recorta al dominio $["lower", "upper"]$ antes de evaluarla. El resto de fases del algoritmo (observadoras con ruleta, exploradoras según el _Limit_ y criterio de parada) se mantienen idénticas, de forma que la única diferencia con el ABC original es la regla de movimiento, lo que permite atribuir cualquier cambio en el rendimiento exclusivamente a la guía por la mejor solución global. La única estructura de datos adicional que requiere esta variante es el vector $y$ con la mejor solución global, que se actualiza cada vez que se encuentra una fuente con mejor _fitness_.
 
 
 == Comparación de resultados
@@ -357,7 +341,7 @@ Al igual que en el ABC clásico, tras generar la candidata se recorta al dominio
 
 
 #figure(
-  image("code/graficas/comparativa_dim30_barras.png", width: 80%),
+  image("code/graficas/comparativa_dim30_barras.png", width: 100%),
   caption: [Comparación error para dimensión 30],
 )
 
@@ -366,7 +350,7 @@ Al igual que en el ABC clásico, tras generar la candidata se recorta al dominio
   caption: [Número de victorias dimensión 30],
 )
 #figure(
-  image("code/graficas/comparativa_dim50_barras.png", width: 80%),
+  image("code/graficas/comparativa_dim50_barras.png", width: 100%),
   caption: [Comparación error para dimensión 50],
 )
 
@@ -375,7 +359,7 @@ Al igual que en el ABC clásico, tras generar la candidata se recorta al dominio
   caption: [Número de victorias dimensión 50],
 )
 #figure(
-  image("code/graficas/comparativa_dim100_barras.png", width: 80%),
+  image("code/graficas/comparativa_dim100_barras.png", width: 100%),
   caption: [Comparación error para dimensión 100],
 )
 #figure(
