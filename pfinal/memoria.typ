@@ -198,8 +198,45 @@ Por lo que respecta a la implementación , la  diferencia entre la implementaci�
 
 Com primera opción de mejora se opta por hibridarlo con la Búsqueda Local, el enfoque que se usa puede ser de dos maneras distintas.
 
-- Como primera prueba se ha usado la búsqueda local para intensificar la búsqueda sobre la mejor solución. Esta búsqueda local no se ejecuta sobre todas las posibles mejores soluciones, sino que se tiene un contador y cada 
+- Como primera prueba se ha usado la búsqueda local para intensificar la búsqueda sobre la mejor solución. Esta búsqueda local no se ejecuta sobre todas las posibles mejores soluciones, sino que se tiene un contador y cuando se alcanza un determinado número de evaluaciones , se ejecuta la búsqueda local sobre la mejor solución encontrada hasta el momento.
 
+- Otra opción que se ha implementado con la búsqueda local es ejecutarla cuando se crean nuevas fuentes de alimento , de manera que una vez se acaba el alimento en una fuente, se elige una nueva fuente (solución aleatoria) y se aplica búsqueda local sobre la nueva fuente. Esto hace que las nuevas fuentes de alimento que búsquen las abejas exploradoras sean potencialmente mejores ya que previamente a la  explotación habrán sido mejoradas.
+
+
+
+=== Vuelos de Levy
+
+Una de las mejoras que se pueden aplicar consiste en cambiar la forma en la que las abejas generan nuevas soluciones. En el ABC clásico el movimiento que define la ecuación (2.2) es *local y acotado*: la perturbación $phi.alt_(i j) dot (x_(i j) - x_(k j))$ produce pasos de tamaño parecido y, como $phi.alt in [-1, 1]$, nunca genera un salto grande. Esto explora bien en las cercanías de una fuente, pero hace que el algoritmo tenga dificultades para escapar de óptimos locales.
+
+Los *vuelos de Levy* sustituyen ese movimiento por una caminata aleatoria en la que la longitud de cada paso sigue una distribución de *cola pesada*: la mayoría de los pasos son pequeños (lo que permite un refinamiento local fino), pero de vez en cuando aparece un salto muy largo capaz de sacar a la abeja de la cuenca de atracción en la que está atascada. Esta combinación de pasos cortos y saltos largos esporádicos mejora la exploración global del espacio de búsqueda.
+
+==== Generación del paso: algoritmo de Mantegna
+
+No existe una fórmula cerrada sencilla para muestrear directamente una distribución de Levy estable, por lo que se utiliza el *método de Mantegna*, que aproxima un paso de Levy a partir de dos variables aleatorias normales. El paso se calcula como:
+
+$ "paso" = u / (|v|^(1 / beta)) , quad u tilde N(0, sigma_u^2) , quad v tilde N(0, 1) $
+
+donde $beta in (0, 2]$ es el exponente de la distribución (se usa $beta = 1.5$) y la desviación $sigma_u$ se obtiene una única vez, ya que es constante para un $beta$ fijo:
+
+$ sigma_u = ( (Gamma(1 + beta) dot sin(pi beta \/ 2)) / (Gamma((1 + beta) / 2) dot beta dot 2^((beta - 1) / 2)) )^(1 / beta) $
+
+siendo $Gamma$ la función gamma. La cola pesada surge del cociente $u \/ |v|^(1\/beta)$: cuando $v$ toma un valor cercano a 0, el denominador se hace minúsculo y el paso se dispara, generando el salto largo ocasional; el resto del tiempo $v$ tiene un tamaño normal y el paso resultante es pequeño.
+
+==== Aplicación en el ABC
+
+La regla de generación del candidato (ecuación 2.2) se reemplaza por un paso de Levy dirigido hacia la mejor fuente del enjambre. Sobre la componente $j$ elegida al azar:
+
+$ v_(i j) = x_(i j) + alpha dot "paso" dot (x_(i j) - x_("best" j)) $
+
+donde cada factor cumple un papel concreto:
+
+- El término $(x_(i j) - x_("best" j))$ aporta *dirección y escala* al salto: lo orienta respecto a la mejor solución encontrada y lo hace proporcional a la distancia a la que se encuentra la abeja de ella, de modo que las fuentes lejanas dan saltos grandes y las cercanas refinan finamente.
+- El factor $alpha$ (con valor $0.01$) es un *factor de escala* que evita que los saltos largos se salgan de forma sistemática del dominio del problema.
+- Como $u$ está centrada en 0, el paso puede ser positivo o negativo, por lo que el candidato puede acercarse o alejarse de la mejor fuente, manteniendo la diversidad de la población.
+
+Al igual que en el ABC clásico, tras generar la candidata se recorta al dominio $["lower", "upper"]$ antes de evaluarla. El resto de fases del algoritmo (observadoras con ruleta, exploradoras según el _Limit_ y criterio de parada) se mantienen idénticas, de forma que la única diferencia con el ABC original es la regla de movimiento, lo que permite atribuir cualquier cambio en el rendimiento exclusivamente a la incorporación de los vuelos de Levy.
+
+== Propuestas de mejora
 
 
 
