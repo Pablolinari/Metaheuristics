@@ -47,11 +47,71 @@ def cargar_finales():
     return datos
 
 
+def algoritmos_disponibles(datos):
+    """Conjunto de todos los algoritmos encontrados en todas las dimensiones."""
+    algos = set()
+    for por_algo in datos.values():
+        algos.update(por_algo.keys())
+    return sorted(algos)
+
+
+def pedir_algoritmos(disponibles):
+    """Pregunta al usuario qué algoritmos comparar.
+
+    Acepta nombres separados por espacios o comas. Enter (vacío) = todos.
+    Devuelve la lista de algoritmos seleccionados.
+    """
+    print("Algoritmos disponibles:")
+    for i, algo in enumerate(disponibles, 1):
+        print(f"  {i}. {algo}")
+
+    while True:
+        entrada = input(
+            "\n¿Qué algoritmos quieres comparar? "
+            "(nombres o números separados por espacios/comas; Enter = todos): "
+        ).strip()
+        if not entrada:
+            return disponibles
+
+        tokens = [t for t in re.split(r"[\s,]+", entrada) if t]
+        seleccion = []
+        no_validos = []
+        for tok in tokens:
+            if tok.isdigit():
+                idx = int(tok) - 1
+                if 0 <= idx < len(disponibles):
+                    seleccion.append(disponibles[idx])
+                else:
+                    no_validos.append(tok)
+            elif tok in disponibles:
+                seleccion.append(tok)
+            else:
+                no_validos.append(tok)
+
+        if no_validos:
+            print(f"No reconocidos: {', '.join(no_validos)}. Inténtalo de nuevo.")
+            continue
+        if len(seleccion) < 2:
+            print("Selecciona al menos dos algoritmos para comparar.")
+            continue
+        # eliminar duplicados conservando el orden
+        return list(dict.fromkeys(seleccion))
+
+
 def main():
     datos = cargar_finales()
     if not datos:
         print("No se encontraron ficheros xlsx en las carpetas results*.")
         return
+
+    disponibles = algoritmos_disponibles(datos)
+    seleccion = pedir_algoritmos(disponibles)
+    # filtrar los datos a los algoritmos elegidos
+    datos = {
+        dim: {algo: serie for algo, serie in por_algo.items() if algo in seleccion}
+        for dim, por_algo in datos.items()
+    }
+    datos = {dim: por_algo for dim, por_algo in datos.items() if por_algo}
 
     resumen = {}  # algoritmo -> {dim: nº victorias}
 

@@ -103,7 +103,7 @@ $ v_(i j) = x_(i j) + phi.alt_(i j) dot (x_(i j) - x_(k j)) $
 
 donde $k != i$ es otra fuente vecina elegida aleatoriamente y $phi.alt_(i j)$ es un número aleatorio en el intervalo $[-1, 1]$. El resto de componentes de $v_i$ se copian directamente de $x_i$.La nueva solución se acerca o se aleja de una fuente vecina en una sola dimensión.
 
-Para entenderlo mejor , este movimiento en el problema del portfolio equivale a tomar una solución $i$ , y sumar o resar a una empresa de dicha solución un porcentaje de la misma empresa pero de la otra solución escogida $k$.De esta forma nos acercaríamos o alejaríamos de la solución escogida en dicha componente. 
+Para entenderlo mejor , este movimiento en el problema del portfolio equivale a tomar una solución $i$ , y sumar o resar a una empresa de dicha solución un porcentaje de la misma empresa pero de la otra solución escogida $k$.De esta forma nos acercaríamos o alejaríamos de la solución escogida en dicha componente.
 
 La segunda ecuación calcula la probabilidad de que cada fuente sea seleccionada por una observadora, de forma proporcional a su néctar:
 
@@ -192,37 +192,152 @@ Por lo que respecta a la implementación , la  diferencia entre la implementaci�
 
 #pagebreak()
 
-== Mejoras del algoritmo
+= Mejoras del algoritmo
 
-=== Hibridación con Local Search
+== Hibridación con búsqueda local (Solis-Wets)
 
-Com primera opción de mejora se opta por hibridarlo con la Búsqueda Local, el enfoque que se usa puede ser de dos maneras distintas.
+El ABC clásico es un buen explorador del espacio de búsqueda, pero su capacidad de *refinamiento local* es limitada: la ecuación (2.2) solo modifica una componente por candidata y depende de las diferencias entre fuentes, por lo que cuando la población converge esas diferencias se hacen pequeñas y el avance se ralentiza. La idea de esta hibridación es convertir el algoritmo en un *algoritmo memético*, combinando la exploración global del ABC con una *búsqueda local* que pula con detalle las soluciones más prometedoras.
 
-- Como primera prueba se ha usado la búsqueda local para intensificar la búsqueda sobre la mejor solución. Esta búsqueda local no se ejecuta sobre todas las posibles mejores soluciones, sino que se tiene un contador y cuando se alcanza un determinado número de evaluaciones , se ejecuta la búsqueda local sobre la mejor solución encontrada hasta el momento.
+=== La búsqueda local: Solis-Wets
 
-- Otra opción que se ha implementado con la búsqueda local es ejecutarla cuando se crean nuevas fuentes de alimento , de manera que una vez se acaba el alimento en una fuente, se elige una nueva fuente (solución aleatoria) y se aplica búsqueda local sobre la nueva fuente. Esto hace que las nuevas fuentes de alimento que búsquen las abejas exploradoras sean potencialmente mejores ya que previamente a la  explotación habrán sido mejoradas.
+Solis-Wets es una búsqueda local estocástica de paso adaptativo que opera sobre *una única solución*. En lugar de explorar todo el espacio, da pequeños pasos aleatorios alrededor de la solución actual y aprende en qué dirección conviene moverse mediante dos elementos:
 
+- Un *paso* $delta$ que controla el tamaño de las perturbaciones y que se ajusta de forma dinámica según el algoritmo vaya teniendo éxito o no.
+- Un vector de *sesgo* (_bias_) que acumula la dirección de los movimientos que han funcionado, de modo que la búsqueda tiende a continuar avanzando hacia donde ya ha mejorado.
 
+En cada iteración se genera una perturbación aleatoria $d tilde U(0, delta)$ y se construye una solución candidata sumando el paso y el sesgo:
 
-=== Vuelos de Levy
+$ x' = x + d + "bias" $
+
+Si la candidata mejora, se acepta y se *refuerza* el sesgo en esa dirección. Si no mejora, se prueba el *movimiento opuesto* $x' = x - d - "bias"$ (aprovechando la misma perturbación en sentido contrario); si este mejora, se acepta y el sesgo se ajusta en consecuencia. Si ninguno de los dos mejora, se considera un fracaso y el sesgo se reduce a la mitad para "olvidar" una dirección que ya no es útil.
+
+El paso $delta$ se adapta para equilibrar exploración y precisión: tras *5 éxitos consecutivos* se duplica (la búsqueda va bien, conviene avanzar más rápido) y tras *3 fracasos consecutivos* se divide entre dos (hay que afinar con pasos más cortos). Este mecanismo permite que la BL dé pasos grandes cuando está lejos del óptimo local y pasos finos cuando está cerca de él.
+
+=== Integración en el ABC
+
+La búsqueda local no sustituye a ninguna fase del ABC, sino que se *intercala* dentro del bucle principal. La hibridación se controla con tres parámetros:
+
+- *ls_freq*: cada cuántos ciclos del ABC se lanza la búsqueda local (se usa $50$).
+- *ls_budget*: número de evaluaciones que se concede a cada aplicación de la BL (se usa $500$).
+- *ls_delta*: paso inicial $delta$ de Solis-Wets (se usa $0.2$).
+
+Al final de cada ciclo, y solo una vez cada `ls_freq` ciclos, se localiza la *mejor fuente* de la población actual y se le aplica Solis-Wets con un presupuesto de `ls_budget` evaluaciones. Después se reinicia su contador de _trials_ (acaba de ser intensificada, no tiene sentido considerarla agotada). Las evaluaciones que consume la BL se descuentan del presupuesto global del algoritmo, de forma que ABC y BL *comparten el mismo límite de evaluaciones*: la búsqueda local no es "gratis", sino que se le roban evaluaciones a la fase poblacional.
+
+De este modo el ABC se encarga de la *diversificación* (encontrar regiones prometedoras del espacio) y Solis-Wets de la *intensificación* (exprimir al máximo la mejor solución encontrada), repartiendo el esfuerzo entre ambos a lo largo de la ejecución.
+
+#block(fill: luma(240), inset: 8pt, radius: 4pt, width: 100%)[
+  ```py
+  # dentro del bucle principal del ABC, al final de cada ciclo:
+  cycle += 1
+  si use_ls y cycle % ls_freq == 0 y evals < maxevals:
+    best = indice de la fuente con menor obj    # la mejor
+    budget = min(ls_budget, maxevals - evals)   # no pasarse del limite
+    evals += soliswets(foods[best], obj[best], ls_delta, budget, ...)
+    trial[best] = 0                             # recien intensificada
+    actualizar_mejor(foods[best])
+  ```
+]
+
+== Hibridación con Differential Evolution
+
+*Differential Evolution* (DE) es una metaheurística poblacional que genera nuevas soluciones combinando las *diferencias entre individuos* de la población. Su operador básico es la *mutación diferencial*: a un vector base se le suma la diferencia escalada entre otros dos individuos, $F dot (x_(r 2) - x_(r 3))$, donde $F$ es un factor de escala. Después, un *cruce binomial* mezcla el mutante con la solución original copiando cada componente con probabilidad $C R$, garantizando con un índice aleatorio (`jrand`) que al menos una componente provenga del mutante. Finalmente se aplica una selección _greedy_ entre la candidata y la original.
+
+A diferencia de la ecuación (2.2) del ABC, que solo modifica una componente y usa una única fuente vecina, el operador de DE *combina información de toda la población en varias dimensiones a la vez*, lo que suele dar un mejor poder de búsqueda. Se han probado *dos formas distintas* de incorporar DE al ABC.
+
+=== Tipo 1: DE como operador de generación de candidatos
+
+En esta primera variante DE *no se añade como una fase nueva*, sino que *reemplaza la regla de movimiento* de las abejas. Donde el ABC clásico usaba la ecuación (2.2), ahora se usa el operador *DE/current-to-best/1* con cruce binomial. Para cada componente seleccionada por el cruce:
+
+$
+  v_(i j) = x_(i j) + F dot (x_("best" j) - x_(i j)) + F dot (x_(r 1 j) - x_(r 2 j))
+$
+
+donde $x_"best"$ es la mejor fuente actual del enjambre y $r 1, r 2$ son dos índices aleatorios distintos entre sí, de $i$ y de _best_. El término $F dot (x_"best" - x_i)$ atrae la candidata hacia la mejor solución (intensificación dirigida), mientras que $F dot (x_(r 1) - x_(r 2))$ añade una perturbación diferencial que mantiene la diversidad. El cruce binomial con probabilidad $C R$ decide qué componentes se mutan, y `jrand` asegura que al menos una cambie.
+
+Este operador se usa *en las dos fases de explotación* del ABC (abejas empleadas y observadoras), de modo que el esqueleto del algoritmo (ruleta de las observadoras, exploradoras según el _Limit_, criterio de parada) se mantiene intacto y la única diferencia con el ABC original es *cómo se genera cada candidata*. Los parámetros usados son $F = 0.5$ y $C R = 0.9$, valores habituales en DE.
+
+#block(fill: luma(240), inset: 8pt, radius: 4pt, width: 100%)[
+  ```py
+  # reemplaza a produceCandidate (ec. 2.2) en empleadas y observadoras:
+  funcion produceCandidate_DE(foods, i):
+    best = indice de la mejor fuente
+    r1, r2 = dos indices aleatorios distintos de i, best y entre si
+    jrand = dimension aleatoria
+    cand = copia(foods[i])
+    para j en 0..dim:
+      si j == jrand o rand() < CR:                       # cruce binomial
+        cand[j] = foods[i][j] + F*(foods[best][j]-foods[i][j])
+                              + F*(foods[r1][j]-foods[r2][j])
+    devolver clip(cand)
+  ```
+]
+
+=== Tipo 2: DE como algoritmo completo intercalado
+
+La segunda variante sigue *exactamente el mismo esquema que la hibridación con Solis-Wets*: en lugar de modificar la generación de candidatos, se *intercala un DE completo* dentro del bucle del ABC. Aquí DE no es un operador, sino un *algoritmo con su propio bucle generacional*: recorre toda la población aplicando a cada individuo mutación, cruce y selección _greedy_, y repite el proceso hasta agotar su presupuesto de evaluaciones. La variante usada es *DE/rand/1/bin*, cuya mutación parte de un vector base aleatorio en lugar de la mejor fuente:
+
+$ v_(i j) = x_(r 1 j) + F dot (x_(r 2 j) - x_(r 3 j)) $
+
+con $r 1, r 2, r 3$ tres índices distintos entre sí y de $i$. Al partir de un individuo aleatorio en vez del mejor, esta versión es *más exploradora* que la del Tipo 1.
+
+DE cumple aquí el papel que tenía Solis-Wets en la hibridación memética: opera sobre las fuentes del ABC, las modifica _in place_ y devuelve el número de evaluaciones consumidas para que el ABC las descuente de su presupuesto. Se controla con los mismos tres parámetros:
+
+- *de_freq*: cada cuántos ciclos del ABC se lanza el DE (se usa $50$).
+- *de_budget*: evaluaciones concedidas a cada ejecución del DE (se usa $500$).
+- *F, CR*: parámetros del DE ($F = 0.5$, $C R = 0.9$).
+
+La diferencia conceptual entre las dos variantes es clara: en el *Tipo 1* el comportamiento de DE está presente *en todo momento* (sustituye al movimiento de las abejas), mientras que en el *Tipo 2* el ABC y el DE se *alternan por fases*, dejando que cada uno trabaje sobre la población durante un número de evaluaciones antes de devolver el control al otro. El Tipo 2 permite además aislar el efecto de DE, ya que activarlo o desactivarlo no cambia el resto del algoritmo.
+
+#block(fill: luma(240), inset: 8pt, radius: 4pt, width: 100%)[
+  ```py
+  # algoritmo DE completo, ejecutado sobre la poblacion del ABC:
+  funcion differential_evolution(foods, obj, trial, F, CR, maxevals):
+    evals = 0
+    mientras evals < maxevals:
+      para i en 0..SN:
+        r1, r2, r3 = tres indices distintos de i y entre si
+        jrand = dimension aleatoria
+        cand = copia(foods[i])
+        para j en 0..dim:
+          si j == jrand o rand() < CR:                  # cruce binomial
+            cand[j] = foods[r1][j] + F*(foods[r2][j]-foods[r3][j])
+        candfit = fitness(clip(cand));  evals += 1
+        si candfit < obj[i]:                            # seleccion greedy
+          foods[i] = cand;  obj[i] = candfit;  trial[i] = 0
+    devolver evals
+
+  # dentro del bucle principal del ABC, al final de cada ciclo:
+  cycle += 1
+  si use_de y cycle % de_freq == 0 y evals < maxevals:
+    budget = min(de_budget, maxevals - evals)
+    evals += differential_evolution(foods, obj, trial, F, CR, budget)
+  ```
+]
+
+= Propuestas de mejora
+== Vuelos de Levy
 
 Una de las mejoras que se pueden aplicar consiste en cambiar la forma en la que las abejas generan nuevas soluciones. En el ABC clásico el movimiento que define la ecuación (2.2) es *local y acotado*: la perturbación $phi.alt_(i j) dot (x_(i j) - x_(k j))$ produce pasos de tamaño parecido y, como $phi.alt in [-1, 1]$, nunca genera un salto grande. Esto explora bien en las cercanías de una fuente, pero hace que el algoritmo tenga dificultades para escapar de óptimos locales.
 
 Los *vuelos de Levy* sustituyen ese movimiento por una caminata aleatoria en la que la longitud de cada paso sigue una distribución de *cola pesada*: la mayoría de los pasos son pequeños (lo que permite un refinamiento local fino), pero de vez en cuando aparece un salto muy largo capaz de sacar a la abeja de la cuenca de atracción en la que está atascada. Esta combinación de pasos cortos y saltos largos esporádicos mejora la exploración global del espacio de búsqueda.
 
-==== Generación del paso: algoritmo de Mantegna
+=== Generación del paso: algoritmo de Mantegna
 
 No existe una fórmula cerrada sencilla para muestrear directamente una distribución de Levy estable, por lo que se utiliza el *método de Mantegna*, que aproxima un paso de Levy a partir de dos variables aleatorias normales. El paso se calcula como:
 
-$ "paso" = u / (|v|^(1 / beta)) , quad u tilde N(0, sigma_u^2) , quad v tilde N(0, 1) $
+$
+  "paso" = u / (|v|^(1 / beta)) , quad u tilde N(0, sigma_u^2) , quad v tilde N(0, 1)
+$
 
 donde $beta in (0, 2]$ es el exponente de la distribución (se usa $beta = 1.5$) y la desviación $sigma_u$ se obtiene una única vez, ya que es constante para un $beta$ fijo:
 
-$ sigma_u = ( (Gamma(1 + beta) dot sin(pi beta \/ 2)) / (Gamma((1 + beta) / 2) dot beta dot 2^((beta - 1) / 2)) )^(1 / beta) $
+$
+  sigma_u = ( (Gamma(1 + beta) dot sin(pi beta \/ 2)) / (Gamma((1 + beta) / 2) dot beta dot 2^((beta - 1) / 2)) )^(1 / beta)
+$
 
 siendo $Gamma$ la función gamma. La cola pesada surge del cociente $u \/ |v|^(1\/beta)$: cuando $v$ toma un valor cercano a 0, el denominador se hace minúsculo y el paso se dispara, generando el salto largo ocasional; el resto del tiempo $v$ tiene un tamaño normal y el paso resultante es pequeño.
 
-==== Aplicación en el ABC
+=== Aplicación en el ABC
 
 La regla de generación del candidato (ecuación 2.2) se reemplaza por un paso de Levy dirigido hacia la mejor fuente del enjambre. Sobre la componente $j$ elegida al azar:
 
@@ -236,8 +351,34 @@ donde cada factor cumple un papel concreto:
 
 Al igual que en el ABC clásico, tras generar la candidata se recorta al dominio $["lower", "upper"]$ antes de evaluarla. El resto de fases del algoritmo (observadoras con ruleta, exploradoras según el _Limit_ y criterio de parada) se mantienen idénticas, de forma que la única diferencia con el ABC original es la regla de movimiento, lo que permite atribuir cualquier cambio en el rendimiento exclusivamente a la incorporación de los vuelos de Levy.
 
-== Propuestas de mejora
+
+== Comparación de resultados
 
 
 
+#figure(
+  image("code/graficas/comparativa_dim30_barras.png", width: 80%),
+  caption: [Comparación error para dimensión 30],
+)
 
+#figure(
+  image("code/graficas/victorias_dim30.png", width: 80%),
+  caption: [Número de victorias dimensión 30],
+)
+#figure(
+  image("code/graficas/comparativa_dim50_barras.png", width: 80%),
+  caption: [Comparación error para dimensión 50],
+)
+
+#figure(
+  image("code/graficas/victorias_dim50.png", width: 80%),
+  caption: [Número de victorias dimensión 50],
+)
+#figure(
+  image("code/graficas/comparativa_dim100_barras.png", width: 80%),
+  caption: [Comparación error para dimensión 100],
+)
+#figure(
+  image("code/graficas/victorias_dim100.png", width: 80%),
+  caption: [Número de victorias dimensión 100],
+)

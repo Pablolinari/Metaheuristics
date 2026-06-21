@@ -4,7 +4,6 @@ extern "C" {
 #include <iostream>
 #include <vector>
 #include <random>
-#include <cmath>
 
 using namespace std;
 
@@ -39,42 +38,30 @@ int roulette_select(const vector<double> &probs, std::mt19937 &gen) {
 }
 
 // ---------------------------------------------------------------------------
-// Paso de vuelo de Levy mediante el algoritmo de Mantegna.
-//   sigma_u se calcula una sola vez (es constante para un beta fijo) y se
-//   pasa precalculado. El paso resultante tiene cola pesada: la mayoria de
-//   los valores son pequenos, con saltos largos ocasionales.
+// ABC guiado por la mejor solucion global (Gbest-guided ABC, GABC).
+//   Zhu & Kwong, "Gbest-guided artificial bee colony algorithm for numerical
+//   function optimization", Applied Mathematics and Computation, 2010.
+//
+// La unica diferencia con el ABC clasico es la ecuacion de generacion del
+// candidato. En lugar de
+//     v_ij = x_ij + phi_ij (x_ij - x_kj)
+// se anade un termino que atrae la nueva fuente hacia la mejor solucion
+// global encontrada hasta el momento (gbest):
+//     v_ij = x_ij + phi_ij (x_ij - x_kj) + psi_ij (y_j - x_ij)
+// con phi_ij en [-1, 1], psi_ij en [0, C] (C constante, 1.5 habitual) e y la
+// mejor solucion global. El primer termino mantiene la exploracion y el
+// segundo acelera la explotacion guiando el enjambre hacia gbest.
 // ---------------------------------------------------------------------------
-double mantegna_sigma_u(double beta) {
-  double num = tgamma(1.0 + beta) * sin(M_PI * beta / 2.0);
-  double den = tgamma((1.0 + beta) / 2.0) * beta * pow(2.0, (beta - 1.0) / 2.0);
-  return pow(num / den, 1.0 / beta);
-}
-
-double levy_step(double beta, double sigma_u, std::mt19937 &gen) {
-  std::normal_distribution<double> normal_u(0.0, sigma_u);
-  std::normal_distribution<double> normal_v(0.0, 1.0);
-  double u = normal_u(gen);
-  double v = normal_v(gen);
-  return u / pow(fabs(v), 1.0 / beta);
-}
-
-// ---------------------------------------------------------------------------
-// ABC con vuelos de Levy. La unica diferencia con el ABC clasico es la regla
-// de generacion del candidato: en lugar de phi*(x_i - x_k) se usa un paso de
-// Levy dirigido hacia la mejor fuente del enjambre.
-//   beta  : exponente de la distribucion de Levy (1.5 habitual).
-//   alpha : factor de escala del salto (evita salirse del dominio).
-// ---------------------------------------------------------------------------
-double artificial_bee_colony_levy(int dim, int seed, int lower, int upper,
-                                  int SN, int limit, int maxevals, double beta,
-                                  double alpha) {
+double artificial_bee_colony_gbest(int dim, int seed, int lower, int upper,
+                                   int SN, int limit, int maxevals, double C) {
   std::uniform_real_distribution<double> dis(lower, upper);
+  std::uniform_real_distribution<double> phi_dist(-1.0, 1.0);
+  std::uniform_real_distribution<double> psi_dist(0.0, C);
   std::mt19937 gen(seed);
-
-  double sigma_u = mantegna_sigma_u(beta);
 
   int evals = 0;
   double bestfitness = -1;
+  vector<double> bestsol(dim);
   vector<vector<double>> foods(SN, vector<double>(dim));
   vector<double> obj(SN);
   vector<double> fit(SN);
@@ -88,24 +75,23 @@ double artificial_bee_colony_levy(int dim, int seed, int lower, int upper,
     evals += 1;
     if (bestfitness < 0 || obj[i] < bestfitness) {
       bestfitness = obj[i];
+      bestsol = foods[i];
     }
   }
 
+  std::uniform_int_distribution<int> index_dist(0, SN - 1);
   std::uniform_int_distribution<int> dim_dist(0, dim - 1);
 
   auto greedy_update = [&](int i) {
-    // Mejor fuente actual del enjambre: orienta el salto de Levy.
-    int best = 0;
-    for (int b = 1; b < SN; b++) {
-      if (obj[b] < obj[best]) {
-        best = b;
-      }
+    int k = index_dist(gen);
+    while (k == i) {
+      k = index_dist(gen);
     }
 
     int j = dim_dist(gen);
     vector<double> cand = foods[i];
-    double step = levy_step(beta, sigma_u, gen);
-    cand[j] = foods[i][j] + alpha * step * (foods[i][j] - foods[best][j]);
+    cand[j] = foods[i][j] + phi_dist(gen) * (foods[i][j] - foods[k][j]) +
+              psi_dist(gen) * (bestsol[j] - foods[i][j]);
     clip(cand, lower, upper);
 
     double candfit = cec17_fitness(&cand[0]);
@@ -117,6 +103,7 @@ double artificial_bee_colony_levy(int dim, int seed, int lower, int upper,
       trial[i] = 0;
       if (candfit < bestfitness) {
         bestfitness = candfit;
+        bestsol = foods[i];
       }
     } else {
       trial[i] += 1;
@@ -162,6 +149,7 @@ double artificial_bee_colony_levy(int dim, int seed, int lower, int upper,
       trial[max_trial] = 0;
       if (obj[max_trial] < bestfitness) {
         bestfitness = obj[max_trial];
+        bestsol = foods[max_trial];
       }
     }
   }
@@ -170,30 +158,28 @@ double artificial_bee_colony_levy(int dim, int seed, int lower, int upper,
 }
 
 int main() {
-  int dim = 100;
+  int dim = 30;
   int seed = 42;
   int lower = -100;
   int upper = 100;
   int SN = 20;
   int limit = 100;
-  double beta = 1.5;    // exponente del vuelo de Levy
-  double alpha = 0.01;  // factor de escala del salto
+  double C = 1.5;  // limite superior de psi: peso de la atraccion hacia gbest
   const size_t maxtimes = 5;
 
   for (int funcid = 1; funcid <= 30; funcid++) {
-    cec17_init("abc-levy", funcid, dim);
+    cec17_init("abc-gbest", funcid, dim);
 
     double bestfitness = -1;
     for (size_t times = 0; times < maxtimes; times++) {
-      double fitness = artificial_bee_colony_levy(
-          dim, seed, lower, upper, SN, limit, 10000 * dim / maxtimes, beta,
-          alpha);
+      double fitness = artificial_bee_colony_gbest(
+          dim, seed, lower, upper, SN, limit, 10000 * dim / maxtimes, C);
       if (bestfitness < 0 || fitness < bestfitness) {
         bestfitness = fitness;
       }
     }
 
-    cout << "Best ABC-Levy[F" << funcid << "]: " << scientific
+    cout << "Best ABC-Gbest[F" << funcid << "]: " << scientific
          << cec17_error(bestfitness) << endl;
   }
 
