@@ -221,7 +221,7 @@ double artificialBeeColonyGbestGd(int dim, int seed, int lower, int upper,
 }
 
 int main() {
-  int dim = 100;
+  int dim = 30;
   int seed = 42;
   int lower = -100;
   int upper = 100;
