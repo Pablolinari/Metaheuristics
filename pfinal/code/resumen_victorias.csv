@@ -1,3 +1,7 @@
 Algoritmo,30,50,100,TOTAL
-abc-gbest,21,24,0,45
-abc,9,6,30,45
+abc-ls,6,8,20,34
+abc-gbest-de,10,11,0,21
+abc,1,0,10,11
+abc-gbest,6,4,0,10
+abc-de-hyb,3,6,0,9
+abc-de,4,1,0,5
