@@ -73,7 +73,7 @@ El algoritmo *Artificial Bee Colony* (ABC), propuesto por Dervis Karaboga en 200
 
 En el contexto de este problema cada *fuente de alimento* representa una solución candidata, y la cantidad de néctar de una fuente se corresponde con el valor de fitness de esa solución. El objetivo del algoritmo es, por tanto, encontrar la fuente con mayor cantidad de néctar, es decir, la solución que maximiza la función objetivo.
 
-==Explicación de los componentes del algoritmo
+== Explicación de los componentes del algoritmo
 
 La colonia se divide en tres tipos de abejas, cada uno con un papel distinto dentro de la búsqueda:
 
@@ -179,6 +179,8 @@ En las tres fases se actualiza siempre la mejor solución global encontrada, que
     devolver mejor_solucion
   ```
 ]
+= Uso del software
+
 
 = Adaptacion al problema del portfolio
 
@@ -189,7 +191,7 @@ La formulación original de ABC está pensada para la optimización de funciones
 
 Por lo que respecta a la implementación , la  diferencia entre la implementación para el problema del portfolio y para el *cec2017* son las mencionadas previamente y el uso de las funciones de la clase *pPortfolio* , principalmente usadas para poder arreglar y generar soluciones con las restricciones del problema.
 
-=== Comparación de resultados
+== Comparación de resultados
 
 En esta sección veremos los resultados que obtiene el ABC implementado sin ninguna modificación en el problema del portfolio, los algoritmos que se usan para la comparación serán: *Random Search , Greedy ,Local Search, AM-BEST , BMB y Enfriamiento simulado*.
 
@@ -280,6 +282,12 @@ En esta sección veremos los resultados que obtiene el ABC implementado sin ning
   image("code/graficas/syp500.png", width: 80%),
   caption: [Boxplots S&P500],
 )
+Como se puede ver , el ABC consigue estar a la altura de los mejores algoritmos de la
+práctica (AM-BEST y GREEDY) en dimensiones bajas (IBEX35) pero a medida que van subiendo las dimensiones el algoritmo va perdiendo fuerza y se termina quedando en las posiciones 3 y 4. Esto se debe a la mala convergencia que tiene y a que el número de iteraciones no sea lo suficientemente grande para que pueda sacar buenos resultados. También podemos fijarnos en los boxplots del ABC , en el S&P100 su caja se ensancha de una manera esperada ya que el espacio es másgrande que el del IBEX por tanto la población inicial le afecta más, pero al pasar al S&P500 su boxplot presenta muchos outliers por el rango de arriba, esto nos indica que en varias ejecuciones el resultado ha sido mejor que la media , y también presenta outliers por abajo representando todo lo contrario. Esto nos indica que el algoritmo depende mucho de las fuentes de alimento 
+que se toman inicialmente, por tanto si una vez seleccionada la población inicial , las demás fuentes se tomasen en una determinada dirección en vez de hacerlo aleatoriamente el algoritmo podría mejorar considerablemente. Este tipo de mejoras lo veremos en las sigueintes secciones.
+
+Podemos concluir que el algoritmo ABC aplicado a la práctica se encuentra entre el tercer y cuarto puesto de los mejores algoritmos para este escenario de práctico donde se han usado 10000 evaluaciones.
+
 #pagebreak()
 
 = Mejoras del algoritmo
@@ -431,7 +439,8 @@ Este operador se usa la fase de las abejas obreras y en la de las abejas observa
   image("code/graficas/victorias_dim100hyb.png", width: 80%),
   caption: [Número de victorias dimensión 100],
 )
-
+= Comparación de hibridaciones
+#pagebreak()
 = Propuestas de mejora
 
 Uno de los puntos débiles del ABC es la forma en las que se explotan las funetes de alimento ya que al tomar vecinos aleatoriamente para generar nuevas soluciones , podemos estar tomando soluciones malas y estar moviendo nuestra solución hacia soluciones peores.
@@ -489,9 +498,12 @@ De esta forma se obtiene un lazo de realimentación que regula automáticamente 
 
 Los parámetros usados son $"limit"_"min" = 20$ y $"limit"_"max" = 200$, manteniendo $C = 1.5$ para el término gbest.
 
-== Comparación de resultados
+= Comparación de resultados de distintos ABC
+
+En este apartado veremos los resultados de las distintas modificaciones que se le han hecho al ABC y veremos cuales destacan.En las siguiente sección se compararán las mejores con los resultados obtenidos en CEC2017 por otros algoritmos
 
 
+Los gráficos de barras multicolores indican el error que comete cada algoritmo en cada función. Cuanto más alta es la barra peor es el resultado del algoritmo. Los gráfics de barras verdes indican cuantas veces ha ganado un algoritmo.
 
 #figure(
   image("code/graficas/comparativa_dim30_barras.png", width: 100%),
@@ -519,3 +531,489 @@ Los parámetros usados son $"limit"_"min" = 20$ y $"limit"_"max" = 200$, manteni
   image("code/graficas/victorias_dim100.png", width: 80%),
   caption: [Número de victorias dimensión 100],
 )
+
+Observando los gráficos donde se evalua el número de funciones ganadas vemos que el algoritmo que mejor actua independientemente de la dimensión es el ABC-LS. Esto es lógico ya que el punto débil del ABC es la convergencia , y si lo hibridamos con BL , conseguimos intensificar la explotación de las mejores soluciones en  dirección a una solución mejor y no de manera más ineficiente como hace el ABC. La hibridación completa con DE ABC-DE-HYB también consigue buenos resultados en casi todas las dimensiones pero peores que el ABC-LS , por tanto la mejor hibridación que podemos tener de ABC en esta prueba es la que se hace con la búsqueda local. 
+
+Si nos fijamos en la hibridación con DE hecha  solo en el operador de búsqueda de nuevas soluciones ABC-DE vemos que el comportamiento es mejor que el del ABC en casi todos los casos menos en el de dimensión 100 donde el ABC clásico lo supera.Por tanto esto nos indica que el cambio en el operador influye bastante en la mejora de el algoritmo base pero no lo suficiente como para superar al algoritmo hibridado.También se puede observar en el gráfico multicolor  que es el algoritmo que comete los errores más grandes , es decir que cuando pierde pierde por mucho, esto nos indica entonces que las veces que gana puede ser por que la función a evaluar le favorezca.
+
+
+Por último vemos que la modificación ABC-GBEST ha tenido muy buenos resultados ya que permite al algoritmo acelerar su convergencia, la diferencia de victorias entre ABC-GBEST y ABC-GBEST-DL (usando límite dinámico) es pequeña y ambos algoritmos consiguen ganar consistentemente en casi todas las dimensiones. El límite dinámico junto al GBEST ayuda a acelerar la convergencia y a descartar rápidamente fuentes que no son prometedoras , por eso ABC-GBEST-DL tiene resultados un poco mejores al que solo usa GBEST 
+
+
+Como conclusión final podemos ver que el ABC por si solo es un algoritmo que se comporta bien en espacios grandes ya que consigue algunas victorias en dimensión 100, pero el usar generadores de soluciones un poco más complejos le ayuda a mejorar drásticamente. En cuanto a las hibridaciones vemos que la mejor es la que usa Solis-Wets pero la que usa DE también es una buena opción.
+#pagebreak()
+= Comparación de resultados CEC2017
+
+En esta sección se van a compara los resultados obtenidos por las implementaciones del ABC con los siguientes algoritmos: *DE*, *PSO *, *RB-IPOP-CMA-ES* y *jSO*. La comparación se realiza sobre las 30 funciones del benchmark *CEC2017* en dimensión 30,50 y 100 mostrando el error medio obtenido por cada algoritmo. La fila Best indica en cuántas funciones cada algoritmo obtiene el mejor resultado.
+
+Los algoritmos que compararemos serán : *ABC* , *ABC-LS* (mejor hibridación), *ABC-GBESTDL* (mejor modificación).
+
+== ABC
+#figure(
+  text(size: 10pt)[#table(
+    columns: 6,
+    align: center,
+    stroke: (x, y) => if y == 0 or y == 31 { (bottom: 0.8pt) } else { none },
+    inset: 6pt,
+
+    [*Función*],
+    [*ABC*],
+    [*DE*],
+    [*PSO*],
+    [*RB-IPOP-CMA-ES*],
+    [*jSO*],
+
+    [F01], [3.665e+03], [4.909e+04], [4.175e+09], [3.150e-08], [#text(fill: red)[0.000e+00]],
+    [F02], [6.747e+10], [1.309e+19], [1.000e+00], [#text(fill: red)[0.000e+00]], [#text(fill: red)[0.000e+00]],
+    [F03], [1.192e+05], [3.481e+03], [5.453e+04], [#text(fill: red)[0.000e+00]], [#text(fill: red)[0.000e+00]],
+    [F04], [#text(fill: red)[7.786e+00]], [8.430e+01], [1.183e+03], [5.528e+01], [5.867e+01],
+    [F05], [1.156e+02], [2.015e+02], [2.170e+02], [#text(fill: red)[1.649e+00]], [8.557e+00],
+    [F06], [1.717e-03], [6.320e+00], [3.694e+01], [1.208e-07], [#text(fill: red)[6.000e-09]],
+    [F07], [1.146e+02], [2.334e+02], [3.596e+02], [#text(fill: red)[3.433e+01]], [3.893e+01],
+    [F08], [1.148e+02], [1.894e+02], [1.745e+02], [#text(fill: red)[1.756e+00]], [9.092e+00],
+    [F09], [2.578e+03], [6.530e+01], [2.842e+03], [#text(fill: red)[0.000e+00]], [#text(fill: red)[0.000e+00]],
+    [F10], [2.933e+03], [3.764e+03], [6.938e+03], [#text(fill: red)[1.443e+03]], [1.528e+03],
+    [F11], [7.757e+02], [7.958e+01], [1.207e+03], [4.107e+01], [#text(fill: red)[3.037e+00]],
+    [F12], [3.230e+06], [3.258e+05], [3.586e+08], [1.093e+03], [#text(fill: red)[1.704e+02]],
+    [F13], [1.537e+05], [1.536e+02], [4.508e+07], [1.187e+02], [#text(fill: red)[1.484e+01]],
+    [F14], [2.171e+05], [7.100e+01], [3.059e+05], [9.083e+01], [#text(fill: red)[2.183e+01]],
+    [F15], [2.336e+04], [6.256e+01], [2.737e+05], [2.177e+02], [#text(fill: red)[1.088e+00]],
+    [F16], [6.607e+02], [1.319e+03], [1.568e+03], [5.016e+02], [#text(fill: red)[7.892e+01]],
+    [F17], [3.390e+02], [4.809e+02], [4.725e+02], [1.323e+02], [#text(fill: red)[3.292e+01]],
+    [F18], [7.763e+05], [6.122e+01], [2.170e+06], [1.601e+02], [#text(fill: red)[2.041e+01]],
+    [F19], [8.593e+03], [3.572e+01], [1.260e+06], [1.146e+02], [#text(fill: red)[4.503e+00]],
+    [F20], [9.940e+01], [2.751e+02], [4.621e+02], [2.965e+02], [#text(fill: red)[2.937e+01]],
+    [F21], [3.097e+02], [3.255e+02], [4.113e+02], [#text(fill: red)[2.086e+02]], [2.093e+02],
+    [F22], [1.369e+02], [1.002e+02], [1.027e+03], [6.716e+02], [#text(fill: red)[1.000e+02]],
+    [F23], [4.790e+02], [5.346e+02], [6.404e+02], [#text(fill: red)[3.393e+02]], [3.507e+02],
+    [F24], [7.046e+02], [6.059e+02], [7.095e+02], [#text(fill: red)[4.194e+02]], [4.265e+02],
+    [F25], [3.900e+02], [3.870e+02], [6.864e+02], [#text(fill: red)[3.867e+02]], [#text(fill: red)[3.867e+02]],
+    [F26], [#text(fill: red)[3.139e+02]], [4.038e+02], [3.369e+03], [3.939e+02], [9.202e+02],
+    [F27], [5.230e+02], [#text(fill: red)[4.925e+02]], [8.068e+02], [5.118e+02], [4.974e+02],
+    [F28], [4.272e+02], [3.943e+02], [1.105e+03], [3.089e+02], [#text(fill: red)[3.087e+02]],
+    [F29], [6.453e+02], [1.025e+03], [1.409e+03], [4.933e+02], [#text(fill: red)[4.337e+02]],
+    [F30], [2.470e+04], [3.657e+03], [1.359e+07], [2.844e+03], [#text(fill: red)[1.971e+03]],
+    [*Best*], [*2*], [*1*], [*0*], [*10*], [*20*],
+  )],
+  caption: [Resultados CEC2017 dimensión 30 (Medias)],
+)
+
+#figure(
+  text(size: 10pt)[#table(
+    columns: 6,
+    align: center,
+    stroke: (x, y) => if y == 0 or y == 31 { (bottom: 0.8pt) } else { none },
+    inset: 6pt,
+
+    [*Función*],
+    [*ABC*],
+    [*DE*],
+    [*PSO*],
+    [*RB-IPOP-CMA-ES*],
+    [*jSO*],
+
+    [F01], [1.039e+04], [2.039e+08], [1.823e+10], [1.131e-07], [#text(fill: red)[0.000e+00]],
+    [F02], [7.357e+26], [5.158e+52], [1.000e+00], [2.767e+05], [#text(fill: red)[0.000e+00]],
+    [F03], [2.942e+05], [7.597e+04], [1.008e+05], [#text(fill: red)[0.000e+00]], [#text(fill: red)[0.000e+00]],
+    [F04], [7.455e+01], [2.322e+02], [4.091e+03], [#text(fill: red)[2.959e+01]], [5.621e+01],
+    [F05], [2.610e+02], [3.978e+02], [4.328e+02], [#text(fill: red)[2.790e+00]], [1.641e+01],
+    [F06], [9.876e-04], [1.180e+01], [5.450e+01], [#text(fill: red)[1.632e-07]], [1.093e-06],
+    [F07], [2.863e+02], [4.781e+02], [8.197e+02], [#text(fill: red)[5.663e+01]], [6.650e+01],
+    [F08], [2.801e+02], [4.070e+02], [4.077e+02], [#text(fill: red)[2.575e+00]], [1.696e+01],
+    [F09], [1.006e+04], [3.756e+03], [1.620e+04], [#text(fill: red)[0.000e+00]], [#text(fill: red)[0.000e+00]],
+    [F10], [5.599e+03], [1.127e+04], [1.295e+04], [#text(fill: red)[1.726e+03]], [3.140e+03],
+    [F11], [4.434e+03], [2.173e+02], [3.151e+03], [1.832e+02], [#text(fill: red)[2.794e+01]],
+    [F12], [8.735e+06], [1.382e+08], [6.062e+09], [2.438e+06], [#text(fill: red)[1.681e+03]],
+    [F13], [2.067e+04], [2.726e+04], [5.262e+08], [1.652e+03], [#text(fill: red)[3.060e+01]],
+    [F14], [1.664e+06], [1.683e+02], [1.558e+06], [2.416e+02], [#text(fill: red)[2.496e+01]],
+    [F15], [2.469e+04], [5.090e+02], [5.790e+06], [5.290e+02], [#text(fill: red)[2.386e+01]],
+    [F16], [1.267e+03], [3.047e+03], [2.745e+03], [8.899e+02], [#text(fill: red)[4.505e+02]],
+    [F17], [1.360e+03], [1.827e+03], [1.652e+03], [3.978e+02], [#text(fill: red)[2.829e+02]],
+    [F18], [5.569e+06], [2.420e+04], [1.203e+07], [3.573e+02], [#text(fill: red)[2.428e+01]],
+    [F19], [9.648e+04], [1.322e+02], [1.336e+07], [1.394e+02], [#text(fill: red)[1.414e+01]],
+    [F20], [6.477e+02], [9.384e+02], [1.282e+03], [5.468e+02], [#text(fill: red)[1.401e+02]],
+    [F21], [4.418e+02], [6.177e+02], [6.655e+02], [#text(fill: red)[2.062e+02]], [2.192e+02],
+    [F22], [6.390e+03], [#text(fill: red)[1.707e+02]], [1.258e+04], [2.051e+03], [1.487e+03],
+    [F23], [6.928e+02], [8.435e+02], [1.098e+03], [#text(fill: red)[4.227e+02]], [4.301e+02],
+    [F24], [1.116e+03], [8.850e+02], [1.206e+03], [#text(fill: red)[4.912e+02]], [5.075e+02],
+    [F25], [5.699e+02], [5.667e+02], [3.069e+03], [#text(fill: red)[4.807e+02]], [4.809e+02],
+    [F26], [4.209e+03], [#text(fill: red)[5.745e+02]], [7.890e+03], [6.548e+02], [1.129e+03],
+    [F27], [6.340e+02], [5.765e+02], [1.744e+03], [6.081e+02], [#text(fill: red)[5.113e+02]],
+    [F28], [5.187e+02], [5.013e+02], [3.468e+03], [4.700e+02], [#text(fill: red)[4.598e+02]],
+    [F29], [1.523e+03], [2.218e+03], [3.566e+03], [6.690e+02], [#text(fill: red)[3.629e+02]],
+    [F30], [1.079e+06], [2.386e+06], [3.374e+08], [6.460e+06], [#text(fill: red)[6.011e+05]],
+    [*Best*], [*0*], [*2*], [*0*], [*12*], [*18*],
+  )],
+  caption: [Resultados CEC2017 dimensión 50 (Medias)],
+)
+
+#figure(
+  text(size: 10pt)[#table(
+    columns: 6,
+    align: center,
+    stroke: (x, y) => if y == 0 or y == 31 { (bottom: 0.8pt) } else { none },
+    inset: 6pt,
+
+    [*Función*],
+    [*ABC*],
+    [*DE*],
+    [*PSO*],
+    [*RB-IPOP-CMA-ES*],
+    [*jSO*],
+
+    [F01], [8.187e+04], [1.030e+10], [1.097e+11], [2.759e-07], [#text(fill: red)[0.000e+00]],
+    [F02], [1.875e+76], [7.019e+135], [1.000e+00], [#text(fill: red)[0.000e+00]], [8.940e+00],
+    [F03], [6.030e+05], [2.283e+05], [2.920e+05], [#text(fill: red)[0.000e+00]], [2.391e-06],
+    [F04], [2.724e+02], [1.492e+03], [2.257e+04], [#text(fill: red)[1.560e+02]], [1.896e+02],
+    [F05], [8.017e+02], [9.967e+02], [1.165e+03], [#text(fill: red)[1.100e+01]], [4.391e+01],
+    [F06], [1.208e-03], [3.598e+01], [7.538e+01], [#text(fill: red)[1.331e-07]], [2.024e-04],
+    [F07], [9.114e+02], [1.185e+03], [2.369e+03], [#text(fill: red)[1.265e+02]], [1.449e+02],
+    [F08], [8.093e+02], [9.973e+02], [1.228e+03], [#text(fill: red)[1.220e+01]], [4.215e+01],
+    [F09], [5.497e+04], [3.090e+04], [5.577e+04], [#text(fill: red)[0.000e+00]], [4.590e-02],
+    [F10], [1.313e+04], [2.600e+04], [2.966e+04], [#text(fill: red)[5.586e+03]], [9.704e+03],
+    [F11], [9.957e+04], [2.782e+04], [6.682e+04], [1.047e+03], [#text(fill: red)[1.132e+02]],
+    [F12], [4.234e+07], [4.396e+09], [3.663e+10], [5.790e+04], [#text(fill: red)[1.843e+04]],
+    [F13], [5.781e+04], [3.037e+07], [3.724e+09], [4.511e+03], [#text(fill: red)[1.449e+02]],
+    [F14], [1.517e+07], [2.134e+05], [1.884e+07], [5.785e+02], [#text(fill: red)[6.434e+01]],
+    [F15], [3.469e+04], [7.510e+05], [9.414e+07], [7.564e+02], [#text(fill: red)[1.621e+02]],
+    [F16], [3.777e+03], [8.579e+03], [8.692e+03], [#text(fill: red)[1.695e+03]], [1.859e+03],
+    [F17], [3.367e+03], [5.528e+03], [5.963e+03], [1.380e+03], [#text(fill: red)[1.278e+03]],
+    [F18], [1.514e+07], [4.452e+06], [1.157e+07], [3.160e+02], [#text(fill: red)[1.673e+02]],
+    [F19], [5.774e+05], [4.166e+06], [5.261e+08], [5.937e+02], [#text(fill: red)[1.049e+02]],
+    [F20], [3.347e+03], [3.941e+03], [4.932e+03], [1.905e+03], [#text(fill: red)[1.376e+03]],
+    [F21], [9.582e+02], [1.259e+03], [1.680e+03], [#text(fill: red)[2.450e+02]], [2.638e+02],
+    [F22], [1.373e+04], [#text(fill: red)[1.978e+03]], [3.152e+04], [6.324e+03], [1.021e+04],
+    [F23], [9.729e+02], [1.554e+03], [2.368e+03], [5.840e+02], [#text(fill: red)[5.712e+02]],
+    [F24], [1.535e+03], [1.898e+03], [3.456e+03], [#text(fill: red)[8.932e+02]], [9.022e+02],
+    [F25], [7.015e+02], [2.281e+03], [9.639e+03], [#text(fill: red)[6.775e+02]], [7.361e+02],
+    [F26], [1.097e+04], [1.355e+04], [2.540e+04], [#text(fill: red)[2.893e+03]], [3.267e+03],
+    [F27], [8.112e+02], [1.112e+03], [3.206e+03], [6.729e+02], [#text(fill: red)[5.855e+02]],
+    [F28], [6.403e+02], [1.694e+03], [1.266e+04], [#text(fill: red)[4.976e+02]], [5.268e+02],
+    [F29], [3.798e+03], [6.958e+03], [1.073e+04], [2.028e+03], [#text(fill: red)[1.257e+03]],
+    [F30], [6.374e+04], [8.920e+06], [3.022e+09], [1.191e+04], [#text(fill: red)[2.325e+03]],
+    [*Best*], [*0*], [*1*], [*0*], [*15*], [*14*],
+  )],
+  caption: [Resultados CEC2017 dimensión 100 (Medias)],
+)
+
+Lo primero que llama la atención es la diferencia que hay entre los algoritmos especializados (*jSO* y *RB-IPOP-CMA-ES*) y el resto. El jSO domina claramente en dimensión 30 ganando en 20 de las 30 funciones, mientras que el CMA-ES se queda con 10 victorias, y a medida que sube la dimensión el CMA-ES va igualando e incluso superando al jSO (15 frente a 14 en dimensión 100). Esto tiene sentido ya que ambos son algoritmos del estado del arte muy afinados para este benchmark, y en las funciones unimodales y simples (F01, F03, F06, F09) consiguen errores prácticamente nulos, algo que el ABC no es capaz de alcanzar.
+
+El ABC consigue 2 victorias en dimensión 30 (F04 con 7.786e+00 y F26 con 3.139e+02) pero pierde todas sus victorias en dimensión 50 y 100. Esto vuelve a confirmar el principal problema del algoritmo: su mala convergencia. Cuando el espacio crece, el número de evaluaciones no le da margen para refinar las soluciones y los errores se disparan, perdiendo cualquier opción de competir con los algoritmos especializados.
+
+Aun así, si comparamos el ABC con el *PSO* y el *DE* vemos que el ABC se comporta mucho mejor que el PSO en prácticamente todas las funciones, ya que el PSO comete errores catastróficos (F01 con 4.175e+09 o F12 con 3.586e+08) y no gana en ninguna función en ninguna dimensión. Frente al DE el ABC también gana en varias funciones multimodales y de composición (F16, F20, F29), aunque el DE le supera con claridad en las funciones híbridas (F13, F14, F15, F18, F19) donde el ABC se estanca y genera errores enormes (F18 con 7.763e+05 frente a 6.122e+01 del DE). Esto nos vuelve a indicar que el punto débil del ABC es el refinamiento local de las soluciones.
+
+Por último cabe destacar el comportamiento anómalo de la función F02, donde el ABC alcanza valores que crecen de forma descontrolada con la dimensión (desde 6.747e+10 en dimensión 30 hasta 1.875e+76 en dimensión 100). Esta función es muy inestable y sensible a la precisión numérica, por lo que conviene no tenerla muy en cuenta a la hora de sacar conclusiones.
+
+== ABC-LS (Hibridación con Wet-Solis)
+
+#figure(
+  text(size: 10pt)[#table(
+    columns: 6,
+    align: center,
+    stroke: (x, y) => if y == 0 or y == 31 { (bottom: 0.8pt) } else { none },
+    inset: 6pt,
+
+    [*Función*],
+    [*ABC-LS*],
+    [*DE*],
+    [*PSO*],
+    [*RB-IPOP-CMA-ES*],
+    [*jSO*],
+
+    [F01], [1.105e+03], [4.909e+04], [4.175e+09], [3.150e-08], [#text(fill: red)[0.000e+00]],
+    [F02], [9.573e+13], [1.309e+19], [1.000e+00], [#text(fill: red)[0.000e+00]], [#text(fill: red)[0.000e+00]],
+    [F03], [1.350e+05], [3.481e+03], [5.453e+04], [#text(fill: red)[0.000e+00]], [#text(fill: red)[0.000e+00]],
+    [F04], [6.934e+01], [8.430e+01], [1.183e+03], [#text(fill: red)[5.528e+01]], [5.867e+01],
+    [F05], [1.324e+02], [2.015e+02], [2.170e+02], [#text(fill: red)[1.649e+00]], [8.557e+00],
+    [F06], [1.766e-02], [6.320e+00], [3.694e+01], [1.208e-07], [#text(fill: red)[6.000e-09]],
+    [F07], [1.195e+02], [2.334e+02], [3.596e+02], [#text(fill: red)[3.433e+01]], [3.893e+01],
+    [F08], [1.243e+02], [1.894e+02], [1.745e+02], [#text(fill: red)[1.756e+00]], [9.092e+00],
+    [F09], [2.761e+03], [6.530e+01], [2.842e+03], [#text(fill: red)[0.000e+00]], [#text(fill: red)[0.000e+00]],
+    [F10], [3.155e+03], [3.764e+03], [6.938e+03], [#text(fill: red)[1.443e+03]], [1.528e+03],
+    [F11], [6.318e+01], [7.958e+01], [1.207e+03], [4.107e+01], [#text(fill: red)[3.037e+00]],
+    [F12], [2.451e+06], [3.258e+05], [3.586e+08], [1.093e+03], [#text(fill: red)[1.704e+02]],
+    [F13], [4.668e+02], [1.536e+02], [4.508e+07], [1.187e+02], [#text(fill: red)[1.484e+01]],
+    [F14], [8.978e+04], [7.100e+01], [3.059e+05], [9.083e+01], [#text(fill: red)[2.183e+01]],
+    [F15], [2.837e+02], [6.256e+01], [2.737e+05], [2.177e+02], [#text(fill: red)[1.088e+00]],
+    [F16], [8.451e+02], [1.319e+03], [1.568e+03], [5.016e+02], [#text(fill: red)[7.892e+01]],
+    [F17], [2.544e+02], [4.809e+02], [4.725e+02], [1.323e+02], [#text(fill: red)[3.292e+01]],
+    [F18], [2.723e+05], [6.122e+01], [2.170e+06], [1.601e+02], [#text(fill: red)[2.041e+01]],
+    [F19], [1.067e+02], [3.572e+01], [1.260e+06], [1.146e+02], [#text(fill: red)[4.503e+00]],
+    [F20], [1.850e+02], [2.751e+02], [4.621e+02], [2.965e+02], [#text(fill: red)[2.937e+01]],
+    [F21], [2.930e+02], [3.255e+02], [4.113e+02], [#text(fill: red)[2.086e+02]], [2.093e+02],
+    [F22], [1.147e+02], [1.002e+02], [1.027e+03], [6.716e+02], [#text(fill: red)[1.000e+02]],
+    [F23], [4.823e+02], [5.346e+02], [6.404e+02], [#text(fill: red)[3.393e+02]], [3.507e+02],
+    [F24], [6.547e+02], [6.059e+02], [7.095e+02], [#text(fill: red)[4.194e+02]], [4.265e+02],
+    [F25], [3.891e+02], [3.870e+02], [6.864e+02], [#text(fill: red)[3.867e+02]], [#text(fill: red)[3.867e+02]],
+    [F26], [#text(fill: red)[2.274e+02]], [4.038e+02], [3.369e+03], [3.939e+02], [9.202e+02],
+    [F27], [5.266e+02], [#text(fill: red)[4.925e+02]], [8.068e+02], [5.118e+02], [4.974e+02],
+    [F28], [4.154e+02], [3.943e+02], [1.105e+03], [3.089e+02], [#text(fill: red)[3.087e+02]],
+    [F29], [7.550e+02], [1.025e+03], [1.409e+03], [4.933e+02], [#text(fill: red)[4.337e+02]],
+    [F30], [2.317e+04], [3.657e+03], [1.359e+07], [2.844e+03], [#text(fill: red)[1.971e+03]],
+    [*Best*], [*1*], [*1*], [*0*], [*11*], [*20*],
+  )],
+  caption: [Resultados ABC-LS CEC2017 dimensión 30 (Medias)],
+)
+
+#figure(
+  text(size: 10pt)[#table(
+    columns: 6,
+    align: center,
+    stroke: (x, y) => if y == 0 or y == 31 { (bottom: 0.8pt) } else { none },
+    inset: 6pt,
+
+    [*Función*],
+    [*ABC-LS*],
+    [*DE*],
+    [*PSO*],
+    [*RB-IPOP-CMA-ES*],
+    [*jSO*],
+
+    [F01], [4.356e+02], [2.039e+08], [1.823e+10], [1.131e-07], [#text(fill: red)[0.000e+00]],
+    [F02], [5.723e+26], [5.158e+52], [1.000e+00], [2.767e+05], [#text(fill: red)[0.000e+00]],
+    [F03], [2.272e+05], [7.597e+04], [1.008e+05], [#text(fill: red)[0.000e+00]], [#text(fill: red)[0.000e+00]],
+    [F04], [5.898e+01], [2.322e+02], [4.091e+03], [#text(fill: red)[2.959e+01]], [5.621e+01],
+    [F05], [2.641e+02], [3.978e+02], [4.328e+02], [#text(fill: red)[2.790e+00]], [1.641e+01],
+    [F06], [1.078e-02], [1.180e+01], [5.450e+01], [#text(fill: red)[1.632e-07]], [1.093e-06],
+    [F07], [2.246e+02], [4.781e+02], [8.197e+02], [#text(fill: red)[5.663e+01]], [6.650e+01],
+    [F08], [2.372e+02], [4.070e+02], [4.077e+02], [#text(fill: red)[2.575e+00]], [1.696e+01],
+    [F09], [1.259e+04], [3.756e+03], [1.620e+04], [#text(fill: red)[0.000e+00]], [#text(fill: red)[0.000e+00]],
+    [F10], [5.697e+03], [1.127e+04], [1.295e+04], [#text(fill: red)[1.726e+03]], [3.140e+03],
+    [F11], [1.936e+02], [2.173e+02], [3.151e+03], [1.832e+02], [#text(fill: red)[2.794e+01]],
+    [F12], [1.150e+07], [1.382e+08], [6.062e+09], [2.438e+06], [#text(fill: red)[1.681e+03]],
+    [F13], [5.271e+02], [2.726e+04], [5.262e+08], [1.652e+03], [#text(fill: red)[3.060e+01]],
+    [F14], [8.626e+05], [1.683e+02], [1.558e+06], [2.416e+02], [#text(fill: red)[2.496e+01]],
+    [F15], [1.413e+02], [5.090e+02], [5.790e+06], [5.290e+02], [#text(fill: red)[2.386e+01]],
+    [F16], [1.799e+03], [3.047e+03], [2.745e+03], [8.899e+02], [#text(fill: red)[4.505e+02]],
+    [F17], [8.765e+02], [1.827e+03], [1.652e+03], [3.978e+02], [#text(fill: red)[2.829e+02]],
+    [F18], [2.272e+06], [2.420e+04], [1.203e+07], [3.573e+02], [#text(fill: red)[2.428e+01]],
+    [F19], [1.074e+02], [1.322e+02], [1.336e+07], [1.394e+02], [#text(fill: red)[1.414e+01]],
+    [F20], [3.789e+02], [9.384e+02], [1.282e+03], [5.468e+02], [#text(fill: red)[1.401e+02]],
+    [F21], [4.519e+02], [6.177e+02], [6.655e+02], [#text(fill: red)[2.062e+02]], [2.192e+02],
+    [F22], [6.104e+03], [#text(fill: red)[1.707e+02]], [1.258e+04], [2.051e+03], [1.487e+03],
+    [F23], [7.289e+02], [8.435e+02], [1.098e+03], [#text(fill: red)[4.227e+02]], [4.301e+02],
+    [F24], [1.050e+03], [8.850e+02], [1.206e+03], [#text(fill: red)[4.912e+02]], [5.075e+02],
+    [F25], [5.471e+02], [5.667e+02], [3.069e+03], [#text(fill: red)[4.807e+02]], [4.809e+02],
+    [F26], [3.337e+03], [#text(fill: red)[5.745e+02]], [7.890e+03], [6.548e+02], [1.129e+03],
+    [F27], [7.700e+02], [5.765e+02], [1.744e+03], [6.081e+02], [#text(fill: red)[5.113e+02]],
+    [F28], [4.941e+02], [5.013e+02], [3.468e+03], [4.700e+02], [#text(fill: red)[4.598e+02]],
+    [F29], [1.275e+03], [2.218e+03], [3.566e+03], [6.690e+02], [#text(fill: red)[3.629e+02]],
+    [F30], [7.870e+05], [2.386e+06], [3.374e+08], [6.460e+06], [#text(fill: red)[6.011e+05]],
+    [*Best*], [*0*], [*2*], [*0*], [*12*], [*18*],
+  )],
+  caption: [Resultados ABC-LS CEC2017 dimensión 50 (Medias)],
+)
+
+#figure(
+  text(size: 10pt)[#table(
+    columns: 6,
+    align: center,
+    stroke: (x, y) => if y == 0 or y == 31 { (bottom: 0.8pt) } else { none },
+    inset: 6pt,
+
+    [*Función*],
+    [*ABC-LS*],
+    [*DE*],
+    [*PSO*],
+    [*RB-IPOP-CMA-ES*],
+    [*jSO*],
+
+    [F01], [4.221e+03], [1.030e+10], [1.097e+11], [2.759e-07], [#text(fill: red)[0.000e+00]],
+    [F02], [3.610e+79], [7.019e+135], [1.000e+00], [#text(fill: red)[0.000e+00]], [8.940e+00],
+    [F03], [5.706e+05], [2.283e+05], [2.920e+05], [#text(fill: red)[0.000e+00]], [2.391e-06],
+    [F04], [2.750e+02], [1.492e+03], [2.257e+04], [#text(fill: red)[1.560e+02]], [1.896e+02],
+    [F05], [8.097e+02], [9.967e+02], [1.165e+03], [#text(fill: red)[1.100e+01]], [4.391e+01],
+    [F06], [1.296e-02], [3.598e+01], [7.538e+01], [#text(fill: red)[1.331e-07]], [2.024e-04],
+    [F07], [7.095e+02], [1.185e+03], [2.369e+03], [#text(fill: red)[1.265e+02]], [1.449e+02],
+    [F08], [7.469e+02], [9.973e+02], [1.228e+03], [#text(fill: red)[1.220e+01]], [4.215e+01],
+    [F09], [4.194e+04], [3.090e+04], [5.577e+04], [#text(fill: red)[0.000e+00]], [4.590e-02],
+    [F10], [1.175e+04], [2.600e+04], [2.966e+04], [#text(fill: red)[5.586e+03]], [9.704e+03],
+    [F11], [1.604e+04], [2.782e+04], [6.682e+04], [1.047e+03], [#text(fill: red)[1.132e+02]],
+    [F12], [4.738e+07], [4.396e+09], [3.663e+10], [5.790e+04], [#text(fill: red)[1.843e+04]],
+    [F13], [2.157e+03], [3.037e+07], [3.724e+09], [4.511e+03], [#text(fill: red)[1.449e+02]],
+    [F14], [2.755e+06], [2.134e+05], [1.884e+07], [5.785e+02], [#text(fill: red)[6.434e+01]],
+    [F15], [5.210e+02], [7.510e+05], [9.414e+07], [7.564e+02], [#text(fill: red)[1.621e+02]],
+    [F16], [3.894e+03], [8.579e+03], [8.692e+03], [#text(fill: red)[1.695e+03]], [1.859e+03],
+    [F17], [2.814e+03], [5.528e+03], [5.963e+03], [1.380e+03], [#text(fill: red)[1.278e+03]],
+    [F18], [2.667e+06], [4.452e+06], [1.157e+07], [3.160e+02], [#text(fill: red)[1.673e+02]],
+    [F19], [4.278e+02], [4.166e+06], [5.261e+08], [5.937e+02], [#text(fill: red)[1.049e+02]],
+    [F20], [2.242e+03], [3.941e+03], [4.932e+03], [1.905e+03], [#text(fill: red)[1.376e+03]],
+    [F21], [8.571e+02], [1.259e+03], [1.680e+03], [#text(fill: red)[2.450e+02]], [2.638e+02],
+    [F22], [1.435e+04], [#text(fill: red)[1.978e+03]], [3.152e+04], [6.324e+03], [1.021e+04],
+    [F23], [9.217e+02], [1.554e+03], [2.368e+03], [5.840e+02], [#text(fill: red)[5.712e+02]],
+    [F24], [1.488e+03], [1.898e+03], [3.456e+03], [#text(fill: red)[8.932e+02]], [9.022e+02],
+    [F25], [7.071e+02], [2.281e+03], [9.639e+03], [#text(fill: red)[6.775e+02]], [7.361e+02],
+    [F26], [8.860e+03], [1.355e+04], [2.540e+04], [#text(fill: red)[2.893e+03]], [3.267e+03],
+    [F27], [7.977e+02], [1.112e+03], [3.206e+03], [6.729e+02], [#text(fill: red)[5.855e+02]],
+    [F28], [7.309e+02], [1.694e+03], [1.266e+04], [#text(fill: red)[4.976e+02]], [5.268e+02],
+    [F29], [4.055e+03], [6.958e+03], [1.073e+04], [2.028e+03], [#text(fill: red)[1.257e+03]],
+    [F30], [3.291e+04], [8.920e+06], [3.022e+09], [1.191e+04], [#text(fill: red)[2.325e+03]],
+    [*Best*], [*0*], [*1*], [*0*], [*15*], [*14*],
+  )],
+  caption: [Resultados ABC-LS CEC2017 dimensión 100 (Medias)],
+)
+
+El efecto de hibridar el ABC con la búsqueda local de Solis-Wets se nota de forma muy clara en las funciones donde el ABC original se estancaba. Si comparamos las tablas con las del ABC base, vemos que las funciones híbridas mejoran drásticamente: en dimensión 30 la F13 pasa de 1.537e+05 a 4.668e+02, la F15 de 2.336e+04 a 2.837e+02, la F19 de 8.593e+03 a 1.067e+02 y la F11 de 7.757e+02 a 6.318e+01. Esta mejora se mantiene en las dimensiones altas (en dimensión 100 la F19 baja de 5.774e+05 a 4.278e+02). Esto confirma que la búsqueda local ataca directamente el punto débil del ABC, que es el refinamiento de las soluciones, intensificando la explotación en la dirección correcta en lugar de hacerlo de forma aleatoria.
+
+Sin embargo, a pesar de la enorme reducción del error, el número de victorias apenas cambia (1 en dimensión 30 y 0 en las demás), ya que los algoritmos especializados *jSO* y *RB-IPOP-CMA-ES* siguen estando por delante, sobre todo en las funciones unimodales y simples donde alcanzan errores cercanos a cero. Lo que sí consigue el ABC-LS es separarse definitivamente del *DE* y del *PSO*, superándolos en la gran mayoría de funciones. También se observa que en algún caso puntual la búsqueda local no aporta nada e incluso empeora ligeramente (la F04 en dimensión 30 pasa de 7.786e+00 a 6.934e+01, perdiendo la victoria que tenía el ABC), pero son casos aislados frente a la mejora global.
+
+En resumen, el ABC-LS no llega a competir con los algoritmos del estado del arte, pero recorta muchísimo la distancia que había, demostrando que el problema del ABC no era tanto la exploración del espacio como la falta de un mecanismo de explotación fino.
+
+== ABC-GBESTDL (usando GBEST y limit dinámico)
+
+#figure(
+  text(size: 10pt)[#table(
+    columns: 6,
+    align: center,
+    stroke: (x, y) => if y == 0 or y == 31 { (bottom: 0.8pt) } else { none },
+    inset: 6pt,
+
+    [*Función*],
+    [*ABC-GBESTDL*],
+    [*DE*],
+    [*PSO*],
+    [*RB-IPOP-CMA-ES*],
+    [*jSO*],
+
+    [F01], [1.102e+04], [4.909e+04], [4.175e+09], [3.150e-08], [#text(fill: red)[0.000e+00]],
+    [F02], [5.391e+12], [1.309e+19], [1.000e+00], [#text(fill: red)[0.000e+00]], [#text(fill: red)[0.000e+00]],
+    [F03], [1.418e+05], [3.481e+03], [5.453e+04], [#text(fill: red)[0.000e+00]], [#text(fill: red)[0.000e+00]],
+    [F04], [7.181e+01], [8.430e+01], [1.183e+03], [#text(fill: red)[5.528e+01]], [5.867e+01],
+    [F05], [8.523e+01], [2.015e+02], [2.170e+02], [#text(fill: red)[1.649e+00]], [8.557e+00],
+    [F06], [2.104e-06], [6.320e+00], [3.694e+01], [1.208e-07], [#text(fill: red)[6.000e-09]],
+    [F07], [7.502e+01], [2.334e+02], [3.596e+02], [#text(fill: red)[3.433e+01]], [3.893e+01],
+    [F08], [6.975e+01], [1.894e+02], [1.745e+02], [#text(fill: red)[1.756e+00]], [9.092e+00],
+    [F09], [6.128e+02], [6.530e+01], [2.842e+03], [#text(fill: red)[0.000e+00]], [#text(fill: red)[0.000e+00]],
+    [F10], [2.989e+03], [3.764e+03], [6.938e+03], [#text(fill: red)[1.443e+03]], [1.528e+03],
+    [F11], [4.612e+02], [7.958e+01], [1.207e+03], [4.107e+01], [#text(fill: red)[3.037e+00]],
+    [F12], [1.193e+06], [3.258e+05], [3.586e+08], [1.093e+03], [#text(fill: red)[1.704e+02]],
+    [F13], [9.089e+04], [1.536e+02], [4.508e+07], [1.187e+02], [#text(fill: red)[1.484e+01]],
+    [F14], [4.661e+04], [7.100e+01], [3.059e+05], [9.083e+01], [#text(fill: red)[2.183e+01]],
+    [F15], [2.842e+04], [6.256e+01], [2.737e+05], [2.177e+02], [#text(fill: red)[1.088e+00]],
+    [F16], [7.885e+02], [1.319e+03], [1.568e+03], [5.016e+02], [#text(fill: red)[7.892e+01]],
+    [F17], [2.356e+02], [4.809e+02], [4.725e+02], [1.323e+02], [#text(fill: red)[3.292e+01]],
+    [F18], [4.019e+05], [6.122e+01], [2.170e+06], [1.601e+02], [#text(fill: red)[2.041e+01]],
+    [F19], [5.498e+04], [3.572e+01], [1.260e+06], [1.146e+02], [#text(fill: red)[4.503e+00]],
+    [F20], [4.198e+02], [2.751e+02], [4.621e+02], [2.965e+02], [#text(fill: red)[2.937e+01]],
+    [F21], [2.727e+02], [3.255e+02], [4.113e+02], [#text(fill: red)[2.086e+02]], [2.093e+02],
+    [F22], [1.002e+02], [1.002e+02], [1.027e+03], [6.716e+02], [#text(fill: red)[1.000e+02]],
+    [F23], [4.285e+02], [5.346e+02], [6.404e+02], [#text(fill: red)[3.393e+02]], [3.507e+02],
+    [F24], [5.811e+02], [6.059e+02], [7.095e+02], [#text(fill: red)[4.194e+02]], [4.265e+02],
+    [F25], [3.872e+02], [3.870e+02], [6.864e+02], [#text(fill: red)[3.867e+02]], [#text(fill: red)[3.867e+02]],
+    [F26], [#text(fill: red)[3.005e+02]], [4.038e+02], [3.369e+03], [3.939e+02], [9.202e+02],
+    [F27], [5.214e+02], [#text(fill: red)[4.925e+02]], [8.068e+02], [5.118e+02], [4.974e+02],
+    [F28], [4.193e+02], [3.943e+02], [1.105e+03], [3.089e+02], [#text(fill: red)[3.087e+02]],
+    [F29], [6.657e+02], [1.025e+03], [1.409e+03], [4.933e+02], [#text(fill: red)[4.337e+02]],
+    [F30], [1.800e+04], [3.657e+03], [1.359e+07], [2.844e+03], [#text(fill: red)[1.971e+03]],
+    [*Best*], [*1*], [*1*], [*0*], [*11*], [*20*],
+  )],
+  caption: [Resultados ABC-GBESTDL CEC2017 dimensión 30 (Medias)],
+)
+
+#figure(
+  text(size: 10pt)[#table(
+    columns: 6,
+    align: center,
+    stroke: (x, y) => if y == 0 or y == 31 { (bottom: 0.8pt) } else { none },
+    inset: 6pt,
+
+    [*Función*],
+    [*ABC-GBESTDL*],
+    [*DE*],
+    [*PSO*],
+    [*RB-IPOP-CMA-ES*],
+    [*jSO*],
+
+    [F01], [4.485e+05], [2.039e+08], [1.823e+10], [1.131e-07], [#text(fill: red)[0.000e+00]],
+    [F02], [3.536e+23], [5.158e+52], [1.000e+00], [2.767e+05], [#text(fill: red)[0.000e+00]],
+    [F03], [2.337e+05], [7.597e+04], [1.008e+05], [#text(fill: red)[0.000e+00]], [#text(fill: red)[0.000e+00]],
+    [F04], [1.057e+02], [2.322e+02], [4.091e+03], [#text(fill: red)[2.959e+01]], [5.621e+01],
+    [F05], [1.382e+02], [3.978e+02], [4.328e+02], [#text(fill: red)[2.790e+00]], [1.641e+01],
+    [F06], [2.916e-06], [1.180e+01], [5.450e+01], [#text(fill: red)[1.632e-07]], [1.093e-06],
+    [F07], [2.038e+02], [4.781e+02], [8.197e+02], [#text(fill: red)[5.663e+01]], [6.650e+01],
+    [F08], [1.314e+02], [4.070e+02], [4.077e+02], [#text(fill: red)[2.575e+00]], [1.696e+01],
+    [F09], [1.984e+03], [3.756e+03], [1.620e+04], [#text(fill: red)[0.000e+00]], [#text(fill: red)[0.000e+00]],
+    [F10], [4.392e+03], [1.127e+04], [1.295e+04], [#text(fill: red)[1.726e+03]], [3.140e+03],
+    [F11], [1.052e+03], [2.173e+02], [3.151e+03], [1.832e+02], [#text(fill: red)[2.794e+01]],
+    [F12], [5.916e+06], [1.382e+08], [6.062e+09], [2.438e+06], [#text(fill: red)[1.681e+03]],
+    [F13], [5.892e+04], [2.726e+04], [5.262e+08], [1.652e+03], [#text(fill: red)[3.060e+01]],
+    [F14], [1.065e+06], [1.683e+02], [1.558e+06], [2.416e+02], [#text(fill: red)[2.496e+01]],
+    [F15], [1.791e+04], [5.090e+02], [5.790e+06], [5.290e+02], [#text(fill: red)[2.386e+01]],
+    [F16], [1.465e+03], [3.047e+03], [2.745e+03], [8.899e+02], [#text(fill: red)[4.505e+02]],
+    [F17], [1.154e+03], [1.827e+03], [1.652e+03], [3.978e+02], [#text(fill: red)[2.829e+02]],
+    [F18], [2.448e+06], [2.420e+04], [1.203e+07], [3.573e+02], [#text(fill: red)[2.428e+01]],
+    [F19], [5.626e+04], [1.322e+02], [1.336e+07], [1.394e+02], [#text(fill: red)[1.414e+01]],
+    [F20], [1.008e+03], [9.384e+02], [1.282e+03], [5.468e+02], [#text(fill: red)[1.401e+02]],
+    [F21], [3.213e+02], [6.177e+02], [6.655e+02], [#text(fill: red)[2.062e+02]], [2.192e+02],
+    [F22], [5.903e+03], [#text(fill: red)[1.707e+02]], [1.258e+04], [2.051e+03], [1.487e+03],
+    [F23], [5.723e+02], [8.435e+02], [1.098e+03], [#text(fill: red)[4.227e+02]], [4.301e+02],
+    [F24], [9.495e+02], [8.850e+02], [1.206e+03], [#text(fill: red)[4.912e+02]], [5.075e+02],
+    [F25], [5.258e+02], [5.667e+02], [3.069e+03], [#text(fill: red)[4.807e+02]], [4.809e+02],
+    [F26], [2.465e+03], [#text(fill: red)[5.745e+02]], [7.890e+03], [6.548e+02], [1.129e+03],
+    [F27], [6.764e+02], [5.765e+02], [1.744e+03], [6.081e+02], [#text(fill: red)[5.113e+02]],
+    [F28], [5.042e+02], [5.013e+02], [3.468e+03], [4.700e+02], [#text(fill: red)[4.598e+02]],
+    [F29], [1.170e+03], [2.218e+03], [3.566e+03], [6.690e+02], [#text(fill: red)[3.629e+02]],
+    [F30], [8.785e+05], [2.386e+06], [3.374e+08], [6.460e+06], [#text(fill: red)[6.011e+05]],
+    [*Best*], [*0*], [*2*], [*0*], [*12*], [*18*],
+  )],
+  caption: [Resultados ABC-GBESTDL CEC2017 dimensión 50 (Medias)],
+)
+
+#figure(
+  text(size: 10pt)[#table(
+    columns: 6,
+    align: center,
+    stroke: (x, y) => if y == 0 or y == 31 { (bottom: 0.8pt) } else { none },
+    inset: 6pt,
+
+    [*Función*],
+    [*ABC-GBESTDL*],
+    [*DE*],
+    [*PSO*],
+    [*RB-IPOP-CMA-ES*],
+    [*jSO*],
+
+    [F01], [4.867e+05], [1.030e+10], [1.097e+11], [2.759e-07], [#text(fill: red)[0.000e+00]],
+    [F02], [1.095e+72], [7.019e+135], [1.000e+00], [#text(fill: red)[0.000e+00]], [8.940e+00],
+    [F03], [5.659e+05], [2.283e+05], [2.920e+05], [#text(fill: red)[0.000e+00]], [2.391e-06],
+    [F04], [2.543e+02], [1.492e+03], [2.257e+04], [#text(fill: red)[1.560e+02]], [1.896e+02],
+    [F05], [5.629e+02], [9.967e+02], [1.165e+03], [#text(fill: red)[1.100e+01]], [4.391e+01],
+    [F06], [2.199e-05], [3.598e+01], [7.538e+01], [#text(fill: red)[1.331e-07]], [2.024e-04],
+    [F07], [7.001e+02], [1.185e+03], [2.369e+03], [#text(fill: red)[1.265e+02]], [1.449e+02],
+    [F08], [5.170e+02], [9.973e+02], [1.228e+03], [#text(fill: red)[1.220e+01]], [4.215e+01],
+    [F09], [2.142e+04], [3.090e+04], [5.577e+04], [#text(fill: red)[0.000e+00]], [4.590e-02],
+    [F10], [1.209e+04], [2.600e+04], [2.966e+04], [#text(fill: red)[5.586e+03]], [9.704e+03],
+    [F11], [7.796e+04], [2.782e+04], [6.682e+04], [1.047e+03], [#text(fill: red)[1.132e+02]],
+    [F12], [4.422e+07], [4.396e+09], [3.663e+10], [5.790e+04], [#text(fill: red)[1.843e+04]],
+    [F13], [9.054e+04], [3.037e+07], [3.724e+09], [4.511e+03], [#text(fill: red)[1.449e+02]],
+    [F14], [9.202e+06], [2.134e+05], [1.884e+07], [5.785e+02], [#text(fill: red)[6.434e+01]],
+    [F15], [1.062e+05], [7.510e+05], [9.414e+07], [7.564e+02], [#text(fill: red)[1.621e+02]],
+    [F16], [3.912e+03], [8.579e+03], [8.692e+03], [#text(fill: red)[1.695e+03]], [1.859e+03],
+    [F17], [3.292e+03], [5.528e+03], [5.963e+03], [1.380e+03], [#text(fill: red)[1.278e+03]],
+    [F18], [6.422e+06], [4.452e+06], [1.157e+07], [3.160e+02], [#text(fill: red)[1.673e+02]],
+    [F19], [5.517e+04], [4.166e+06], [5.261e+08], [5.937e+02], [#text(fill: red)[1.049e+02]],
+    [F20], [2.727e+03], [3.941e+03], [4.932e+03], [1.905e+03], [#text(fill: red)[1.376e+03]],
+    [F21], [7.006e+02], [1.259e+03], [1.680e+03], [#text(fill: red)[2.450e+02]], [2.638e+02],
+    [F22], [1.501e+04], [#text(fill: red)[1.978e+03]], [3.152e+04], [6.324e+03], [1.021e+04],
+    [F23], [7.811e+02], [1.554e+03], [2.368e+03], [5.840e+02], [#text(fill: red)[5.712e+02]],
+    [F24], [1.284e+03], [1.898e+03], [3.456e+03], [#text(fill: red)[8.932e+02]], [9.022e+02],
+    [F25], [7.783e+02], [2.281e+03], [9.639e+03], [#text(fill: red)[6.775e+02]], [7.361e+02],
+    [F26], [8.379e+03], [1.355e+04], [2.540e+04], [#text(fill: red)[2.893e+03]], [3.267e+03],
+    [F27], [7.333e+02], [1.112e+03], [3.206e+03], [6.729e+02], [#text(fill: red)[5.855e+02]],
+    [F28], [6.540e+02], [1.694e+03], [1.266e+04], [#text(fill: red)[4.976e+02]], [5.268e+02],
+    [F29], [4.149e+03], [6.958e+03], [1.073e+04], [2.028e+03], [#text(fill: red)[1.257e+03]],
+    [F30], [3.808e+04], [8.920e+06], [3.022e+09], [1.191e+04], [#text(fill: red)[2.325e+03]],
+    [*Best*], [*0*], [*1*], [*0*], [*15*], [*14*],
+  )],
+  caption: [Resultados ABC-GBESTDL CEC2017 dimensión 100 (Medias)],
+)
+
+El ABC-GBESTDL, al guiar la búsqueda hacia la mejor solución global, acelera la convergencia y esto se traduce en una clara mejora sobre las funciones multimodales y simples. Comparando con el ABC base en dimensión 30, la F05 baja de 1.156e+02 a 8.523e+01, la F07 de 1.146e+02 a 7.502e+01, la F08 de 1.148e+02 a 6.975e+01, la F09 de 2.578e+03 a 6.128e+02 y la F06 de 1.717e-03 a 2.104e-06. Incluso en la F22 alcanza un 1.002e+02, prácticamente igualando al DE y quedándose muy cerca del jSO (1.000e+02). Esta tendencia se mantiene en dimensión 50 y 100 (la F08 en dimensión 100 baja de 8.093e+02 a 5.170e+02), lo que demuestra que la atracción hacia el gbest junto al límite dinámico ayuda al algoritmo a converger más rápido sobre estas funciones.
+
+En cambio, en las funciones híbridas el ABC-GBESTDL no mejora tanto como lo hacía el ABC-LS. Por ejemplo, en la F13 en dimensión 30 el ABC-GBESTDL se queda en 9.089e+04 mientras que el ABC-LS conseguía 4.668e+02. Esto tiene sentido ya que el gbest acelera la convergencia global pero no aporta el refinamiento local fino que sí da la búsqueda local, y son precisamente las funciones híbridas las que requieren ese ajuste detallado. Por tanto cada modificación destaca en un tipo de función distinto: el ABC-LS en las híbridas y el ABC-GBESTDL en las multimodales y simples.
+
+En cuanto a victorias, el ABC-GBESTDL obtiene resultados muy parecidos al ABC-LS (1 victoria en dimensión 30 con la F26 y 0 en el resto), y al igual que él tampoco consigue superar al *jSO* ni al *RB-IPOP-CMA-ES*, que siguen dominando gracias a su rendimiento casi perfecto en las funciones unimodales (F01, F03, F09).
+
+Como conclusión final de la comparación, podemos ver que ninguna de las modificaciones del ABC llega a alcanzar a los algoritmos especializados del CEC2017, que están muy afinados para este benchmark y resultan imbatibles en las funciones básicas. No obstante, tanto el ABC-LS como el ABC-GBESTDL logran convertir un algoritmo que perdía contra el DE en varias funciones en uno que lo supera de forma consistente y que reduce mucho la distancia con el estado del arte, cada uno reforzando una capacidad diferente del algoritmo: la explotación local en el caso del ABC-LS y la velocidad de convergencia en el del ABC-GBESTDL.
+
+

@@ -1,0 +1,141 @@
+------------IB35---------------\n
+
+..........Ejecutando ...........
+Termina Greedy
+Termina Random
+Termina Local Search
+Termina AM-BEST
+Termina BMB
+Termina ES
+Termina ABC
+----------Termina evaluacion-----------
+Greedy
+Mean fitness of 50 evaluations : -4.55837
+Fitness 2025 :-3.25448 | Profit 2025 :0.0400836
+Mean evaluations 1 | Mean time (miliseconds): 0
+
+Random
+Mean fitness of 50 evaluations : -4.9807
+Fitness 2025 :-3.3783 | Profit 2025 :0.0521752
+Mean evaluations 10000 | Mean time (miliseconds): 7
+
+Local Search
+Mean fitness of 50 evaluations : -4.60883
+Fitness 2025 :-3.11513 | Profit 2025 :0.0202254
+Mean evaluations 1517.36 | Mean time (miliseconds): 0
+
+AM-BEST
+Mean fitness of 50 evaluations : -4.49494
+Fitness 2025 :-3.08521 | Profit 2025 :0.0320638
+Mean evaluations 10000 | Mean time (miliseconds): 9.9
+
+BMB
+Mean fitness of 50 evaluations : -4.56621
+Fitness 2025 :-3.10454 | Profit 2025 :0.0226449
+Mean evaluations 6990.3 | Mean time (miliseconds): 1
+
+ES
+Mean fitness of 50 evaluations : -4.59587
+Fitness 2025 :-3.11359 | Profit 2025 :0.0223825
+Mean evaluations 10000 | Mean time (miliseconds): 3.32
+
+ABC
+Mean fitness of 50 evaluations : -4.51955
+Fitness 2025 :-3.13817 | Profit 2025 :0.0257753
+Mean evaluations 10000 | Mean time (miliseconds): 2
+
+CSV generado en: ../ib35.csv
+------------S&P100---------------\n
+
+..........Ejecutando ...........
+Termina Greedy
+Termina Random
+Termina Local Search
+Termina AM-BEST
+Termina BMB
+Termina ES
+Termina ABC
+----------Termina evaluacion-----------
+Greedy
+Mean fitness of 50 evaluations : -2.83502
+Fitness 2025 :-3.69117 | Profit 2025 :0.0928605
+Mean evaluations 1 | Mean time (miliseconds): 0
+
+Random
+Mean fitness of 50 evaluations : -3.40855
+Fitness 2025 :-4.17498 | Profit 2025 :0.0880462
+Mean evaluations 10000 | Mean time (miliseconds): 24.1
+
+Local Search
+Mean fitness of 50 evaluations : -3.1187
+Fitness 2025 :-3.88835 | Profit 2025 :0.0964705
+Mean evaluations 8984.76 | Mean time (miliseconds): 11.06
+
+AM-BEST
+Mean fitness of 50 evaluations : -2.81629
+Fitness 2025 :-3.76051 | Profit 2025 :0.10115
+Mean evaluations 10000 | Mean time (miliseconds): 105.82
+
+BMB
+Mean fitness of 50 evaluations : -3.02397
+Fitness 2025 :-3.83777 | Profit 2025 :0.0927594
+Mean evaluations 10000 | Mean time (miliseconds): 22.88
+
+ES
+Mean fitness of 50 evaluations : -3.10328
+Fitness 2025 :-3.89482 | Profit 2025 :0.0952626
+Mean evaluations 10000 | Mean time (miliseconds): 48.18
+
+ABC
+Mean fitness of 50 evaluations : -3.03606
+Fitness 2025 :-3.87146 | Profit 2025 :0.0910539
+Mean evaluations 10000 | Mean time (miliseconds): 11.08
+
+CSV generado en: ../syp100.csv
+------------S&P500---------------\n
+
+..........Ejecutando ...........
+Termina Greedy
+Termina Random
+Termina Local Search
+Termina AM-BEST
+Termina BMB
+Termina ES
+Termina ABC
+----------Termina evaluacion-----------
+Greedy
+Mean fitness of 50 evaluations : -2.74951
+Fitness 2025 :-3.77676 | Profit 2025 :0.0133634
+Mean evaluations 1 | Mean time (miliseconds): 0
+
+Random
+Mean fitness of 50 evaluations : -3.63828
+Fitness 2025 :-4.38934 | Profit 2025 :0.0266328
+Mean evaluations 10000 | Mean time (miliseconds): 275.18
+
+Local Search
+Mean fitness of 50 evaluations : -3.51722
+Fitness 2025 :-4.32404 | Profit 2025 :0.0108477
+Mean evaluations 10000 | Mean time (miliseconds): 228.02
+
+AM-BEST
+Mean fitness of 50 evaluations : -3.20503
+Fitness 2025 :-4.12372 | Profit 2025 :0.0035791
+Mean evaluations 10000 | Mean time (miliseconds): 1109.6
+
+BMB
+Mean fitness of 50 evaluations : -3.66307
+Fitness 2025 :-4.45096 | Profit 2025 :0.00519289
+Mean evaluations 10000 | Mean time (miliseconds): 289.68
+
+ES
+Mean fitness of 50 evaluations : -3.47248
+Fitness 2025 :-4.35214 | Profit 2025 :0.000808843
+Mean evaluations 10000 | Mean time (miliseconds): 1324.4
+
+ABC
+Mean fitness of 50 evaluations : -3.58443
+Fitness 2025 :-4.36398 | Profit 2025 :0.0122949
+Mean evaluations 10000 | Mean time (miliseconds): 180.64
+
+CSV generado en: ../syp500.csv
