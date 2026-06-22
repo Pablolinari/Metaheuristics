@@ -98,22 +98,7 @@ void greedyUpdate(int i, vector<vector<double>> &foods, vector<double> &obj,
   }
 }
 
-/*
- * ABC hibridado con Differential Evolution. La unica diferencia con el ABC
- * clasico esta en la regla de generacion del candidato. En lugar de perturbar
- * una sola dimension con phi*(x_i - x_k), construyo un mutante con el operador
- * DE/current-to-best/1:
- *
- *   v = x_i + F*(x_best - x_i) + F*(x_r1 - x_r2)
- *
- * y lo mezclo con la fuente actual mediante cruce binomial (CR), garantizando
- * que al menos una dimension venga del mutante (jrand). Asi cada candidato
- * combina la informacion diferencial de toda la poblacion en varias dimensiones
- * a la vez, dentro del esqueleto de fases del ABC.
- *
- *   F  : factor de escala de la mutacion diferencial (0.5 habitual).
- *   CR : probabilidad de cruce binomial (0.9 habitual).
- */
+
 double artificialBeeColonyDe(int dim, int seed, int lower, int upper, int SN,
                              int limit, int maxevals, double F, double CR) {
   std::uniform_real_distribution<double> dis(lower, upper);

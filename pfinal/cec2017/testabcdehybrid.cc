@@ -41,21 +41,7 @@ int rouletteSelect(const vector<double> &probs, std::mt19937 &gen) {
   return probs.size() - 1;
 }
 
-/*
- * Differential Evolution (DE/rand/1/bin) ejecutado como algoritmo completo
- * sobre la poblacion que recibe. No es solo un operador: tiene su propio bucle
- * generacional (para cada individuo: mutacion diferencial + cruce binomial +
- * seleccion greedy) y se repite hasta agotar el presupuesto de evaluaciones.
- *
- * Es el analogo a soliswets() en testabchybrid.cc: una busqueda que opera sobre
- * las fuentes del ABC y devuelve el numero de evaluaciones realmente consumidas
- * para que el ABC las descuente de su presupuesto global.
- *
- *   foods/obj/trial : poblacion compartida con el ABC (se actualiza in place).
- *   bestFitness     : mejor fitness global (se actualiza si DE mejora).
- *   F  : factor de escala de la mutacion diferencial.
- *   CR : probabilidad de cruce binomial.
- */
+
 int differentialEvolution(vector<vector<double>> &foods, vector<double> &obj,
                           vector<int> &trial, double &bestFitness, double F,
                           double CR, int maxevals, int lower, int upper,
@@ -119,7 +105,7 @@ int differentialEvolution(vector<vector<double>> &foods, vector<double> &obj,
 }
 
 // genero un candidato perturbando una dimension de la fuente i y me quedo con
-// el si mejora (seleccion greedy)
+// el si mejora 
 void greedyUpdate(int i, vector<vector<double>> &foods, vector<double> &obj,
                   vector<int> &trial, double &bestFitness, int &evals,
                   int lower, int upper, std::mt19937 &gen) {
@@ -156,13 +142,6 @@ void greedyUpdate(int i, vector<vector<double>> &foods, vector<double> &obj,
   }
 }
 
-/*
- * ABC. Si useDe == true se convierte en hibrido (ABC + Differential Evolution
- * intercalado), con la misma estructura que el hibrido ABC + Solis-Wets:
- *   deFreq   : ejecuta el DE cada deFreq ciclos del ABC.
- *   deBudget : evaluaciones que se le dan a cada ejecucion del DE.
- *   F, CR    : parametros del DE.
- */
 double artificialBeeColony(int dim, int seed, int lower, int upper, int SN,
                            int limit, int maxevals, bool useDe, int deFreq,
                            int deBudget, double F, double CR) {

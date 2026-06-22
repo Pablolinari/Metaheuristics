@@ -111,25 +111,7 @@ void greedyUpdate(int i, vector<vector<double>> &foods, vector<double> &obj,
   }
 }
 
-/*
- * ABC guiado por gbest con LIMIT DINAMICO para equilibrar diversidad y
- * convergencia. La base es el Gbest-guided ABC (Zhu & Kwong, 2010): el termino
- * gbest esta siempre activo y acelera la convergencia.
- *
- * El problema del gbest puro es que converge demasiado y el enjambre se colapsa.
- * Aqui el limite de la abeja exploradora (cuantos ciclos sin mejorar aguanta una
- * fuente antes de reiniciarse) deja de ser fijo y se adapta a la diversidad:
- *   - poca diversidad (enjambre colapsado) -> limit pequeno: las fuentes se
- *     reinician antes, inyectando diversidad con saltos aleatorios grandes.
- *   - mucha diversidad (enjambre disperso)  -> limit grande: las fuentes
- *     explotan mas tiempo hacia gbest.
- * Como reiniciar una fuente es un salto aleatorio en todo el dominio, el limit
- * dinamico si reabre el enjambre de verdad (a diferencia de apagar gbest).
- *
- *   C        : limite superior de psi (peso de la atraccion hacia gbest).
- *   limitMin : limit cuando la diversidad es minima (mas exploracion).
- *   limitMax : limit cuando la diversidad es maxima (mas explotacion).
- */
+
 double artificialBeeColonyGbestDl(int dim, int seed, int lower, int upper,
                                   int SN, int maxevals, double C, int limitMin,
                                   int limitMax) {

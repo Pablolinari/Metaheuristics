@@ -83,21 +83,7 @@ void greedyUpdate(int i, vector<vector<double>> &foods, vector<double> &obj,
   }
 }
 
-/*
- * ABC guiado por la mejor solucion global (Gbest-guided ABC, GABC).
- *   Zhu & Kwong, "Gbest-guided artificial bee colony algorithm for numerical
- *   function optimization", Applied Mathematics and Computation, 2010.
- *
- * La unica diferencia con el ABC clasico es la ecuacion de generacion del
- * candidato. En lugar de
- *     v_ij = x_ij + phi_ij (x_ij - x_kj)
- * anado un termino que atrae la nueva fuente hacia la mejor solucion global
- * encontrada hasta el momento (gbest):
- *     v_ij = x_ij + phi_ij (x_ij - x_kj) + psi_ij (y_j - x_ij)
- * con phi_ij en [-1, 1], psi_ij en [0, C] (C constante, 1.5 habitual) e y la
- * mejor solucion global. El primer termino mantiene la exploracion y el segundo
- * acelera la explotacion guiando el enjambre hacia gbest.
- */
+
 double artificialBeeColonyGbest(int dim, int seed, int lower, int upper, int SN,
                                 int limit, int maxevals, double C) {
   std::uniform_real_distribution<double> dis(lower, upper);

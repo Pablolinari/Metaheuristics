@@ -42,7 +42,7 @@ int rouletteSelect(const vector<double> &probs, std::mt19937 &gen) {
 }
 
 // genero un candidato perturbando una dimension de la fuente i y me quedo con
-// el si mejora (seleccion greedy)
+// el si mejora 
 void greedyUpdate(int i, vector<vector<double>> &foods, vector<double> &obj,
                   vector<int> &trial, double &bestFitness, int &evals,
                   int lower, int upper, std::mt19937 &gen) {
@@ -131,7 +131,7 @@ double artificialBeeColony(int dim, int seed, int lower, int upper, int SN,
       t += 1;
     }
 
-    // fase de abeja exploradora: abandono la fuente mas estancada
+    // fase de abeja exploradora
     int maxTrial = 0;
     for (int i = 1; i < SN; i++) {
       if (trial[i] > trial[maxTrial]) {

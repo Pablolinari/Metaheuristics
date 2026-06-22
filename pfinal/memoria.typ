@@ -121,15 +121,15 @@ La ejecución se divide en 4 fases  donde se identifica el comportamiento de cad
 
 Se generan $S N$ fuentes de alimento de forma aleatoria, asegurando que cada una cumple las restricciones del problema (en el caso del portfolio se comprueban las restriciones necesarias). Se evalúa el fitness de cada una y se memoriza la mejor solución encontrada hasta el momento. Además, se inicializa a 0 un contador de _trials_ por cada fuente, que registra cuántos ciclos lleva sin mejorar.
 
-=== Etapa 2: Fase de abejas empleadas
+=== Etapa 2: Fase de abejas empleadas (exploración)
 
-Cada abeja empleada explota su propia fuente $x_i$. Para ello genera una solución candidata $v_i$ aplicando la  ecuación y la evalúa. A continuación se aplica una selección greedy: si la candidata es mejor que la fuente original, la sustituye y el contador de _trials_ de esa fuente se reinicia a 0, en caso contrario, la fuente se mantiene y su contador de _trials_ se incrementa. Esta fase genera por cada fuente de alimento una posible solución mejor usando la ecuación previamente vista, si esta solución es mejor será la que se use como base para la explotación.
+Cada abeja empleada explota una única vez su propia fuente $x_i$. Para ello genera una solución candidata $v_i$ aplicando la  ecuación y la evalúa. A continuación se aplica una selección greedy: si la candidata es mejor que la fuente original, la sustituye y el contador de _trials_ de esa fuente se reinicia a 0, en caso contrario, la fuente se mantiene y su contador de _trials_ se incrementa. Esta fase genera por cada fuente de alimento una posible solución mejor usando la ecuación previamente vista, si esta solución es mejor será la que se use como base para la explotación.
 
-=== Etapa 3: Fase de abejas observadoras
+=== Etapa 3: Fase de abejas observadoras (explotación)
 
-Esta etapa consiste en el "baile de las obreras" donde cada obrera vuelve a la colmena e intentará convencer a las observadoras de elegir su fuente de alimento , las observadoras eligirán con mayor probabilidad la fuente que más nectar tenga.Los pasos que se siguen una vez la obrera vuelve a la colmena son los siguientes. Primero se calculan las probabilidades de selección de cada fuente con la segunda ecuación . Después, se reparten $S N$ observadoras: cada una elige una fuente mediante selección por ruleta ,(las fuentes con más néctar tienen más probabilidad) y la explota igual que una obrera, usando la misma ecuación y aplicando de nuevo la selección greedy. Como las mejores fuentes tienden a ser elegidas varias veces, esta fase intensifica la búsqueda en las regiones más prometedoras del espacio. Es decir que podemos tener varias abejas observadoras en la misma fuente de alimento, esto ocurrirá sobre todo en las fuente más prometedoras donde como es lógico, interesa intensificar la búsqueda.
+Esta etapa consiste en el "baile de las obreras" donde cada obrera vuelve a la colmena e intentará convencer a las observadoras de elegir su fuente de alimento , las observadoras eligirán con mayor probabilidad la fuente que más nectar tenga y ayudaran a las obreras a explotar la fuente de alimento.Los pasos que se siguen una vez la obrera vuelve a la colmena son los siguientes. Primero se calculan las probabilidades de selección de cada fuente con la segunda ecuación . Después, se reparten $S N$ observadoras: cada una elige una fuente mediante selección por ruleta ,(las fuentes con más néctar tienen más probabilidad) y la explota igual que una obrera, usando la misma ecuación , aplicando de nuevo la selección greedy y aumentando el parámetro limit si la solución generada por la observadora es peor que la actual. Como las mejores fuentes tienden a ser elegidas varias veces, esta fase intensifica la búsqueda en las regiones más prometedoras del espacio. Es decir que podemos tener varias abejas observadoras en la misma fuente de alimento, esto ocurrirá sobre todo en las fuente más prometedoras donde como es lógico, interesa intensificar la búsqueda.
 
-=== Etapa 4: Fase de abeja exploradora
+=== Etapa 4: Fase de abeja exploradora (exploración)
 
 Al final de cada ciclo se comprueba si alguna fuente se ha agotado. Se localiza la fuente con mayor número de _trials_ acumulados y, si este supera el _Limit_, dicha fuente se abandona, se sustituye y la abeja exploradora buscaría una nueva, que a modo práctico consiste en crear una nueva solución aleatoria,se evalúa la nueva solución y su contador de _trials_ vuelve a 0. Se permite como máximo una abeja exploradora por ciclo. Esta fase introduce diversificación y evita que el algoritmo quede estancado en óptimos locales.
 
@@ -223,7 +223,7 @@ Cada ejecutable recorre las 30 funciones del benchmark y escribe sus resultados 
 
 Los scripts de python restantes son los usados para generar las gráficas y los xlsx con los resultados.
 
-= Adaptacion al problema del portfolio
+= Adaptación al problema del portfolio
 
 La formulación original de ABC está pensada para la optimización de funciones numéricas sin restricciones, por lo que ha sido necesario realizar dos adaptaciones:
 
@@ -231,6 +231,79 @@ La formulación original de ABC está pensada para la optimización de funciones
 - *Desplazamiento de las probabilidades*: la ecuación de cálculo de probabilidades  asume cantidades de néctar no negativas, pero el fitness del portfolio  puede ser negativo, de hecho en la práctica es siempre negativo. Para poder aplicar la ruleta, se desplazan todos los valores de fitness sumándoles una constante que deja el peor de ellos ligeramente por encima de 0, conservando las diferencias relativas entre fuentes.
 
 Por lo que respecta a la implementación , la  diferencia entre la implementación para el problema del portfolio y para el *cec2017* son las mencionadas previamente y el uso de las funciones de la clase *pPortfolio* , principalmente usadas para poder arreglar y generar soluciones con las restricciones del problema.
+
+A continuación se muestra el pseudocódigo del ABC adaptado al problema del portfolio. El esquema es el mismo que el del ABC clásico, pero incorpora las dos adaptaciones descritas: la reparación de candidatas con `problem.fix()` y el desplazamiento del fitness al calcular las probabilidades.
+
+#block(fill: luma(240), inset: 8pt, radius: 4pt, width: 100%)[
+  ```py
+  funcion ABC_portfolio(problema, maxevals):
+    SN = colonySize / 2
+    # --- Inicialización ---
+    para i en 0..SN:
+      fuentes[i] = problema.createSolution()   # cumple restricciones
+      fitness[i] = problema.fitness(fuentes[i])
+      trials[i]  = 0
+      actualizar_mejor(fuentes[i], fitness[i])
+
+    # --- Ciclos de búsqueda ---
+    mientras evals < maxevals:
+
+      # Fase empleadas
+      para i en 0..SN:
+        candidata = produceCandidate(fuentes, i)
+        si fitness(candidata) > fitness[i]:        # selección greedy
+          fuentes[i] = candidata;  trials[i] = 0
+        sino:
+          trials[i] += 1
+        actualizar_mejor(candidata)
+
+      # Fase observadoras
+      probs = computeProbabilities(fitness)
+      para t en 0..SN:
+        i = rouletteSelect(probs)
+        candidata = produceCandidate(fuentes, i)
+        si fitness(candidata) > fitness[i]:        # selección greedy
+          fuentes[i] = candidata;  trials[i] = 0
+        sino:
+          trials[i] += 1
+        actualizar_mejor(candidata)
+
+      # Fase exploradora (una por ciclo)
+      peor = indice con mayor trials
+      si trials[peor] >= trialLimit:
+        fuentes[peor] = problema.createSolution()
+        trials[peor]  = 0
+        actualizar_mejor(fuentes[peor])
+
+    devolver mejor_solucion
+
+
+  funcion produceCandidate(fuentes, i):
+    j = dimension aleatoria en 0..D
+    k = fuente aleatoria, k != i
+    phi = aleatorio en [-1, 1]
+    candidata = copia(fuentes[i])
+    # ecuación (2.2): solo se perturba la componente j
+    candidata(j) = fuentes[i](j) + phi * (fuentes[i](j) - fuentes[k](j))
+    # ADAPTACIÓN: el movimiento rompe las restricciones -> reparar
+    si no problema.isValid(candidata):
+      problema.fix(candidata)
+    devolver candidata
+
+
+  funcion computeProbabilities(fitness):
+    # ADAPTACIÓN: el fitness del portfolio puede ser negativo,
+    # se desplaza para que el peor quede ligeramente por encima de 0
+    minFit = min(fitness)
+    shift  = (minFit <= 0) ? (-minFit + 1e-9) : 0
+    para i en 0..SN:
+      probs[i] = fitness[i] + shift
+    total = suma(probs)
+    si total <= 0:                                 # todas iguales
+      devolver reparto_uniforme
+    devolver probs / total
+  ```
+]
 
 == Comparación de resultados
 
@@ -327,7 +400,7 @@ Como se puede ver , el ABC consigue estar a la altura de los mejores algoritmos 
 práctica (AM-BEST y GREEDY) en dimensiones bajas (IBEX35) pero a medida que van subiendo las dimensiones el algoritmo va perdiendo fuerza y se termina quedando en las posiciones 3 y 4. Esto se debe a la mala convergencia que tiene y a que el número de iteraciones no sea lo suficientemente grande para que pueda sacar buenos resultados. También podemos fijarnos en los boxplots del ABC , en el S&P100 su caja se ensancha de una manera esperada ya que el espacio es másgrande que el del IBEX por tanto la población inicial le afecta más, pero al pasar al S&P500 su boxplot presenta muchos outliers por el rango de arriba, esto nos indica que en varias ejecuciones el resultado ha sido mejor que la media , y también presenta outliers por abajo representando todo lo contrario. Esto nos indica que el algoritmo depende mucho de las fuentes de alimento 
 que se toman inicialmente, por tanto si una vez seleccionada la población inicial , las demás fuentes se tomasen en una determinada dirección en vez de hacerlo aleatoriamente el algoritmo podría mejorar considerablemente. Este tipo de mejoras lo veremos en las sigueintes secciones.
 
-Podemos concluir que el algoritmo ABC aplicado a la práctica se encuentra entre el tercer y cuarto puesto de los mejores algoritmos para este escenario de práctico donde se han usado 10000 evaluaciones.
+Podemos concluir que el algoritmo ABC aplicado a la práctica se encuentra entre el tercer y cuarto puesto de los mejores algoritmos para este escenario  práctico donde se han usado 10000 evaluaciones.
 
 #pagebreak()
 
@@ -1093,5 +1166,9 @@ En cuanto a victorias, el ABC-GBESTDL obtiene resultados muy parecidos al ABC-LS
 == Conclusión
 
 Como conclusión final de la comparación, podemos ver que ninguna de las modificaciones del ABC llega a alcanzar a los algoritmos especializados del CEC2017, que están muy afinados para este benchmark y son muy buenos  en las funciones básicas. No obstante, tanto el ABC-LS como el ABC-GBESTDL logran convertir un algoritmo que perdía contra el DE en varias funciones en uno que lo supera de forma consistente y que reduce mucho la distancia con los mejores, cada uno reforzando una capacidad diferente del algoritmo: la explotación local en el caso del ABC-LS y la velocidad de convergencia en el del ABC-GBESTDL.
+#pagebreak()
+= Bibliografía
+
+- Karaboga, D., Basturk, B. (2007). A powerful and efficient algorithm for numerical function optimization: artificial bee colony (ABC) algorithm. _Journal of Global Optimization_, 39(3), 459–471. #link("https://link.springer.com/article/10.1007/s10898-007-9149-x")
 
 

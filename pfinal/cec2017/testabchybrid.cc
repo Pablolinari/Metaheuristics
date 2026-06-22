@@ -159,12 +159,7 @@ void greedyUpdate(int i, vector<vector<double>> &foods, vector<double> &obj,
   }
 }
 
-/*
- * ABC memetico: ABC + Solis-Wets como busqueda local.
- *   lsFreq   : aplica la BL cada lsFreq ciclos del ABC.
- *   lsBudget : evaluaciones que se le dan a cada aplicacion de la BL.
- *   lsDelta  : paso inicial de la BL.
- */
+
 double artificialBeeColony(int dim, int seed, int lower, int upper, int SN,
                            int limit, int maxevals, int lsFreq, int lsBudget,
                            double lsDelta) {
