@@ -69,17 +69,19 @@
 
 = Descripción del algoritmo
 
-El algoritmo *Artificial Bee Colony* (ABC), propuesto por Dervis Karaboga en 2007, es una metaheurística poblacional inspirada en el comportamiento de búsqueda de alimento de las colonias de abejas. La idea del algoritmo es que un conjunto de abejas explora el espacio de búsqueda  en el que hay una serie de fuentes de alimentos, intensificando la exploración alrededor de las fuentes más prometedoras y abandonando aquellas que se agotan.
+El algoritmo *Artificial Bee Colony* (ABC), propuesto por Dervis Karaboga en 2007, es una metaheurística de swarm intelligence inspirada en el comportamiento de búsqueda de alimento de las colonias de abejas. La idea del algoritmo es que un conjunto de abejas explora el espacio de búsqueda  en el que hay una serie de fuentes de alimentos, intensificando la exploración alrededor de las fuentes más prometedoras y abandonando aquellas que se agotan.
 
-En el contexto de este problema cada *fuente de alimento* representa una solución candidata, y la cantidad de néctar de una fuente se corresponde con el valor de fitness de esa solución. El objetivo del algoritmo es, por tanto, encontrar la fuente con mayor cantidad de néctar, es decir, la solución que maximiza la función objetivo.
+En el contexto de este problema cada *fuente de alimento* representa una solución candidata, y la cantidad de néctar de una fuente se corresponde con el valor de fitness de esa solución. El objetivo del algoritmo es  encontrar la fuente con mayor cantidad de néctar, es decir, la solución que maximiza la función objetivo.
 
 == Explicación de los componentes del algoritmo
 
 La colonia se divide en tres tipos de abejas, cada uno con un papel distinto dentro de la búsqueda:
 
 - *Abejas obreras (worker bees)*: cada una está asociada a una fuente de alimento concreta y se encarga de explotarla buscando soluciones mejores en su vecindario.
-- *Abejas observadoras (onlooker bees)*: esperan en la colmena y eligen qué fuentes explotar en función de la información que comparten las obreras. Las fuentes con más néctar tienen más probabilidad de ser elegidas, esto hace que se concentre la búsqueda en las funetes de alimento más prometedoras.
-- *Abejas exploradoras (scout bees)*: cuando una fuente se agota se abandona, y la abeja obrera que trabajaba sobre esta se convierte en exploradora, buscando una fuente de alimento nueva.
+- *Abejas observadoras (onlooker bees)*: esperan en la colmena y eligen qué fuentes explotar en función de la información que comparten las obreras. Las fuentes con más néctar tienen más probabilidad de ser elegidas, esto hace que se concentre la búsqueda en las funetes de alimento más prometedoras.Conceptualmente podríamos decir que se convierten en obreras cuando llegan a la fuente de alimento.
+- *Abejas exploradoras (scout bees)*: cuando una fuente se agota se abandona, y la abeja obrera que trabajaba sobre esta se convierte en exploradora, buscando una fuente de alimento nueva.La abeja obrera principal se transforma en exploradora 
+
+Des esta manera las observadoras se transforman en obreras cuando llegan a una fuente de alimento y cuando el alimento se acabaa , la obrera que había sido la primera en llegar se convierte en exploradora.
 
 El número de fuentes de alimento, según se indica en el artículo, es la mitad del tamaño total de la colonia, y coincide tanto con el número de abejas trabajadoras como con el de abejas observadoras ya que cada fuente tiene una trabajadora asociada.
 
@@ -92,7 +94,7 @@ El comportamiento del algoritmo se controla mediante los siguientes parámetros:
 
 - *colonySize*: tamaño total de la colonia. El número de fuentes de alimento se calcula como $S N = "colonySize" / 2$. En la implementación se usa un valor de 50, por lo que $S N = 25$.
 
-- *Limit* : número máximo de ciclos que una fuente puede permanecer sin mejorar antes de ser abandonada. Controla cuanto se pueden explotar las soluciones.
+- *Limit* : número máximo de ciclos que una fuente puede permanecer sin mejorar antes de ser abandonada. Controla cuanto se pueden explotar las soluciones.Es el parámetro que más influye en el algoritmo.
 - *maxevals*: número máximo de evaluaciones de la función objetivo, que actúa como criterio de parada.
 
 == Ecuaciones
@@ -113,7 +115,7 @@ Cuanto mayor es el fitness de una fuente, mayor es su probabilidad de ser explot
 
 == Etapas del algoritmo
 
-La ejecución se divide en 4 fases claras donde se identifica el comportamiento de cada abeja con su rol.
+La ejecución se divide en 4 fases  donde se identifica el comportamiento de cada abeja con su rol.
 
 === Etapa 1: Inicialización
 
@@ -121,11 +123,11 @@ Se generan $S N$ fuentes de alimento de forma aleatoria, asegurando que cada una
 
 === Etapa 2: Fase de abejas empleadas
 
-Cada abeja empleada explota su propia fuente $x_i$. Para ello genera una solución candidata $v_i$ aplicando la ecuación (2.2) y la evalúa. A continuación se aplica una selección greedy: si la candidata es mejor que la fuente original, la sustituye y el contador de _trials_ de esa fuente se reinicia a 0, en caso contrario, la fuente se mantiene y su contador de _trials_ se incrementa. Esta fase genera por cada fuente de alimento una posible solución mejor usando la ecuación previamente vista, si esta solución es mejor será la que se use como base para la explotación.
+Cada abeja empleada explota su propia fuente $x_i$. Para ello genera una solución candidata $v_i$ aplicando la  ecuación y la evalúa. A continuación se aplica una selección greedy: si la candidata es mejor que la fuente original, la sustituye y el contador de _trials_ de esa fuente se reinicia a 0, en caso contrario, la fuente se mantiene y su contador de _trials_ se incrementa. Esta fase genera por cada fuente de alimento una posible solución mejor usando la ecuación previamente vista, si esta solución es mejor será la que se use como base para la explotación.
 
 === Etapa 3: Fase de abejas observadoras
 
-Esta etapa consiste en el "baile de las obreras" donde cada obrera vuelve a la colmena e intentará convencer a las observadoras de elegir su fuente de alimento , las observadoras eligirán con mayor probabilidad la fuente que más nectar tenga.Los pasos que se siguen una vez la obrera vuelve a la colmena son los siguientes. Primero se calculan las probabilidades de selección de cada fuente con la segunda ecuación . Después, se reparten $S N$ observadoras: cada una elige una fuente mediante selección por ruleta ,(las fuentes con más néctar tienen más probabilidad) y la explota igual que una empleada, usando la misma ecuación y aplicando de nuevo la selección greedy. Como las mejores fuentes tienden a ser elegidas varias veces, esta fase intensifica la búsqueda en las regiones más prometedoras del espacio. Es decir que podemos tener varias abejas observadoras en la misma fuente de alimento, esto ocurrirá sobre todo en las fuente más prometedoras donde como es lógico, interesa intensificar la búsqueda.
+Esta etapa consiste en el "baile de las obreras" donde cada obrera vuelve a la colmena e intentará convencer a las observadoras de elegir su fuente de alimento , las observadoras eligirán con mayor probabilidad la fuente que más nectar tenga.Los pasos que se siguen una vez la obrera vuelve a la colmena son los siguientes. Primero se calculan las probabilidades de selección de cada fuente con la segunda ecuación . Después, se reparten $S N$ observadoras: cada una elige una fuente mediante selección por ruleta ,(las fuentes con más néctar tienen más probabilidad) y la explota igual que una obrera, usando la misma ecuación y aplicando de nuevo la selección greedy. Como las mejores fuentes tienden a ser elegidas varias veces, esta fase intensifica la búsqueda en las regiones más prometedoras del espacio. Es decir que podemos tener varias abejas observadoras en la misma fuente de alimento, esto ocurrirá sobre todo en las fuente más prometedoras donde como es lógico, interesa intensificar la búsqueda.
 
 === Etapa 4: Fase de abeja exploradora
 
@@ -179,8 +181,47 @@ En las tres fases se actualiza siempre la mejor solución global encontrada, que
     devolver mejor_solucion
   ```
 ]
+
+#pagebreak()
 = Uso del software
 
+El código se reparte en dos carpetas independientes según el problema sobre el que se trabaja: `portfolio`, con la aplicación al problema del portfolio, y `cec2017`, con la experimentación sobre el benchmark CEC2017.
+
+== Carpeta portfolio
+
+El código se organiza en tres bloques: la carpeta `src`, que contiene los archivos `.cpp` con la implementación de cada algoritmo, la carpeta `include`, con las cabeceras (`.h`/`.hpp`) correspondientes y la librería Eigen y el fichero `main.cpp`, que es el programa principal, se encarga de leer los argumentos y lanzar los algoritmos. La implementación del ABC se encuentra en `src/abc.cpp` (con su cabecera en `include/abc.h`), y el resto de algoritmos usados en la comparación siguen el mismo patrón (`randomsearch.cpp`, `localsearch.cpp`, `greedy.cpp`, `ambest.cpp`, `bmb.cpp`, `es.cpp`, etc.).
+
+Para compilar se ejecuta `./script.sh release`, que configura el proyecto con CMake en modo *release* y genera el ejecutable `program`. La ejecución recibe la ruta del CSV de datos, los pesos mínimo y máximo (`low` y `high`), el número de ejecuciones, la semilla y, opcionalmente, el archivo CSV de salida:
+
+#block(fill: luma(240), inset: 8pt, radius: 4pt, width: 100%)[
+  ```sh
+  ./program data/ibex_35.csv 0.005 0.08 50 42 ib35.csv
+  ```
+]
+
+Por terminal se muestra la media de las ejecuciones y, en el CSV de salida, todos los fitness obtenidos. Para reproducir de una sola vez los experimentos sobre los tres conjuntos de datos (IBEX-35, S&P 100 y S&P 500) se proporciona el script `execute_all.sh`, que lanza `program` sobre cada uno de ellos con sus parámetros y escribe los resultados en `salida.txt`:
+
+#block(fill: luma(240), inset: 8pt, radius: 4pt, width: 100%)[
+  ```sh
+  ./execute_all.sh
+  ```
+]
+
+== Carpeta `cec2017`
+
+Esta carpeta contiene el código del benchmark CEC2017 junto con un fichero de prueba por cada variante del algoritmo: `testabc.cc` (ABC base), `testabchybrid.cc` (hibridación con Solis-Wets), `testabcde.cc`(hibridación con el operador de DE) , `testabcdehybrid.cc` (hibridacion completa con DE ), `testabcgbest.cc` (ABC guiado por la mejor solución global) y `testabcgbestdl.cc` (gbest con límite dinámico). Todos ellos se compilan desde el `CMakeLists.txt`, que genera un ejecutable por archivo.
+
+Cada ejecutable recorre las 30 funciones del benchmark y escribe sus resultados en la carpeta `results` correspondiente que hay que crear previamente. Por ejemplo:
+
+#block(fill: luma(240), inset: 8pt, radius: 4pt, width: 100%)[
+  ```sh
+  cmake CMakeLists.txt
+  make
+  ./testabc
+  ```
+]
+
+Los scripts de python restantes son los usados para generar las gráficas y los xlsx con los resultados.
 
 = Adaptacion al problema del portfolio
 
@@ -270,16 +311,16 @@ En esta sección veremos los resultados que obtiene el ABC implementado sin ning
   caption: [Resultados de S&P500 (Medias)],
 )
 #figure(
-  image("code/graficas/ib35.png", width: 80%),
+  image("cec2017/graficas/ib35.png", width: 80%),
   caption: [Boxplots Ibex35],
 )
 
 #figure(
-  image("code/graficas/syp100.png", width: 80%),
+  image("cec2017/graficas/syp100.png", width: 80%),
   caption: [Boxplots S&P100],
 )
 #figure(
-  image("code/graficas/syp500.png", width: 80%),
+  image("cec2017/graficas/syp500.png", width: 80%),
   caption: [Boxplots S&P500],
 )
 Como se puede ver , el ABC consigue estar a la altura de los mejores algoritmos de la
@@ -332,7 +373,7 @@ Al final de cada ciclo, y solo una vez cada ls_freq ciclos, se localiza la mejor
     best = indice de la fuente con menor obj    # la mejor
     budget = min(ls_budget, maxevals - evals)   # no pasarse del limite
     evals += soliswets(foods[best], obj[best], ls_delta, budget, ...)
-    trial[best] = 0                             # recien intensificada
+    trial[best] = 0                             # permito seguir explotando
     actualizar_mejor(foods[best])
   ```
 ]
@@ -414,32 +455,43 @@ Este operador se usa la fase de las abejas obreras y en la de las abejas observa
 == Comparación de las hibridaciones
 
 #figure(
-  image("code/graficas/comparativa_dim30_barrashyb.png", width: 100%),
+  image("cec2017/graficas/comparativa_dim30_barrashyb.png", width: 100%),
   caption: [Comparación error para dimensión 30],
 )
 
 #figure(
-  image("code/graficas/victorias_dim30hyb.png", width: 80%),
+  image("cec2017/graficas/victorias_dim30hyb.png", width: 80%),
   caption: [Número de victorias dimensión 30],
 )
 #figure(
-  image("code/graficas/comparativa_dim50_barrashyb.png", width: 100%),
+  image("cec2017/graficas/comparativa_dim50_barrashyb.png", width: 100%),
   caption: [Comparación error para dimensión 50],
 )
 
 #figure(
-  image("code/graficas/victorias_dim50hyb.png", width: 80%),
+  image("cec2017/graficas/victorias_dim50hyb.png", width: 80%),
   caption: [Número de victorias dimensión 50],
 )
 #figure(
-  image("code/graficas/comparativa_dim100_barrashyb.png", width: 100%),
+  image("cec2017/graficas/comparativa_dim100_barrashyb.png", width: 100%),
   caption: [Comparación error para dimensión 100],
 )
 #figure(
-  image("code/graficas/victorias_dim100hyb.png", width: 80%),
+  image("cec2017/graficas/victorias_dim100hyb.png", width: 80%),
   caption: [Número de victorias dimensión 100],
 )
 = Comparación de hibridaciones
+
+En este apartado se comparan las tres hibridaciones propuestas frente al ABC clásico: *ABC-LS* (hibridación con la búsqueda local de Solis-Wets), *ABC-DE* (cambio del operador de generación por el de DE) y *ABC-DE-HYB* (hibridación completa con DE). Los gráficos de barras multicolores muestran el error relativo al mejor de cada función (cuanto más alta es la barra, peor es el resultado) y los gráficos de barras verdes indican cuántas veces gana cada algoritmo.
+
+Observando los gráficos de victorias vemos que las dos hibridaciones que de verdad mejoran al ABC son ABC-DE-HYB y ABC-LS, que se reparten el primer puesto según la dimensión. En dimensión 30 y 50 la mejor es la hibridación completa con DE (ABC-DE-HYB), que gana en 12 y 15 funciones respectivamente, por delante del ABC-LS (9 y 12). Sin embargo, en dimensión 100 la situación se invierte y el ABC-LS pasa a ser claramente el mejor con 12 victorias frente a las 8 del ABC-DE-HYB. Esto tiene sentido ya que la búsqueda local de Solis-Wets refina las soluciones de forma muy efectiva y escala mejor a dimensiones altas, mientras que el DE completo, al recorrer toda la población dentro del bucle del ABC, pierde algo de eficiencia cuando el espacio de búsqueda crece.
+
+El caso del ABC-DE (cambio únicamente del operador)  es el  peor de todas las variantes en número de victorias e incluso queda por debajo del ABC clásico. Además, si nos fijamos en los gráficos multicolores, es con diferencia el algoritmo que comete los errores más grandes . Esto nos indica que cuando pierde, pierde por mucho, y que el simple reemplazo del operador de generación por el de DE desestabiliza al algoritmo en lugar de mejorarlo.
+
+El ABC clásico, por su parte, se comporta razonablemente bien en dimensión 100 (7 victorias, por delante incluso del ABC-DE-HYB en algunas funciones), lo que confirma que el ABC base es un buen explorador en espacios grandes.
+
+Como conclusión, las dos hibridaciones recomendables son ABC-DE-HYB y ABC-LS. La hibridación completa con DE destaca en dimensiones bajas y medias, pero el ABC-LS es la opción más robusta y la que mejor escala, por lo que la tomamos como la mejor hibridación para la comparación posterior con el resto de modificaciones del ABC.
+
 #pagebreak()
 = Propuestas de mejora
 
@@ -469,9 +521,9 @@ Lo mejor de esta modificación es que mantiene el mismo esquema que el ABC origi
 
 == ABC guiado por gbest con límite de  dinámico
 
-El término gbest acelera mucho la convergencia, pero tiene un efecto secundario: como todas las fuentes son atraídas hacia la misma solución global, el enjambre tiende a _colapsar_ en un único punto. Cuando esto ocurre, el ABC deja de progresar, porque la perturbación clásica $phi.alt_(i j) dot (x_(i j) - x_(k j))$ es proporcional a la distancia entre fuentes: si todas las fuentes están casi en el mismo sitio, los movimientos que generan son pequeños y la búsqueda se estanca.
+El término gbest acelera mucho la convergencia, pero tiene un efecto secundario: como todas las fuentes son atraídas hacia la misma solución global, el enjambre tiende a _colapsar_ en un único punto. Cuando esto ocurre, el ABC deja de progresar, porque la perturbación clásica $phi.alt_(i j) dot (x_(i j) - x_(k j))$ es proporcional a la distancia entre fuentes, si todas las fuentes están casi en el mismo sitio, los movimientos que generan son pequeños y la búsqueda se estanca.
 
-El único mecanismo del ABC que introduce diversidad real es la _abeja exploradora_, que reinicia una fuente con un salto aleatorio en todo el dominio. Sin embargo, en el ABC clásico esa fase depende de un parámetro $"limit"$ fijo, una fuente solo se abandona tras $"limit"$ ciclos sin mejorar. Si $"limit"$ es muy alto, las fuentes estancadas tardan demasiado en reiniciarse y el enjambre permanece colapsado, si es muy bajo, se reinician fuentes que todavía eran útiles y se pierde capacidad de explotación.
+El único mecanismo del ABC que introduce diversidad real es la abeja exploradora, que reinicia una fuente con un salto aleatorio en todo el dominio. Sin embargo, en el ABC clásico esa fase depende de un parámetro $"limit"$ fijo, una fuente solo se abandona tras $"limit"$ ciclos sin mejorar. Si $"limit"$ es muy alto, las fuentes estancadas tardan demasiado en reiniciarse y el enjambre permanece colapsado, si es muy bajo, se reinician fuentes que todavía eran útiles y se pierde capacidad de explotación.
 
 La propuesta consiste en hacer que ese límite *deje de ser fijo y se adapte a la diversidad del enjambre*. Como base para esta modificación voy a seleccionar el ABC que usa Gbest ya que es el que mejor funciona y  lo único que cambio es cuándo se reinicia una fuente.
 
@@ -482,6 +534,29 @@ En cada ciclo se mide la dispersión de las fuentes calculando, para cada dimens
 $ D = 1/n sum_(j=1)^(n) sigma_j / ("upper" - "lower") $
 
 El valor $D$ es cercano a $0$ cuando el enjambre está colapsado y máximo cuando está disperso. Esta medida no consume evaluaciones, ya que solo usa las coordenadas de las fuentes que ya tenemos.
+
+#block(fill: luma(240), inset: 8pt, radius: 4pt, width: 100%)[
+  ```py
+  funcion swarmDiversity(fuentes, lower, upper):
+    SN  = numero de fuentes
+    n   = numero de dimensiones
+    total = 0
+    para j en 0..n:                       # recorro cada dimensión
+      # media de la dimensión j sobre las SN fuentes
+      media = 0
+      para i en 0..SN:
+        media += fuentes[i][j]
+      media /= SN
+      # varianza de la dimensión j
+      var = 0
+      para i en 0..SN:
+        var += (fuentes[i][j] - media)^2
+      var /= SN
+      total += sqrt(var)                   # desviación típica sigma_j
+    avgStd = total / n                      # promedio de las sigma_j
+    devolver avgStd / (upper - lower)       # normalizado por el dominio
+  ```
+]
 
 === Límite dinámico
 
@@ -494,57 +569,58 @@ El comportamiento resultante es:
 - *Poca diversidad* (enjambre colapsado, $D approx 0$): el límite baja hacia $"limit"_"min"$, de modo que las fuentes estancadas se reinician antes y se inyecta diversidad mediante saltos aleatorios.
 - *Mucha diversidad* (enjambre disperso, $D approx D_0$): el límite sube hacia $"limit"_"max"$, dejando que las fuentes exploten más tiempo hacia la mejor solución global.
 
-De esta forma se obtiene un lazo de realimentación que regula automáticamente el equilibrio exploración-explotación: cuando el enjambre converge demasiado, el propio algoritmo aumenta el ritmo de reinicios para reabrir la búsqueda, y cuando hay diversidad suficiente, relaja los reinicios para afinar la solución. A diferencia de una estrategia que simplemente desactivase la guía global cuando baja la diversidad, aquí la diversidad se recupera con el reinicio aleatorio de la exploradora, cuyo salto es de magnitud grande e independiente de lo colapsado que esté el enjambre, por lo que sí consigue reabrir la búsqueda de manera efectiva.
+De esta forma  cuando el enjambre converge demasiado, el propio algoritmo aumenta el ritmo de reinicios para reabrir la búsqueda, y cuando hay diversidad suficiente, relaja los reinicios para afinar la solución. A diferencia de una estrategia que simplemente desactivase la guía global cuando baja la diversidad, aquí la diversidad se recupera con el reinicio aleatorio de la exploradora, cuyo salto es de magnitud grande e independiente de lo colapsado que esté el enjambre, por lo que sí consigue reabrir la búsqueda de manera efectiva.
 
 Los parámetros usados son $"limit"_"min" = 20$ y $"limit"_"max" = 200$, manteniendo $C = 1.5$ para el término gbest.
 
 = Comparación de resultados de distintos ABC
 
-En este apartado veremos los resultados de las distintas modificaciones que se le han hecho al ABC y veremos cuales destacan.En las siguiente sección se compararán las mejores con los resultados obtenidos en CEC2017 por otros algoritmos
+En este apartado veremos los resultados de las distintas modificaciones que se le han hecho al ABC y veremos cuales destacan. En las siguiente sección se compararán las mejores con los resultados obtenidos en CEC2017 por otros algoritmos
 
 
 Los gráficos de barras multicolores indican el error que comete cada algoritmo en cada función. Cuanto más alta es la barra peor es el resultado del algoritmo. Los gráfics de barras verdes indican cuantas veces ha ganado un algoritmo.
 
 #figure(
-  image("code/graficas/comparativa_dim30_barras.png", width: 100%),
+  image("cec2017/graficas/comparativa_dim30_barras.png", width: 100%),
   caption: [Comparación error para dimensión 30],
 )
 
 #figure(
-  image("code/graficas/victorias_dim30.png", width: 80%),
+  image("cec2017/graficas/victorias_dim30.png", width: 80%),
   caption: [Número de victorias dimensión 30],
 )
 #figure(
-  image("code/graficas/comparativa_dim50_barras.png", width: 100%),
+  image("cec2017/graficas/comparativa_dim50_barras.png", width: 100%),
   caption: [Comparación error para dimensión 50],
 )
 
 #figure(
-  image("code/graficas/victorias_dim50.png", width: 80%),
+  image("cec2017/graficas/victorias_dim50.png", width: 80%),
   caption: [Número de victorias dimensión 50],
 )
 #figure(
-  image("code/graficas/comparativa_dim100_barras.png", width: 100%),
+  image("cec2017/graficas/comparativa_dim100_barras.png", width: 100%),
   caption: [Comparación error para dimensión 100],
 )
 #figure(
-  image("code/graficas/victorias_dim100.png", width: 80%),
+  image("cec2017/graficas/victorias_dim100.png", width: 80%),
   caption: [Número de victorias dimensión 100],
 )
 
-Observando los gráficos donde se evalua el número de funciones ganadas vemos que el algoritmo que mejor actua independientemente de la dimensión es el ABC-LS. Esto es lógico ya que el punto débil del ABC es la convergencia , y si lo hibridamos con BL , conseguimos intensificar la explotación de las mejores soluciones en  dirección a una solución mejor y no de manera más ineficiente como hace el ABC. La hibridación completa con DE ABC-DE-HYB también consigue buenos resultados en casi todas las dimensiones pero peores que el ABC-LS , por tanto la mejor hibridación que podemos tener de ABC en esta prueba es la que se hace con la búsqueda local. 
+Observando los gráficos donde se evalua el número de funciones ganadas vemos que el algoritmo que mejor actua independientemente de la dimensión es el ABC-LS. Esto es lógico ya que el punto débil del ABC es la convergencia , y si lo hibridamos con BL , conseguimos intensificar la explotación de las mejores soluciones en  dirección a una solución mejor y no de manera más ineficiente como hace el ABC. La hibridación completa con DE ABC-DE-HYB también consigue buenos resultados en casi todas las dimensiones pero peores que el ABC-LS , esto se debe a que cuando la dimensión es mayor como DE tiene que recorrer toda la población dentro del bucle del ABC pierde algo de eficiencia cuando el espacio de búsqueda crece, por tanto la mejor hibridación que podemos tener de ABC en esta prueba es la que se hace con la búsqueda local. 
 
-Si nos fijamos en la hibridación con DE hecha  solo en el operador de búsqueda de nuevas soluciones ABC-DE vemos que el comportamiento es mejor que el del ABC en casi todos los casos menos en el de dimensión 100 donde el ABC clásico lo supera.Por tanto esto nos indica que el cambio en el operador influye bastante en la mejora de el algoritmo base pero no lo suficiente como para superar al algoritmo hibridado.También se puede observar en el gráfico multicolor  que es el algoritmo que comete los errores más grandes , es decir que cuando pierde pierde por mucho, esto nos indica entonces que las veces que gana puede ser por que la función a evaluar le favorezca.
-
-
-Por último vemos que la modificación ABC-GBEST ha tenido muy buenos resultados ya que permite al algoritmo acelerar su convergencia, la diferencia de victorias entre ABC-GBEST y ABC-GBEST-DL (usando límite dinámico) es pequeña y ambos algoritmos consiguen ganar consistentemente en casi todas las dimensiones. El límite dinámico junto al GBEST ayuda a acelerar la convergencia y a descartar rápidamente fuentes que no son prometedoras , por eso ABC-GBEST-DL tiene resultados un poco mejores al que solo usa GBEST 
+Si nos fijamos en la hibridación con DE hecha  solo en el operador de búsqueda de nuevas soluciones ABC-DE vemos que el comportamiento es mejor que el del ABC en casi todos los casos menos en el de dimensión 100 donde el ABC clásico lo supera.Por tanto esto nos indica que el cambio en el operador influye bastante en la mejora de el algoritmo base pero no lo suficiente como para superar al algoritmo hibridado.También se puede observar en el gráfico multicolor  que es el algoritmo que comete los errores más grandes , es decir que cuando pierde pierde por mucho, esto nos indica entonces que es bastante inestable en sus resultados y que  las veces que gana puede ser por que la función a evaluar le favorezca.
 
 
-Como conclusión final podemos ver que el ABC por si solo es un algoritmo que se comporta bien en espacios grandes ya que consigue algunas victorias en dimensión 100, pero el usar generadores de soluciones un poco más complejos le ayuda a mejorar drásticamente. En cuanto a las hibridaciones vemos que la mejor es la que usa Solis-Wets pero la que usa DE también es una buena opción.
+Por último vemos que la modificación ABC-GBEST ha tenido muy buenos resultados ya que permite al algoritmo acelerar su convergencia, la diferencia de victorias entre ABC-GBEST y ABC-GBEST-DL (usando límite dinámico) es pequeña y ambos algoritmos consiguen ganar consistentemente en casi todas las dimensiones. El límite dinámico junto al GBEST ayuda a acelerar la convergencia y a  dedicar mas o menos evaluaciones a las fuentes de alimento dependiendo de su diversidad ajustando el parámetro limit, por eso ABC-GBEST-DL tiene resultados un poco mejores al que solo usa GBEST 
+
+
+Como conclusión final podemos ver que el ABC por si solo es un algoritmo que se comporta bien en  ya que consigue algunas victorias en dimensión 100, pero el usar generadores de soluciones un poco más complejos le ayuda a mejorar drásticamente. En cuanto a las hibridaciones vemos que la mejor es la que usa Solis-Wets pero la que usa DE también es una buena opción si pudiesemos tener más evaluaciones.
+
 #pagebreak()
 = Comparación de resultados CEC2017
 
-En esta sección se van a compara los resultados obtenidos por las implementaciones del ABC con los siguientes algoritmos: *DE*, *PSO *, *RB-IPOP-CMA-ES* y *jSO*. La comparación se realiza sobre las 30 funciones del benchmark *CEC2017* en dimensión 30,50 y 100 mostrando el error medio obtenido por cada algoritmo. La fila Best indica en cuántas funciones cada algoritmo obtiene el mejor resultado.
+En esta sección se van a compara los resultados obtenidos por las mejores implementaciones del ABC con los siguientes algoritmos: *DE*, *PSO *, *RB-IPOP-CMA-ES* y *jSO*. La comparación se realiza sobre las 30 funciones del benchmark *CEC2017* en dimensión 30,50 y 100 mostrando el error medio obtenido por cada algoritmo. La fila Best indica en cuántas funciones cada algoritmo obtiene el mejor resultado.
 
 Los algoritmos que compararemos serán : *ABC* , *ABC-LS* (mejor hibridación), *ABC-GBESTDL* (mejor modificación).
 
@@ -698,11 +774,11 @@ Los algoritmos que compararemos serán : *ABC* , *ABC-LS* (mejor hibridación), 
 
 Lo primero que llama la atención es la diferencia que hay entre los algoritmos especializados (*jSO* y *RB-IPOP-CMA-ES*) y el resto. El jSO domina claramente en dimensión 30 ganando en 20 de las 30 funciones, mientras que el CMA-ES se queda con 10 victorias, y a medida que sube la dimensión el CMA-ES va igualando e incluso superando al jSO (15 frente a 14 en dimensión 100). Esto tiene sentido ya que ambos son algoritmos del estado del arte muy afinados para este benchmark, y en las funciones unimodales y simples (F01, F03, F06, F09) consiguen errores prácticamente nulos, algo que el ABC no es capaz de alcanzar.
 
-El ABC consigue 2 victorias en dimensión 30 (F04 con 7.786e+00 y F26 con 3.139e+02) pero pierde todas sus victorias en dimensión 50 y 100. Esto vuelve a confirmar el principal problema del algoritmo: su mala convergencia. Cuando el espacio crece, el número de evaluaciones no le da margen para refinar las soluciones y los errores se disparan, perdiendo cualquier opción de competir con los algoritmos especializados.
+El ABC consigue 2 victorias en dimensión 30 (F04 con 7.786e+00 y F26 con 3.139e+02) pero pierde todas sus victorias en dimensión 50 y 100. Esto confirma el principal problema del algoritmo  su mala convergencia. Cuando el espacio crece, el número de evaluaciones no le da margen para refinar las soluciones y los errores se disparan, perdiendo cualquier opción de competir con los algoritmos especializados.
 
-Aun así, si comparamos el ABC con el *PSO* y el *DE* vemos que el ABC se comporta mucho mejor que el PSO en prácticamente todas las funciones, ya que el PSO comete errores catastróficos (F01 con 4.175e+09 o F12 con 3.586e+08) y no gana en ninguna función en ninguna dimensión. Frente al DE el ABC también gana en varias funciones multimodales y de composición (F16, F20, F29), aunque el DE le supera con claridad en las funciones híbridas (F13, F14, F15, F18, F19) donde el ABC se estanca y genera errores enormes (F18 con 7.763e+05 frente a 6.122e+01 del DE). Esto nos vuelve a indicar que el punto débil del ABC es el refinamiento local de las soluciones.
+Podemos ver que si comparamos el ABC con el PSO y el DE vemos que el ABC se comporta mucho mejor que el PSO en prácticamente todas las funciones, ya que el PSO comete errores   muy grandes (F01 con 4.175e+09 o F12 con 3.586e+08) y no gana en ninguna función en ninguna dimensión. Si lo comparamos con el DE el ABC también gana en varias funciones (F16, F20, F29), aunque el DE le supera con claridad en las funciones (F13, F14, F15, F18, F19) donde el ABC se estanca y genera errores enormes (F18 con 7.763e+05 frente a 6.122e+01 del DE). Esto nos vuelve a indicar que el punto débil del ABC es el refinamiento local de las soluciones.
 
-Por último cabe destacar el comportamiento anómalo de la función F02, donde el ABC alcanza valores que crecen de forma descontrolada con la dimensión (desde 6.747e+10 en dimensión 30 hasta 1.875e+76 en dimensión 100). Esta función es muy inestable y sensible a la precisión numérica, por lo que conviene no tenerla muy en cuenta a la hora de sacar conclusiones.
+Por último cabe destacar el comportamiento raro de la función F02, donde el ABC alcanza valores que crecen de forma descontrolada con la dimensión (desde 6.747e+10 en dimensión 30 hasta 1.875e+76 en dimensión 100).Como hemos visto en gráficas de comparaciones anteriores esta función es muy inestable y hace que los algoritmos sean muy inestables.
 
 == ABC-LS (Hibridación con Wet-Solis)
 
@@ -853,11 +929,11 @@ Por último cabe destacar el comportamiento anómalo de la función F02, donde e
   caption: [Resultados ABC-LS CEC2017 dimensión 100 (Medias)],
 )
 
-El efecto de hibridar el ABC con la búsqueda local de Solis-Wets se nota de forma muy clara en las funciones donde el ABC original se estancaba. Si comparamos las tablas con las del ABC base, vemos que las funciones híbridas mejoran drásticamente: en dimensión 30 la F13 pasa de 1.537e+05 a 4.668e+02, la F15 de 2.336e+04 a 2.837e+02, la F19 de 8.593e+03 a 1.067e+02 y la F11 de 7.757e+02 a 6.318e+01. Esta mejora se mantiene en las dimensiones altas (en dimensión 100 la F19 baja de 5.774e+05 a 4.278e+02). Esto confirma que la búsqueda local ataca directamente el punto débil del ABC, que es el refinamiento de las soluciones, intensificando la explotación en la dirección correcta en lugar de hacerlo de forma aleatoria.
+El efecto de hibridar el ABC con la búsqueda local de Solis-Wets se nota de forma muy clara en las funciones donde el ABC original se estancaba. Si comparamos las tablas con las del ABC base, vemos que las funciones híbridas mejoran mucho el comportamiento: en dimensión 30 la F13 pasa de 1.537e+05 a 4.668e+02, la F15 de 2.336e+04 a 2.837e+02, la F19 de 8.593e+03 a 1.067e+02 y la F11 de 7.757e+02 a 6.318e+01. Esta mejora se mantiene en las dimensiones altas . Esto confirma que la búsqueda local ayuda a mejorar el punto débil del ABC, que es el refinamiento de las soluciones, intensificando la explotación en la dirección correcta en lugar de hacerlo de forma aleatoria.
 
-Sin embargo, a pesar de la enorme reducción del error, el número de victorias apenas cambia (1 en dimensión 30 y 0 en las demás), ya que los algoritmos especializados *jSO* y *RB-IPOP-CMA-ES* siguen estando por delante, sobre todo en las funciones unimodales y simples donde alcanzan errores cercanos a cero. Lo que sí consigue el ABC-LS es separarse definitivamente del *DE* y del *PSO*, superándolos en la gran mayoría de funciones. También se observa que en algún caso puntual la búsqueda local no aporta nada e incluso empeora ligeramente (la F04 en dimensión 30 pasa de 7.786e+00 a 6.934e+01, perdiendo la victoria que tenía el ABC), pero son casos aislados frente a la mejora global.
+Sin embargo, aunque hay una reducción del error el número de victorias apenas cambia (1 en dimensión 30 y 0 en las demás), ya que los algoritmos  jSO y RB-IPOP-CMA-ES siguen estando por delante, sobre todo en las funciones  donde alcanzan errores cercanos a cero. Lo que sí consigue el ABC-LS es separarse  del DE y del PSO, superándolos en la gran mayoría de funciones. También se observa que en algún caso puntual la búsqueda local no aporta nada e incluso empeora  (la F04 en dimensión 30 pasa de 7.786e+00 a 6.934e+01, perdiendo la victoria que tenía el ABC), pero son casos aislados frente a la mejora global.
 
-En resumen, el ABC-LS no llega a competir con los algoritmos del estado del arte, pero recorta muchísimo la distancia que había, demostrando que el problema del ABC no era tanto la exploración del espacio como la falta de un mecanismo de explotación fino.
+En resumen, el ABC-LS no llega a competir con los mejores algoritmos , pero recorta muchísimo la distancia que había, demostrando que el problema del ABC no era tanto la exploración del espacio como la falta de un mecanismo de explotación más exacto.
 
 == ABC-GBESTDL (usando GBEST y limit dinámico)
 
@@ -1008,12 +1084,14 @@ En resumen, el ABC-LS no llega a competir con los algoritmos del estado del arte
   caption: [Resultados ABC-GBESTDL CEC2017 dimensión 100 (Medias)],
 )
 
-El ABC-GBESTDL, al guiar la búsqueda hacia la mejor solución global, acelera la convergencia y esto se traduce en una clara mejora sobre las funciones multimodales y simples. Comparando con el ABC base en dimensión 30, la F05 baja de 1.156e+02 a 8.523e+01, la F07 de 1.146e+02 a 7.502e+01, la F08 de 1.148e+02 a 6.975e+01, la F09 de 2.578e+03 a 6.128e+02 y la F06 de 1.717e-03 a 2.104e-06. Incluso en la F22 alcanza un 1.002e+02, prácticamente igualando al DE y quedándose muy cerca del jSO (1.000e+02). Esta tendencia se mantiene en dimensión 50 y 100 (la F08 en dimensión 100 baja de 8.093e+02 a 5.170e+02), lo que demuestra que la atracción hacia el gbest junto al límite dinámico ayuda al algoritmo a converger más rápido sobre estas funciones.
+El ABC-GBESTDL, al guiar la búsqueda hacia la mejor solución global, acelera la convergencia y esto se traduce en una clara mejora sobre las funciones. Comparando con el ABC base en dimensión 30, la F05 baja de 1.156e+02 a 8.523e+01, la F07 de 1.146e+02 a 7.502e+01, la F08 de 1.148e+02 a 6.975e+01, la F09 de 2.578e+03 a 6.128e+02 y la F06 de 1.717e-03 a 2.104e-06. Incluso en la F22 alcanza un 1.002e+02, prácticamente igualando al DE y quedándose muy cerca del jSO (1.000e+02). Esta tendencia se mantiene en dimensión 50 y 100 (la F08 en dimensión 100 baja de 8.093e+02 a 5.170e+02), lo que demuestra que la atracción hacia la mejor solución  junto al límite dinámico ayuda al algoritmo a converger más rápido sobre estas funciones.
 
-En cambio, en las funciones híbridas el ABC-GBESTDL no mejora tanto como lo hacía el ABC-LS. Por ejemplo, en la F13 en dimensión 30 el ABC-GBESTDL se queda en 9.089e+04 mientras que el ABC-LS conseguía 4.668e+02. Esto tiene sentido ya que el gbest acelera la convergencia global pero no aporta el refinamiento local fino que sí da la búsqueda local, y son precisamente las funciones híbridas las que requieren ese ajuste detallado. Por tanto cada modificación destaca en un tipo de función distinto: el ABC-LS en las híbridas y el ABC-GBESTDL en las multimodales y simples.
+En cambio, en otras funciones el ABC-GBESTDL no mejora tanto como lo hacía el ABC-LS. Por ejemplo, en la F13 en dimensión 30 el ABC-GBESTDL se queda en 9.089e+04 mientras que el ABC-LS conseguía 4.668e+02. Esto tiene sentido ya que el gbest acelera la convergencia global pero no aporta el refinamiento local fino que sí da la búsqueda local. Por tanto cada modificación destaca en un tipo de función distinto: el ABC-LS en las híbridas y el ABC-GBESTDL en las multimodales y simples.
 
-En cuanto a victorias, el ABC-GBESTDL obtiene resultados muy parecidos al ABC-LS (1 victoria en dimensión 30 con la F26 y 0 en el resto), y al igual que él tampoco consigue superar al *jSO* ni al *RB-IPOP-CMA-ES*, que siguen dominando gracias a su rendimiento casi perfecto en las funciones unimodales (F01, F03, F09).
+En cuanto a victorias, el ABC-GBESTDL obtiene resultados muy parecidos al ABC-LS (1 victoria en dimensión 30 con la F26 y 0 en el resto), y al igual que él tampoco consigue superar al jSO ni al RB-IPOP-CMA-ES.
 
-Como conclusión final de la comparación, podemos ver que ninguna de las modificaciones del ABC llega a alcanzar a los algoritmos especializados del CEC2017, que están muy afinados para este benchmark y resultan imbatibles en las funciones básicas. No obstante, tanto el ABC-LS como el ABC-GBESTDL logran convertir un algoritmo que perdía contra el DE en varias funciones en uno que lo supera de forma consistente y que reduce mucho la distancia con el estado del arte, cada uno reforzando una capacidad diferente del algoritmo: la explotación local en el caso del ABC-LS y la velocidad de convergencia en el del ABC-GBESTDL.
+== Conclusión
+
+Como conclusión final de la comparación, podemos ver que ninguna de las modificaciones del ABC llega a alcanzar a los algoritmos especializados del CEC2017, que están muy afinados para este benchmark y son muy buenos  en las funciones básicas. No obstante, tanto el ABC-LS como el ABC-GBESTDL logran convertir un algoritmo que perdía contra el DE en varias funciones en uno que lo supera de forma consistente y que reduce mucho la distancia con los mejores, cada uno reforzando una capacidad diferente del algoritmo: la explotación local en el caso del ABC-LS y la velocidad de convergencia en el del ABC-GBESTDL.
 
 

@@ -43,7 +43,7 @@ int rouletteSelect(const vector<double> &probs, std::mt19937 &gen) {
 }
 
 // diversidad del enjambre: media de las desviaciones tipicas por dimension,
-// normalizada por el tamano del dominio (queda en torno a [0, 0.29])
+// normalizada por el tamano del dominio 
 double swarmDiversity(const vector<vector<double>> &foods, int lower,
                       int upper) {
   int SN = foods.size();
