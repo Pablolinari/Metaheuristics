@@ -412,7 +412,7 @@ Veremos a lo largo de esta sección las diferentes mejoras que se han hecho sobr
 
 == Hibridación con búsqueda local (Solis-Wets)
 
-El ABC clásico es un buen explorador del espacio de búsqueda, pero su capacidad de *refinamiento local* es limitada: la ecuación de selección solo modifica una componente por candidata y depende de las diferencias entre fuentes, por lo que cuando la población converge esas diferencias se hacen pequeñas y el avance se ralentiza. La idea de esta hibridación es convertir el algoritmo en un algoritmo memético, combinando la exploración global del ABC con una búsqueda local que intente refinar con más detalle las mejores soluciones
+El ABC clásico es un buen explorador del espacio de búsqueda, pero su capacidad de refinamiento local es limitada: la ecuación de selección solo modifica una componente por candidata y depende de las diferencias entre fuentes, por lo que cuando la población converge esas diferencias se hacen pequeñas y el avance se ralentiza. La idea de esta hibridación es convertir el algoritmo en un algoritmo memético, combinando la exploración global del ABC con una búsqueda local que intente refinar con más detalle las mejores soluciones
 
 === Búsqueda local: Solis-Wets
 
